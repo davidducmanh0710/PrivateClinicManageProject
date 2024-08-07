@@ -77,7 +77,6 @@ public class User implements Serializable {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})
 	@JoinColumn(name = "role_id", referencedColumnName = "id")
-	@JsonIgnore
 	private Role role;
 
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
