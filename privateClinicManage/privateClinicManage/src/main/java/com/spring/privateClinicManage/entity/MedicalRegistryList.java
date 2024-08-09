@@ -33,6 +33,7 @@ public class MedicalRegistryList implements Serializable {
 	@Id
 	@Column(name = "id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@JsonIgnore
 	private Integer id;
 
 	@Column(name = "name")
@@ -45,19 +46,27 @@ public class MedicalRegistryList implements Serializable {
 	@Column(name = "is_canceled", nullable = false)
 	private Boolean isCanceled;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = {
+
+	@ManyToOne(fetch = FetchType.EAGER, cascade = {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})
 	@JoinColumn(name = "schedule_id", referencedColumnName = "id")
-	@JsonIgnore
+//	@JsonIgnore
 	private Schedule schedule;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = {
+	@ManyToOne(fetch = FetchType.EAGER, cascade = {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
-	@JsonIgnore
+//	@JsonIgnore
 	private User user;
+
+	@ManyToOne(fetch = FetchType.EAGER, cascade = {
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
+	})
+	@JoinColumn(name = "statusIsApproved_id", referencedColumnName = "id")
+//	@JsonIgnore
+	private StatusIsApproved statusIsApproved;
 
 	@Transient
 	private Integer order;

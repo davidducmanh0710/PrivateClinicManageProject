@@ -1,12 +1,19 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Header.css";
-import React, { useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import LoginForm from "../LoginForm/LoginForm";
+import RegisterForm from "../RegisterForm/RegisterForm";
+import { UserContext } from "../config/Context";
+import { Button, Dropdown, Image, NavDropdown } from "react-bootstrap";
+import { Link , useNavigate } from "react-router-dom";
 
-export default function Header(props) {
+export default function Header() {
   const formLoginRef = useRef();
+  const formRegisterRef = useRef();
+  const { currentUser, setCurrentUser } = useContext(UserContext);
+  const navigate = useNavigate();
 
-  function handleShowLoginForm() {
+
+  function handleOpenLoginForm() {
     formLoginRef.current.open();
   }
 
@@ -14,9 +21,32 @@ export default function Header(props) {
     formLoginRef.current.close();
   }
 
+  function handleOpenRegisterForm() {
+    formRegisterRef.current.open();
+  }
+
+  function handleCloseRegisterForm() {
+    formRegisterRef.current.close();
+  }
+
+  function logout() {
+    localStorage.setItem("token", "");
+    setCurrentUser(null);
+    navigate("/")
+  }
+
+  useEffect(() => {}, [currentUser]);
+
+  function handleAppointmentSchedule() {
+    if (currentUser == null) {
+      formLoginRef.current.open();
+    }
+  }
+
   return (
     <>
       <LoginForm ref={formLoginRef} onClose={handleCloseLoginForm} />
+      <RegisterForm ref={formRegisterRef} onClose={handleCloseRegisterForm} />
 
       <div className="container-fluid topbar px-0 px-lg-4 bg-light py-2 d-none d-lg-block">
         <div className="container">
@@ -24,18 +54,15 @@ export default function Header(props) {
             <div className="col-lg-8 text-center text-lg-start mb-lg-0">
               <div className="d-flex flex-wrap">
                 <div className="border-end border-success pe-3">
-                  <a href="#" className="text-muted small">
+                  <a className="text-muted small">
                     <i className="fas fa-map-marker-alt text-success me-2"></i>
-                    {props.location}
+                    Xã Phước Kiển , Nhà Bè
                   </a>
                 </div>
                 <div className="ps-3">
-                  <a
-                    href="mailto:example@gmail.com"
-                    className="text-muted small"
-                  >
+                  <a className="text-muted small">
                     <i className="fas fa-envelope text-success me-2"></i>
-                    {props.email}
+                    2151050249manh@ou.edu.vn
                   </a>
                 </div>
               </div>
@@ -43,42 +70,74 @@ export default function Header(props) {
             <div className="col-lg-4 text-center text-lg-end">
               <div className="d-flex justify-content-end">
                 <div className="d-flex border-end border-success pe-3">
-                  <a className="btn p-0 text-success me-3" href="#">
+                  <a className="btn p-0 text-success me-3">
                     <i className="fab fa-facebook-f"></i>
                   </a>
-                  <a className="btn p-0 text-success me-3" href="#">
+                  <a className="btn p-0 text-success me-3">
                     <i className="fab fa-telegram"></i>
                   </a>
-                  <a className="btn p-0 text-success me-3" href="#">
+                  <a className="btn p-0 text-success me-3">
                     <i className="fab fa-twitter"></i>
                   </a>
-                  <a className="btn p-0 text-success me-3" href="#">
+                  <a className="btn p-0 text-success me-3">
                     <i className="fab fa-instagram"></i>
                   </a>
                 </div>
-                <div className="dropdown ms-3">
-                  <a
-                    href="#"
-                    className="dropdown-toggle text-dark"
-                    data-bs-toggle="dropdown"
-                  >
-                    <small>
-                      <i className="fas fa-user text-success me-2"></i> Tài
-                      khoản
-                    </small>
-                  </a>
-                  <div className="dropdown-menu rounded">
-                    <a className="border border-white dropdown-item">
-                      Đăng kí
-                    </a>
+                {currentUser ? (
+                  <>
+                    <Dropdown className="dropdown text-end ms-2">
+                      <Dropdown.Toggle className="btn btn-secondary">
+                        <Image
+                          src={currentUser === null ? "" : currentUser.avatar}
+                          alt="mdo"
+                          width="20"
+                          height="20"
+                          className="rounded-circle"
+                        />
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu className="r-0 header-dropdown-menu">
+                        <Dropdown.Item>
+                          <Link className="dropdown-item" to="user-detail">
+                            Thông tin cá nhân
+                          </Link>
+                        </Dropdown.Item>
+                        <NavDropdown.Divider />
+
+                        <NavDropdown.Item>
+                          <Button className="dropdown-item" onClick={logout}>
+                            Đăng xuất
+                          </Button>
+                        </NavDropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </>
+                ) : (
+                  <div className="dropdown ms-3">
                     <a
-                      onClick={handleShowLoginForm}
-                      className="border border-white dropdown-item"
+                      className="dropdown-toggle text-dark"
+                      data-bs-toggle="dropdown"
                     >
-                      Đăng nhập
+                      <small>
+                        <i className="fas fa-user text-success me-2"></i> Tài
+                        khoản
+                      </small>
                     </a>
+                    <div className="dropdown-menu rounded">
+                      <a
+                        onClick={handleOpenRegisterForm}
+                        className="border border-white dropdown-item"
+                      >
+                        Đăng kí
+                      </a>
+                      <a
+                        onClick={handleOpenLoginForm}
+                        className="border border-white dropdown-item"
+                      >
+                        Đăng nhập
+                      </a>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -87,9 +146,9 @@ export default function Header(props) {
       <div className="container-fluid nav-bar px-0 px-lg-4 py-lg-0">
         <div className="container">
           <nav className="navbar navbar-expand-lg navbar-light">
-            <a href="#" className="navbar-brand p-0">
-              <h1 className="text-success mb-0"> HealthCare</h1>
-            </a>
+            <Link to="/" className="navbar-brand p-0">
+              <h1 className="text-success mb-0">HealthCare</h1>
+            </Link>
             <button
               className="navbar-toggler"
               type="button"
@@ -100,31 +159,19 @@ export default function Header(props) {
             </button>
             <div className="collapse navbar-collapse" id="navbarCollapse">
               <div className="navbar-nav mx-0 mx-lg-auto">
-                <a href="index.html" className="nav-item nav-link active">
-                  Trang chủ
-                </a>
-                <a href="about.html" className="nav-item nav-link">
-                  Giới thiệu
-                </a>
-                <a href="service.html" className="nav-item nav-link">
-                  Đội ngũ
-                </a>
-                <a href="blog.html" className="nav-item nav-link">
-                  Blog
-                </a>
+                <a className="nav-item nav-link active">Trang chủ</a>
+                <a className="nav-item nav-link">Giới thiệu</a>
+                <a className="nav-item nav-link">Đội ngũ</a>
+                <a className="nav-item nav-link">Blog</a>
                 <div className="nav-item dropdown">
-                  <a href="#" className="nav-link" data-bs-toggle="dropdown">
+                  <a className="nav-link" data-bs-toggle="dropdown">
                     <span className="dropdown-toggle">Pages</span>
                   </a>
                   <div className="dropdown-menu">
-                    <a href="feature.html" className="dropdown-item">
-                      Our Features
-                    </a>
+                    <a className="dropdown-item">Our Features</a>
                   </div>
                 </div>
-                <a href="contact.html" className="nav-item nav-link">
-                  Contact
-                </a>
+                <a className="nav-item nav-link">Contact</a>
                 <div className="nav-btn px-3">
                   <button
                     className="btn-search btn btn-success btn-md-square rounded-circle flex-shrink-0"
@@ -138,17 +185,26 @@ export default function Header(props) {
             </div>
             <div className="d-none d-xl-flex flex-shrink-0 ps-4 ">
               <a
-                href="#"
                 className="btn btn-light btn-lg-square position-relative wow tada"
                 data-wow-delay=".9s"
               >
-                <i className="fa fa-calendar-alt fa-2x"></i>
-                <div className="position-absolute"></div>
-                <div className="d-flex flex-column ms-3 text-center">
-                  <a href="#">
+                {currentUser === null ? (
+                  <button
+                    onClick={handleAppointmentSchedule}
+                    className="d-flex flex-column ms-3 text-center align-items-center border-0"
+                  >
+                    <i className="fa fa-calendar-alt fa-2x"></i>
                     <span className="text-blue">Đặt lịch khám</span>
-                  </a>
-                </div>
+                  </button>
+                ) : (
+                  <Link
+                    to="/register-schedule"
+                    className="d-flex flex-column ms-3 text-center align-items-center border-0"
+                  >
+                    <i className="fa fa-calendar-alt fa-2x"></i>
+                    <span className="text-blue">Đặt lịch khám</span>
+                  </Link>
+                )}
               </a>
             </div>
           </nav>

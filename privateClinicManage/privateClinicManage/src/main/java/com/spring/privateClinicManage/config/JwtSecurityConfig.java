@@ -69,8 +69,9 @@ public class JwtSecurityConfig {
 //				.requestMatchers(HttpMethod.GET)
 //				.hasRole("USER")
 //
-//				.requestMatchers(HttpMethod.POST)
-//				.hasRole("USER")
+				.requestMatchers(HttpMethod.POST,
+						"/api/users/register-schedule/")
+				.hasRole("BENHNHAN")
 
 				.anyRequest().authenticated())
 				.httpBasic(httpbc -> httpbc

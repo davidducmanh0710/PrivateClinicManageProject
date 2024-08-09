@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "unitmedicinetype")
+@Table(name = "unit_medicine_type")
 @Getter
 @Setter
 @AllArgsConstructor
