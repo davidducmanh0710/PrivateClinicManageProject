@@ -70,8 +70,14 @@ public class JwtSecurityConfig {
 //				.hasRole("USER")
 //
 				.requestMatchers(HttpMethod.POST,
-						"/api/users/register-schedule/")
+						"/api/users/register-schedule/",
+						"/api/users/user-register-schedule-list/")
 				.hasRole("BENHNHAN")
+				
+				.requestMatchers(HttpMethod.PUT,					
+						"/api/users/cancel-register-schedule/{registerScheduleId}/")
+				.hasRole("BENHNHAN")
+				
 
 				.anyRequest().authenticated())
 				.httpBasic(httpbc -> httpbc

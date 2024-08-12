@@ -4,14 +4,14 @@ import LoginForm from "../LoginForm/LoginForm";
 import RegisterForm from "../RegisterForm/RegisterForm";
 import { UserContext } from "../config/Context";
 import { Button, Dropdown, Image, NavDropdown } from "react-bootstrap";
-import { Link , useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { isBENHNHAN, isYTA } from "../Common/Common";
 
 export default function Header() {
   const formLoginRef = useRef();
   const formRegisterRef = useRef();
   const { currentUser, setCurrentUser } = useContext(UserContext);
   const navigate = useNavigate();
-
 
   function handleOpenLoginForm() {
     formLoginRef.current.open();
@@ -32,7 +32,7 @@ export default function Header() {
   function logout() {
     localStorage.setItem("token", "");
     setCurrentUser(null);
-    navigate("/")
+    navigate("/");
   }
 
   useEffect(() => {}, [currentUser]);
@@ -97,10 +97,20 @@ export default function Header() {
                       </Dropdown.Toggle>
                       <Dropdown.Menu className="r-0 header-dropdown-menu">
                         <Dropdown.Item>
-                          <Link className="dropdown-item" to="user-detail">
+                          <Link className="dropdown-item" to="/user-detail">
                             Thông tin cá nhân
                           </Link>
                         </Dropdown.Item>
+                        {currentUser !== null && isBENHNHAN(currentUser) && (
+                          <Dropdown.Item>
+                            <Link
+                              className="dropdown-item"
+                              to="/user-register-schedule-list"
+                            >
+                              Danh sách lịch hẹn
+                            </Link>
+                          </Dropdown.Item>
+                        )}
                         <NavDropdown.Divider />
 
                         <NavDropdown.Item>
@@ -162,13 +172,18 @@ export default function Header() {
                 <a className="nav-item nav-link active">Trang chủ</a>
                 <a className="nav-item nav-link">Giới thiệu</a>
                 <a className="nav-item nav-link">Đội ngũ</a>
-                <a className="nav-item nav-link">Blog</a>
+                <a className="nav-item nav-link">Tư vấn</a>
                 <div className="nav-item dropdown">
                   <a className="nav-link" data-bs-toggle="dropdown">
-                    <span className="dropdown-toggle">Pages</span>
+                    <span className="dropdown-toggle">Dịch vụ</span>
                   </a>
                   <div className="dropdown-menu">
-                    <a className="dropdown-item">Our Features</a>
+                    <a className="dropdown-item">Hướng dẫn khách hàng</a>
+                    {currentUser !== null && isYTA(currentUser) && (
+                      <>
+                        <a className="dropdown-item">Duyệt danh sách khám</a>
+                      </>
+                    )}
                   </div>
                 </div>
                 <a className="nav-item nav-link">Contact</a>
@@ -188,22 +203,24 @@ export default function Header() {
                 className="btn btn-light btn-lg-square position-relative wow tada"
                 data-wow-delay=".9s"
               >
-                {currentUser === null ? (
-                  <button
-                    onClick={handleAppointmentSchedule}
-                    className="d-flex flex-column ms-3 text-center align-items-center border-0"
-                  >
-                    <i className="fa fa-calendar-alt fa-2x"></i>
-                    <span className="text-blue">Đặt lịch khám</span>
-                  </button>
-                ) : (
+                {currentUser !== null && isBENHNHAN(currentUser) ? (
                   <Link
                     to="/register-schedule"
-                    className="d-flex flex-column ms-3 text-center align-items-center border-0"
+                    className="d-flex flex-column text-center align-items-center border-0"
                   >
                     <i className="fa fa-calendar-alt fa-2x"></i>
                     <span className="text-blue">Đặt lịch khám</span>
                   </Link>
+                ) : currentUser !== null && isYTA(currentUser) ? (
+                  <></>
+                ) : (
+                  <button
+                    onClick={handleAppointmentSchedule}
+                    className="d-flex flex-column text-center align-items-center border-0"
+                  >
+                    <i className="fa fa-calendar-alt fa-2x"></i>
+                    <span className="text-blue">Đặt lịch khám</span>
+                  </button>
                 )}
               </a>
             </div>

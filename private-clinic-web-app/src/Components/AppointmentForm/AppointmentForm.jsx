@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import "./AppointmentForm.css";
 import { CustomerSnackbar } from "../Common/Common";
 import Api, { authAPI, endpoints } from "../config/Api";
+import { useNavigate } from "react-router-dom";
 
 export default function AppointmentForm() {
   const [registerScheduleState, setRegisterScheduleState] = useState({
@@ -9,7 +10,7 @@ export default function AppointmentForm() {
     date: "",
     favor: "",
   });
-
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
     message: "Đặt lịch thành công",
@@ -28,10 +29,10 @@ export default function AppointmentForm() {
       setOpen(false);
     }, 5000);
 
-    console.log(registerScheduleState)
+    console.log(registerScheduleState);
   };
 
-  function handleDateChange (e) {
+  function handleDateChange(e) {
     const selectedDate = new Date(e.target.value);
     const today = new Date();
     const maxDate = new Date();
@@ -39,7 +40,8 @@ export default function AppointmentForm() {
 
     if (selectedDate < today || selectedDate > maxDate) {
       alert(
-        "Đặt lịch khám khám phải nằm trong khoảng từ hôm nay đến 3 tuần sau."
+        "Đặt lịch khám khám phải nằm trong khoảng từ ngày mai đến 3 tuần sau.\n" + 
+        "Nếu bạn muốn khám hôm nay , hãy đến cơ sở gần nhất để đăng kí trực tiếp"
       );
       setRegisterScheduleState((prev) => ({
         ...prev,
@@ -51,10 +53,10 @@ export default function AppointmentForm() {
         date: e.target.value,
       }));
     }
-  };
+  }
 
   function hanldeRegisterScheduleState(e) {
-    const {name, value} = e.target;
+    const { name, value } = e.target;
     setRegisterScheduleState((prev) => ({
       ...prev,
       [name]: value,
@@ -79,13 +81,16 @@ export default function AppointmentForm() {
 
       if (response.status === 201) {
         showSnackbar("Đặt lịch thành công !", "success");
+        setTimeout(() => {
+          navigate("/user-register-schedule-list");
+        }, 3000);
       } else {
         showSnackbar(response.data, "error");
       }
     } catch {
       showSnackbar("Lỗi", "error");
     }
-  };  
+  };
 
   return (
     <>
@@ -97,7 +102,7 @@ export default function AppointmentForm() {
 
       <div className="appointment-form-container">
         <div className="appointment-form">
-          <h2>Đặt Lịch Khám Bệnh</h2>
+          <h2 className="text text-primary">Đặt Lịch Khám Bệnh</h2>
           <form id="appointmentForm" onSubmit={registerScheduleAct}>
             <div className="form-group">
               <label htmlFor="name">Tên người khám</label>

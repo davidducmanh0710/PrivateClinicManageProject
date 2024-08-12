@@ -1,8 +1,13 @@
 package com.spring.privateClinicManage.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import com.spring.privateClinicManage.dto.UserRegisterDto;
+import com.spring.privateClinicManage.entity.Role;
 import com.spring.privateClinicManage.entity.User;
 
 
@@ -19,5 +24,25 @@ public interface UserService extends UserDetailsService {
 	User getCurrentLoginUser();
 
 	void setCloudinaryField(User user);
+
+	Page<User> findAllUserPaginated(Pageable pageable);
+
+	User findUserById(Integer userId);
+
+	List<User> findUsersByRoleAndActive(Role role, Boolean active);
+
+	List<User> findByRole(Role role);
+
+	List<User> findByActive(Boolean active);
+
+	List<User> findByAnyText(String key);
+
+	List<User> findAllUsers();
+
+	List<User> sortByRole(List<User> users, Role role);
+
+	List<User> sortByActive(List<User> users, String active);
+
+	Page<User> findSortedPaginateUser(Integer size, Integer page, List<User> users);
 
 }

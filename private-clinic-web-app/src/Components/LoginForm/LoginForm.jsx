@@ -11,7 +11,7 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
   const [password, setPassword] = useState();
   const [loading, setLoading] = useState();
   const dialog = useRef();
-  const { setCurrentUser } = useContext(UserContext);
+  const { currentUser , setCurrentUser } = useContext(UserContext);
 
 
   const [open, setOpen] = useState(false);

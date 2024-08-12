@@ -18,3 +18,8 @@ export const isBENHNHAN = (currentUser) => {
   if (currentUser.role.name === "ROLE_BENHNHAN") return true;
   return false;
 };
+
+export const isYTA = (currentUser) => {
+  if (currentUser.role.name === "ROLE_YTA") return true;
+  return false;
+};

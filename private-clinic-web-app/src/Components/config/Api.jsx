@@ -7,7 +7,9 @@ export let endpoints = {
     currentUser: "/api/users/current-user/",
     register : "/api/users/register/",
     sendOtp : "/api/users/verify-email/",
-	registerSchedule : "/api/users/register-schedule/"
+	registerSchedule : "/api/users/register-schedule/",
+	userRegisterScheduleList : "/api/users/user-register-schedule-list/",
+	userCancelRegisterSchedule : (registerScheduleId) => `/api/users/cancel-register-schedule/${registerScheduleId}/`
 };
 
 export const authAPI = () => {

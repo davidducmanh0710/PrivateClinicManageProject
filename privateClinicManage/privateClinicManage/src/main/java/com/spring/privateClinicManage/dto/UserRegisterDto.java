@@ -1,5 +1,6 @@
 package com.spring.privateClinicManage.dto;
 
+
 import java.util.Date;
 
 import lombok.AllArgsConstructor;

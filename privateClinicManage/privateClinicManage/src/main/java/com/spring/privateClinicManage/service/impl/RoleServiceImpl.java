@@ -1,5 +1,7 @@
 package com.spring.privateClinicManage.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,11 @@ public class RoleServiceImpl implements RoleService {
 	@Override
 	public Role findByName(String name) {
 		return roleRepository.findByName(name);
+	}
+
+	@Override
+	public List<Role> findAllRoles() {
+		return roleRepository.findAll();
 	}
 
 }

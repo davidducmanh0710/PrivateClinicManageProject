@@ -16,12 +16,14 @@ function App() {
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
-      setTimeout(async () => {
+      const fetchUser = async () => {
         const response = await authAPI().get(endpoints["currentUser"]);
-        setCurrentUser((prev) => setCurrentUser(response.data));
-        setToken((prev) => setToken(localStorage.getItem("token")));
-      }, 200);
+        setCurrentUser(response.data);
+        setToken(localStorage.getItem("token"));
+      };
+      fetchUser();
     }
+    
   }, []);
 
   const userCtx = {
@@ -34,7 +36,6 @@ function App() {
     <>
       <BrowserRouter>
       <UserContext.Provider value={userCtx}>
-        <SnackbarContextProvider>
         <div className="App">
           <Routes>
             {publicRoutes.map((route, index) => {
@@ -62,7 +63,6 @@ function App() {
             })}
           </Routes>
         </div>
-        </SnackbarContextProvider>
         </UserContext.Provider> 
       </BrowserRouter>
     </>

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -57,6 +58,7 @@ public class User implements Serializable {
 	private String gender;
 
 	@Column(name = "birthday", nullable = false)
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date birthday;
 
 	@Column(name = "phone", nullable = false)
@@ -82,5 +84,6 @@ public class User implements Serializable {
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<MedicalRegistryList> medicalRegistryLists;
+
 
 }

@@ -1,6 +1,7 @@
 package com.spring.privateClinicManage.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -33,7 +34,6 @@ public class MedicalRegistryList implements Serializable {
 	@Id
 	@Column(name = "id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@JsonIgnore
 	private Integer id;
 
 	@Column(name = "name")
@@ -46,6 +46,8 @@ public class MedicalRegistryList implements Serializable {
 	@Column(name = "is_canceled", nullable = false)
 	private Boolean isCanceled;
 
+	@Column(name = "created_date")
+	private Date createdDate;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
@@ -58,7 +60,7 @@ public class MedicalRegistryList implements Serializable {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
-//	@JsonIgnore
+	@JsonIgnore
 	private User user;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = {

@@ -56,10 +56,10 @@ export default function Footer() {
               </div>
 
               <div className="col-lg-4 col-md-12 mb-4 mb-md-0">
-                <h5 className="text-uppercase mb-4 text-center">Về công ty</h5>
+                <h5 className="text-uppercase mb-4 text-center">Về phòng khám</h5>
 
                 <p className="text-center">
-                CHI NHÁNH CÔNG TY CỔ PHẦN Y TẾ BỆNH VIỆN ĐA KHOA QUỐC TẾ THÀNH PHỐ HCM
+                CHI NHÁNH CÔNG TY CỔ PHẦN Y TẾ BỆNH VIỆN ĐA KHOA QUỐC TẾ THÀNH PHỐ HỒ CHÍ MINH
                 </p>
               </div>
             </div>

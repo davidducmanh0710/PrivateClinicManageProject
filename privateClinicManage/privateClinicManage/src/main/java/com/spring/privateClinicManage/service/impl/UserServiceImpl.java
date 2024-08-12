@@ -2,13 +2,20 @@ package com.spring.privateClinicManage.service.impl;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +28,7 @@ import org.springframework.stereotype.Service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.spring.privateClinicManage.dto.UserRegisterDto;
+import com.spring.privateClinicManage.entity.Role;
 import com.spring.privateClinicManage.entity.User;
 import com.spring.privateClinicManage.repository.UserRepository;
 import com.spring.privateClinicManage.service.RoleService;
@@ -122,6 +130,70 @@ public class UserServiceImpl implements UserService {
 				Logger.getLogger(UserServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+	}
+
+	@Override
+	public Page<User> findAllUserPaginated(Pageable pageable) {
+		return userRepository.findAll(pageable);
+	}
+
+	@Override
+	public User findUserById(Integer userId) {
+		Optional<User> optional = userRepository.findById(userId);
+		if (optional.isEmpty())
+			return null;
+		return optional.get();
+	}
+
+	@Override
+	public List<User> findUsersByRoleAndActive(Role role, Boolean active) {
+		return userRepository.findUsersByRoleAndActive(role, active);
+	}
+
+	@Override
+	public List<User> findByRole(Role role) {
+		return userRepository.findByRole(role);
+	}
+
+	@Override
+	public List<User> findByActive(Boolean active) {
+		return findByActive(active);
+	}
+
+	@Override
+	public List<User> findByAnyText(String key) {
+		return userRepository.findByAnyText(key);
+	}
+
+	@Override
+	public List<User> findAllUsers() {
+		return userRepository.findAll();
+	}
+
+	@Override
+	public List<User> sortByRole(List<User> users, Role role) {
+		return users.stream()
+				.filter(user -> user.getRole().equals(role))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<User> sortByActive(List<User> users, String active) {
+		if (active.equals("true"))
+			return users.stream().filter(User::getActive).collect(Collectors.toList());
+		return users.stream().filter(user -> !user.getActive()).collect(Collectors.toList());
+	}
+
+	@Override
+	public Page<User> findSortedPaginateUser(Integer size, Integer page, List<User> users) {
+		Pageable pageable = PageRequest.of(page - 1, size);
+
+		int start = (int) pageable.getOffset();
+		int end = Math.min((start + pageable.getPageSize()), users.size());
+		List<User> pagedUsers = users.subList(start, end);
+
+		return new PageImpl<>(pagedUsers, pageable, users.size());
+
 	}
 
 }
