@@ -11,7 +11,9 @@ export default function CencorRegister() {
   const [statusList, setStatusList] = useState([]);
   const [allRegisterScheduleList, setallRegisterScheduleList] = useState([]);
   const [status, setStatus] = useState("ALL");
-  const [search , setSearch] = useState("")
+  const [search, setSearch] = useState("");
+  const [sortCreatedDate, setSortCreatedDate] = useState(null);
+  const [registerDate , setRegisterDate] = useState("");
   const { currentUser } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -19,7 +21,7 @@ export default function CencorRegister() {
 
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
-  const [totalElements , setTotalElements] = useState(0)
+  const [totalElements, setTotalElements] = useState(0);
 
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
@@ -80,9 +82,12 @@ export default function CencorRegister() {
     try {
       let url = `${endpoints["getAllRegisterScheduleList"]}?page=${page}`;
       let key = params.get("key");
-			if (key) url = `${url}&key=${key}`;
+      if (key) url = `${url}&key=${key}`;
       let statusParam = params.get("status");
-			if (statusParam) url = `${url}&key=${key}&status=${statusParam}`;
+      if (statusParam) url = `${url}&key=${key}&status=${statusParam}`;
+      let registerDate = params.get("registerDate");
+      if (registerDate)
+        url = `${url}&key=${key}&status=${statusParam}&registerDate=${registerDate}`;
 
       response = await authAPI().get(url, {
         validateStatus: function (status) {
@@ -93,27 +98,27 @@ export default function CencorRegister() {
       if (response.status === 200) {
         setallRegisterScheduleList(response.data);
         setTotalPage(response.data.totalPages);
-        setTotalElements(response.data.totalElements)
+        setTotalElements(response.data.totalElements);
       } else showSnackbar(response.data, "error");
     } catch {
       showSnackbar("Lỗi", "error");
     }
-  }, [currentUser, page , params ]);
+  }, [currentUser, page, params]);
 
   useEffect(() => {
     if (currentUser !== null) {
       getAllRegisterScheduleList();
       if (statusList.length < 1) getAllStatusIsApproved();
     }
-  }, [currentUser, page  ,params]);
+  }, [currentUser, page, params]);
 
   const handleStatusChange = (event) => {
     setStatus(event.target.value);
   };
 
-  function handleSortRegisterList(event){
+  function handleSortRegisterList(event) {
     event.preventDefault();
-    navigate(`?key=${search}&status=${status}`);
+    navigate(`?key=${search}&status=${status}&registerDate=${registerDate}`);
   }
 
   return (
@@ -125,7 +130,8 @@ export default function CencorRegister() {
       />
 
       <div className="filter-container d-flex justify-content-center align-item-center">
-        <form onSubmit={handleSortRegisterList}
+        <form
+          onSubmit={handleSortRegisterList}
           id="filterForm"
           className="d-flex w-100 justify-content-center align-item-center"
         >
@@ -142,28 +148,45 @@ export default function CencorRegister() {
 
           <div className="filter-item date-box">
             <i className="fa fa-calendar-alt"></i>
-            <input type="date" id="createdDate" name="createdDate" />
+            <input
+              type="date"
+              id="createdDate"
+              name="createdDate"
+              onChange={(e) => setSortCreatedDate(e.target.value)}
+            />
             <small className="note text-primary">Lọc ngày đặt lịch</small>
           </div>
 
           <div className="filter-item date-box">
             <i className="fa fa-calendar-alt"></i>
-            <input type="date" id="registerDate" name="registerDate" />
+            <input value={registerDate} type="date" id="registerDate" name="registerDate" onChange={(e) => setRegisterDate(e.target.value)}/>
             <small className="note text-primary">Lọc ngày hẹn khám</small>
           </div>
 
           <div
             className={`filter-item select-box bg-${getStatusClass(status)}`}
           >
-            <i class="fa-solid fa-list-check"></i>
+            <i className="fa-solid fa-list-check"></i>
 
-            <select className="" id="status" name="status" onChange={handleStatusChange} value={status}>
-                <option value="ALL">ALL</option>
+            <select
+              className=""
+              id="status"
+              name="status"
+              onChange={handleStatusChange}
+              value={status}
+            >
+              <option key="0" value="ALL">
+                ALL
+              </option>
               {statusList.length > 0 &&
                 statusList.map((s) => {
                   return (
                     <>
-                      <option className={status === s.status ? 'selected' : ''} key={s.id} value={s.status}>
+                      <option
+                        className={status === s.status ? "selected" : ""}
+                        key={s.id}
+                        value={s.status}
+                      >
                         <strong className="text-white">{s.status}</strong>
                       </option>
                     </>
@@ -183,7 +206,7 @@ export default function CencorRegister() {
       <Pagination
         count={totalPage}
         color="primary"
-        className={`mt-4 ${totalElements < 1 ? 'd-none' : ''}`}
+        className={`mt-4 ${totalElements < 1 ? "d-none" : ""}`}
         onChange={(event, value) => setPage(value)}
       />
       <div className="table-responsive mt-4 p-4 wrapper rounded-3">

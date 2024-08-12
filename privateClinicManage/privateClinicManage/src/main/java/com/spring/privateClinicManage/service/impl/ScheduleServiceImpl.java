@@ -37,4 +37,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 		return optional.get();
 	}
 
+	@Override
+	public Schedule findByDayMonthYear(Integer year, Integer month, Integer day) {
+		return scheduleRepository.findByDayMonthYear(year, month, day);
+	}
+
 }

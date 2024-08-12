@@ -304,6 +304,24 @@ public class ApiUserRestController {
 		if (!key.isBlank())
 			mrls = medicalRegistryListService.findByAnyKey(key);
 
+		String registerDate = params.getOrDefault("registerDate", "");
+		if (!registerDate.isBlank()) {
+			CalendarFormat c = CalendarFormatUtil.parseStringToCalendar(registerDate);
+			Schedule schedule = scheduleService.findByDayMonthYear(c.getYear(), c.getMonth(),
+					c.getDay());
+			if (schedule != null)
+				mrls = medicalRegistryListService.sortBySchedule(mrls, schedule);
+			else {
+				mrls.clear();
+				Page<MedicalRegistryList> mrlsPaginated = medicalRegistryListService
+						.findMrlsPaginated(page,
+								size, mrls);
+
+				return new ResponseEntity<>(mrlsPaginated, HttpStatus.OK);
+			}
+
+		}
+
 		String status = params.getOrDefault("status", "ALL");
 		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus(status);
 
@@ -313,8 +331,6 @@ public class ApiUserRestController {
 
 		Page<MedicalRegistryList> mrlsPaginated = medicalRegistryListService.findMrlsPaginated(page,
 				size, mrls);
-
-		model.addAttribute("key", key);
 
 		return new ResponseEntity<>(mrlsPaginated, HttpStatus.OK);
 	}

@@ -41,4 +41,6 @@ public interface MedicalRegistryListService {
 
 	List<MedicalRegistryList> findByAnyKey(String key);
 
+	List<MedicalRegistryList> sortBySchedule(List<MedicalRegistryList> mrls, Schedule schedule);
+
 }

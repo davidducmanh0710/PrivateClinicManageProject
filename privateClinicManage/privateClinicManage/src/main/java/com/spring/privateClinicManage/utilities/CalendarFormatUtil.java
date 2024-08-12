@@ -12,21 +12,29 @@ import lombok.Setter;
 @Setter
 public class CalendarFormatUtil {
 
-	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static final SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	public static CalendarFormat parseStringToCalendar(String s) {
 		Date d;
 		Calendar calendar = Calendar.getInstance();
 		try {
-			d = dateFormat.parse(s);
+			d = dateFormat1.parse(s);
 			calendar.setTime(d);
-		} catch (ParseException e) {
 
+		} catch (ParseException e) {
+			try {
+				d = dateFormat2.parse(s);
+				calendar.setTime(d);
+
+			} catch (ParseException e1) {
+				System.err.println("ParseException: " + e.getMessage());
+			}
 			System.err.println("ParseException: " + e.getMessage());
 		}
 
 		Integer year = calendar.get(Calendar.YEAR);
-		Integer month = calendar.get(Calendar.MONTH) + 1; // Tháng bắt đầu từ 0
+		Integer month = calendar.get(Calendar.MONTH) + 1;
 		Integer day = calendar.get(Calendar.DAY_OF_MONTH);
 
 		return new CalendarFormat(year, month, day);

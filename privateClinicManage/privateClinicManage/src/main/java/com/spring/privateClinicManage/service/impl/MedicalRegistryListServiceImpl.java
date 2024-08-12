@@ -118,13 +118,21 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 	public List<MedicalRegistryList> sortByStatusIsApproved(List<MedicalRegistryList> mrls,
 			StatusIsApproved statusIsApproved) {
 		return mrls.stream()
-				.filter(user -> user.getStatusIsApproved().equals(statusIsApproved))
+				.filter(mrl -> mrl.getStatusIsApproved().equals(statusIsApproved))
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<MedicalRegistryList> findByAnyKey(String key) {
 		return medicalRegistryListRepository.findByAnyKey(key);
+	}
+
+	@Override
+	public List<MedicalRegistryList> sortBySchedule(List<MedicalRegistryList> mrls,
+			Schedule schedule) {
+		return mrls.stream()
+				.filter(mrl -> mrl.getSchedule().equals(schedule))
+				.collect(Collectors.toList());
 	}
 
 }
