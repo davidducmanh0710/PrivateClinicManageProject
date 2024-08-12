@@ -181,7 +181,7 @@ export default function Header() {
                     <a className="dropdown-item">Hướng dẫn khách hàng</a>
                     {currentUser !== null && isYTA(currentUser) && (
                       <>
-                        <a className="dropdown-item">Duyệt danh sách khám</a>
+                        <Link to="/censor-register" className="dropdown-item">Duyệt danh sách khám</Link>
                       </>
                     )}
                   </div>

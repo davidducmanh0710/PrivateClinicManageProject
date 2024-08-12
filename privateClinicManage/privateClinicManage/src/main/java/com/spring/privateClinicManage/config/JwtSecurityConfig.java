@@ -57,7 +57,8 @@ public class JwtSecurityConfig {
 
 		http.securityMatcher("/api/**").authorizeHttpRequests(auth -> auth
 
-				.requestMatchers(HttpMethod.GET)
+				.requestMatchers(HttpMethod.GET,
+						"/api/users/getAllStatusIsApproved/")
 				.permitAll()
 
 				.requestMatchers(HttpMethod.POST,
@@ -66,18 +67,19 @@ public class JwtSecurityConfig {
 						"/api/users/verify-email/")
 				.permitAll()
 
-//				.requestMatchers(HttpMethod.GET)
-//				.hasRole("USER")
-//
 				.requestMatchers(HttpMethod.POST,
 						"/api/users/register-schedule/",
 						"/api/users/user-register-schedule-list/")
 				.hasRole("BENHNHAN")
 				
-				.requestMatchers(HttpMethod.PUT,					
+				.requestMatchers(HttpMethod.PATCH,
 						"/api/users/cancel-register-schedule/{registerScheduleId}/")
 				.hasRole("BENHNHAN")
 				
+				.requestMatchers(HttpMethod.GET,
+						"/api/users/censor-register-schedule",
+						"/api/users/all-register-schedule/")
+				.hasRole("YTA")
 
 				.anyRequest().authenticated())
 				.httpBasic(httpbc -> httpbc

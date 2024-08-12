@@ -9,7 +9,9 @@ export let endpoints = {
     sendOtp : "/api/users/verify-email/",
 	registerSchedule : "/api/users/register-schedule/",
 	userRegisterScheduleList : "/api/users/user-register-schedule-list/",
-	userCancelRegisterSchedule : (registerScheduleId) => `/api/users/cancel-register-schedule/${registerScheduleId}/`
+	userCancelRegisterSchedule : (registerScheduleId) => `/api/users/cancel-register-schedule/${registerScheduleId}/`,
+	getAllRegisterScheduleList : "/api/users/all-register-schedule",
+	getAllStatusIsApproved : "/api/users/getAllStatusIsApproved/",
 };
 
 export const authAPI = () => {

@@ -25,17 +25,16 @@ const DeleteConfirmationForm = forwardRef(function DeleteConfirmationForm(
       <dialog ref={dialog}>
         <div className="warning-popup">
           <div className="warning-icon">⚠️</div>
-          <h2>Are you sure?</h2>
+          <h2>Bạn có chắc chắn muốn hủy lịch không ?</h2>
           <p>
-            This action cannot be undone. All values associated with this field
-            will be lost.
+            Sau khi hủy lịch , nếu muốn tái khám vui lòng đăng kí lịch hẹn mới và chờ xác nhận từ phía y tá
           </p>
           <div className="buttons">
             <button className="delete-button" onClick={() => onDelete()}>
-              Delete field
+              Xác nhận
             </button>
             <button className="cancel-button" onClick={onCancel}>
-              Cancel
+              Hủy
             </button>
           </div>
         </div>

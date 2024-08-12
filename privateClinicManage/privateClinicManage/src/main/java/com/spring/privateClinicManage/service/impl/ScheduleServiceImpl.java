@@ -1,6 +1,7 @@
 package com.spring.privateClinicManage.service.impl;
 
 import java.util.Date;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,14 @@ public class ScheduleServiceImpl implements ScheduleService {
 	@Override
 	public Schedule findByDate(Date date) {
 		return scheduleRepository.findByDate(date);
+	}
+
+	@Override
+	public Schedule findById(Integer id) {
+		Optional<Schedule> optional = scheduleRepository.findById(id);
+		if (optional.isEmpty())
+			return null;
+		return optional.get();
 	}
 
 }

@@ -8,4 +8,6 @@ public interface ScheduleService {
 	void saveSchedule(Schedule schedule);
 
 	Schedule findByDate(Date date);
+
+	Schedule findById(Integer id);
 }

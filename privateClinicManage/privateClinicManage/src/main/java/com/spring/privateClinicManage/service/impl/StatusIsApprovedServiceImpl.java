@@ -1,5 +1,7 @@
 package com.spring.privateClinicManage.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,11 @@ public class StatusIsApprovedServiceImpl implements StatusIsApprovedService {
 	@Override
 	public StatusIsApproved findByStatus(String status) {
 		return statusIsApprovedRepository.findByStatus(status);
+	}
+
+	@Override
+	public List<StatusIsApproved> findAllStatus() {
+		return statusIsApprovedRepository.findAll();
 	}
 
 }

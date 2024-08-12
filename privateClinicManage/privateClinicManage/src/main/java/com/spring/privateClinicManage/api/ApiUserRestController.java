@@ -1,20 +1,21 @@
 package com.spring.privateClinicManage.api;
 
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -41,12 +42,13 @@ import com.spring.privateClinicManage.service.ScheduleService;
 import com.spring.privateClinicManage.service.StatusIsApprovedService;
 import com.spring.privateClinicManage.service.UserService;
 import com.spring.privateClinicManage.service.VerifyEmailService;
+import com.spring.privateClinicManage.utilities.CalendarFormat;
+import com.spring.privateClinicManage.utilities.CalendarFormatUtil;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 
 import jakarta.mail.MessagingException;
-
 
 @RestController
 @RequestMapping("/api/users")
@@ -61,13 +63,11 @@ public class ApiUserRestController {
 	private MedicalRegistryListService medicalRegistryListService;
 	private StatusIsApprovedService statusIsApprovedService;
 
-
 	@Autowired
 	public ApiUserRestController(JwtService jwtService, UserService userService,
 			VerifyEmailService verifyEmailService, MailSenderService mailSenderService,
 			Environment environment, MedicalRegistryListService medicalRegistryListService,
-			ScheduleService scheduleService, StatusIsApprovedService statusIsApprovedService
-			) {
+			ScheduleService scheduleService, StatusIsApprovedService statusIsApprovedService) {
 		super();
 		this.jwtService = jwtService;
 		this.userService = userService;
@@ -157,13 +157,16 @@ public class ApiUserRestController {
 		return new ResponseEntity<String>("Message sent successfully", HttpStatus.OK);
 	}
 
+	// ROLE_BENHNHAN
+
 	@PostMapping(value = "/register-schedule/")
 	@CrossOrigin
-	public ResponseEntity<Object> registerSchedule(@RequestBody RegisterScheduleDto registerScheduleDto) {
+	public ResponseEntity<Object> registerSchedule(
+			@RequestBody RegisterScheduleDto registerScheduleDto) {
 		User currentUser = userService.getCurrentLoginUser();
 		if (currentUser == null)
 			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
-		
+
 		Schedule schedule = scheduleService.findByDate(registerScheduleDto.getDate());
 		if (schedule == null) {
 			schedule = new Schedule();
@@ -171,8 +174,8 @@ public class ApiUserRestController {
 			schedule.setIsDayOff(false);
 			scheduleService.saveSchedule(schedule);
 		}
-		
-		if(schedule.getIsDayOff())
+
+		if (schedule.getIsDayOff())
 			return new ResponseEntity<>("Không thể chọn ngày lễ", HttpStatus.UNAUTHORIZED);
 
 		Integer countMedicalRegistryList = medicalRegistryListService
@@ -182,9 +185,9 @@ public class ApiUserRestController {
 				.parseInt(environment.getProperty("register_schedule_per_day_max")))
 			return new ResponseEntity<>("Tài khoản này đã đăng kí đủ 4 lần / 1 ngày",
 					HttpStatus.UNAUTHORIZED);
-		
+
 		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("CHECKING");
-		
+
 		MedicalRegistryList medicalRegistryList = new MedicalRegistryList();
 		medicalRegistryList.setCreatedDate(new Date());
 		medicalRegistryList.setStatusIsApproved(statusIsApproved);
@@ -212,10 +215,10 @@ public class ApiUserRestController {
 		Integer size = Integer.parseInt(params.getOrDefault("size",
 				environment.getProperty("user_register_list_pagesize")));
 
+		List<MedicalRegistryList> mrls = medicalRegistryListService.findByUser(currentUser);
+
 		Page<MedicalRegistryList> registryListsPaginated = medicalRegistryListService
-				.findByUserPaginated(
-						PageRequest.of(page - 1, size,
-								Sort.by("createdDate").descending()));
+				.findByUserPaginated(page, size, mrls);
 
 		return new ResponseEntity<>(registryListsPaginated, HttpStatus.OK);
 
@@ -243,10 +246,77 @@ public class ApiUserRestController {
 		medicalRegistryList.setStatusIsApproved(statusIsApproved);
 		medicalRegistryListService.saveMedicalRegistryList(medicalRegistryList);
 
-
 		return new ResponseEntity<>("Đã hủy lịch thành công !", HttpStatus.OK);
 
 	}
 
+	// ROLE_YTA
+	@GetMapping(value = "/censor-register-schedule")
+	@CrossOrigin
+	public ResponseEntity<Object> censorRegisterSchedule(@RequestParam Map<String, String> params)
+			throws ParseException, NumberFormatException {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		Integer page = Integer.parseInt(params.getOrDefault("page", "1"));
+		Integer size = Integer.parseInt(params.getOrDefault("size", "5"));
+
+		String date = params.getOrDefault("date", "");
+		CalendarFormat c = CalendarFormatUtil.parseStringToCalendar(date);
+		String staus = params.getOrDefault("status", "CHECKING");
+
+		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus(staus);
+
+		if (statusIsApproved == null)
+			return new ResponseEntity<>("Giá trị tìm kiếm không đúng !", HttpStatus.NOT_FOUND);
+
+		List<MedicalRegistryList> mrls = medicalRegistryListService
+				.findByScheduleAndStatusIsApproved(c.getYear(),
+						c.getMonth(), c.getDay(), statusIsApproved);
+
+		Page<MedicalRegistryList> registryListsPaginated = medicalRegistryListService
+				.findByScheduleAndStatusIsApprovedPaginated(page, size, mrls);
+
+		return new ResponseEntity<>(registryListsPaginated, HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/getAllStatusIsApproved/")
+	public ResponseEntity<Object> getAllStatusIsApproved() {
+		return new ResponseEntity<>(statusIsApprovedService.findAllStatus(), HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/all-register-schedule")
+	public ResponseEntity<Object> getAllRegisterSchedule(Model model,
+			@RequestParam Map<String, String> params) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		Integer page = Integer.parseInt(params.getOrDefault("page", "1"));
+		Integer size = Integer.parseInt(params.getOrDefault("size", "6"));
+
+		List<MedicalRegistryList> mrls = medicalRegistryListService.findAllMrl();
+
+		String key = params.getOrDefault("key", "");
+		if (!key.isBlank())
+			mrls = medicalRegistryListService.findByAnyKey(key);
+
+		String status = params.getOrDefault("status", "ALL");
+		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus(status);
+
+		if (statusIsApproved != null) {
+			mrls = medicalRegistryListService.sortByStatusIsApproved(mrls, statusIsApproved);
+		}
+
+		Page<MedicalRegistryList> mrlsPaginated = medicalRegistryListService.findMrlsPaginated(page,
+				size, mrls);
+
+		model.addAttribute("key", key);
+
+		return new ResponseEntity<>(mrlsPaginated, HttpStatus.OK);
+	}
 
 }

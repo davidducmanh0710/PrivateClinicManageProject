@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -36,6 +38,7 @@ public class Schedule implements Serializable {
 	private Integer id;
 
 	@Column(name = "appointment_schedule", nullable = false)
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date date;
 
 	@Column(name = "is_day_off", nullable = false)
