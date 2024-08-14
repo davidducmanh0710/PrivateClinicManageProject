@@ -1,5 +1,6 @@
 package com.spring.privateClinicManage.service.impl;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -59,20 +60,6 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 	}
 
 	@Override
-	public Page<MedicalRegistryList> findByUserPaginated(Integer page, Integer size,
-			List<MedicalRegistryList> mrls) {
-		Pageable pageable = PageRequest.of(page - 1, size);
-
-		mrls.sort(Comparator.comparing(MedicalRegistryList::getCreatedDate).reversed());
-
-		int start = (int) pageable.getOffset();
-		int end = Math.min((start + pageable.getPageSize()), mrls.size());
-		List<MedicalRegistryList> pagedUsers = mrls.subList(start, end);
-
-		return new PageImpl<>(pagedUsers, pageable, mrls.size());
-	}
-
-	@Override
 	public Page<MedicalRegistryList> findByScheduleAndStatusIsApprovedPaginated(Integer page,
 			Integer size,
 			List<MedicalRegistryList> mrls) {
@@ -88,7 +75,7 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 
 	@Override
 	public List<MedicalRegistryList> findByScheduleAndStatusIsApproved(
-			Integer year, Integer month, Integer day, StatusIsApproved status){
+			Integer year, Integer month, Integer day, StatusIsApproved status) {
 		return medicalRegistryListRepository.findByScheduleAndStatusIsApproved(year, month, day,
 				status);
 	}
@@ -99,19 +86,39 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 	}
 
 	@Override
+	public Page<MedicalRegistryList> findByUserPaginated(Integer page, Integer size,
+			List<MedicalRegistryList> mrls) {
+		Pageable pageable = PageRequest.of(page - 1, size);
+
+		mrls.sort(Comparator.comparing(MedicalRegistryList::getCreatedDate).reversed());
+
+		int start = (int) pageable.getOffset();
+		int end = Math.min((start + pageable.getPageSize()), mrls.size());
+		List<MedicalRegistryList> pagedUsers = mrls.subList(start, end);
+
+		return new PageImpl<>(pagedUsers, pageable, mrls.size());
+	}
+
+	@Override
 	public Page<MedicalRegistryList> findMrlsPaginated(Integer page,
 			Integer size,
 			List<MedicalRegistryList> mrls) {
 
 		mrls.sort(Comparator.comparing(MedicalRegistryList::getCreatedDate).reversed());
-
 		Pageable pageable = PageRequest.of(page - 1, size);
 
 		int start = (int) pageable.getOffset();
-		int end = Math.min((start + pageable.getPageSize()), mrls.size());
-		List<MedicalRegistryList> paged = mrls.subList(start, end);
+		int end = 0;
+		List<MedicalRegistryList> mrlsPaginated;
 
-		return new PageImpl<>(paged, pageable, mrls.size());
+		if (mrls.size() < start) {
+			mrlsPaginated = Collections.emptyList();
+		} else {
+			end = Math.min((start + pageable.getPageSize()), mrls.size());
+			mrlsPaginated = mrls.subList(start, end);
+		}
+
+		return new PageImpl<>(mrlsPaginated, pageable, mrls.size());
 	}
 
 	@Override
@@ -133,6 +140,24 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 		return mrls.stream()
 				.filter(mrl -> mrl.getSchedule().equals(schedule))
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<MedicalRegistryList> sortByCreatedDate(List<MedicalRegistryList> mrls, Integer year,
+			Integer month, Integer day) {
+		return medicalRegistryListRepository.sortByCreatedDate(mrls, year, month, day);
+	}
+
+	@Override
+	public List<MedicalRegistryList> findByScheduleAndStatusIsApproved2(Schedule schedule,
+			StatusIsApproved status) {
+		return medicalRegistryListRepository.findByScheduleAndStatusIsApproved2(schedule, status);
+	}
+
+	@Override
+	public List<User> findUniqueUser(Schedule schedule, StatusIsApproved status) {
+
+		return medicalRegistryListRepository.findUniqueUser(schedule, status);
 	}
 
 }

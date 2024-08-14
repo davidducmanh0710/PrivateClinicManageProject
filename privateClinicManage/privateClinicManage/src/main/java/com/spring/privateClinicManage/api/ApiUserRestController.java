@@ -26,8 +26,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.spring.privateClinicManage.dto.ConfirmRegisterDto;
 import com.spring.privateClinicManage.dto.EmailDto;
 import com.spring.privateClinicManage.dto.RegisterScheduleDto;
+import com.spring.privateClinicManage.dto.RegisterStatusDto;
 import com.spring.privateClinicManage.dto.UserLoginDto;
 import com.spring.privateClinicManage.dto.UserRegisterDto;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
@@ -264,7 +266,7 @@ public class ApiUserRestController {
 		Integer size = Integer.parseInt(params.getOrDefault("size", "5"));
 
 		String date = params.getOrDefault("date", "");
-		CalendarFormat c = CalendarFormatUtil.parseStringToCalendar(date);
+		CalendarFormat c = CalendarFormatUtil.parseStringToCalendarFormat(date);
 		String staus = params.getOrDefault("status", "CHECKING");
 
 		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus(staus);
@@ -283,11 +285,13 @@ public class ApiUserRestController {
 	}
 
 	@GetMapping(value = "/getAllStatusIsApproved/")
+	@CrossOrigin
 	public ResponseEntity<Object> getAllStatusIsApproved() {
 		return new ResponseEntity<>(statusIsApprovedService.findAllStatus(), HttpStatus.OK);
 	}
 
 	@GetMapping(value = "/all-register-schedule")
+	@CrossOrigin
 	public ResponseEntity<Object> getAllRegisterSchedule(Model model,
 			@RequestParam Map<String, String> params) {
 
@@ -304,9 +308,17 @@ public class ApiUserRestController {
 		if (!key.isBlank())
 			mrls = medicalRegistryListService.findByAnyKey(key);
 
+		String createdDate = params.getOrDefault("createdDate", "");
+		if (!createdDate.isBlank()) {
+			CalendarFormat cd = CalendarFormatUtil.parseStringToCalendarFormat(createdDate);
+			mrls = medicalRegistryListService.sortByCreatedDate(mrls, cd.getYear(), cd.getMonth(),
+					cd.getDay());
+
+		}
+
 		String registerDate = params.getOrDefault("registerDate", "");
 		if (!registerDate.isBlank()) {
-			CalendarFormat c = CalendarFormatUtil.parseStringToCalendar(registerDate);
+			CalendarFormat c = CalendarFormatUtil.parseStringToCalendarFormat(registerDate);
 			Schedule schedule = scheduleService.findByDayMonthYear(c.getYear(), c.getMonth(),
 					c.getDay());
 			if (schedule != null)
@@ -329,10 +341,103 @@ public class ApiUserRestController {
 			mrls = medicalRegistryListService.sortByStatusIsApproved(mrls, statusIsApproved);
 		}
 
+		for (Integer i = 0; i < mrls.size(); i++)
+			mrls.get(i).setOrder(i + 1);
+
 		Page<MedicalRegistryList> mrlsPaginated = medicalRegistryListService.findMrlsPaginated(page,
 				size, mrls);
 
 		return new ResponseEntity<>(mrlsPaginated, HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/get-all-users/")
+	@CrossOrigin
+	public ResponseEntity<Object> getAllUsers() {
+		return new ResponseEntity<>(userService.findAllUsers(), HttpStatus.OK);
+	}
+
+	@PostMapping(value = "/get-users-schedule-status/")
+	@CrossOrigin
+	public ResponseEntity<Object> getUsersByScheduleAndStatus(
+			@RequestBody RegisterStatusDto registerStatusDto) {
+		StatusIsApproved statusIsApproved = statusIsApprovedService
+				.findByStatus("CHECKING");
+
+		Schedule schedule = scheduleService.findByDate(registerStatusDto.getRegisterDate());
+
+		if (statusIsApproved == null || schedule == null)
+			return new ResponseEntity<>("Không có email đăng kí khám ngày này",
+					HttpStatus.NOT_FOUND);
+
+		List<User> users = medicalRegistryListService.findUniqueUser(schedule, statusIsApproved);
+		if (users.size() < 1)
+			return new ResponseEntity<>("Không có email đăng kí khám ngày này",
+					HttpStatus.NOT_FOUND);
+
+		return new ResponseEntity<>(users, HttpStatus.OK);
+	}
+
+	@PostMapping(value = "/auto-confirm-registers/")
+	@CrossOrigin
+	public ResponseEntity<Object> autoConfirmRegisters(
+
+			@RequestBody ConfirmRegisterDto confirmRegisterDto) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		StatusIsApproved statusIsApproved = statusIsApprovedService
+				.findByStatus(confirmRegisterDto.getStatus());
+
+		Schedule schedule = scheduleService.findByDate(confirmRegisterDto.getRegisterDate());
+
+		if (statusIsApproved == null || schedule == null)
+			return new ResponseEntity<>("Trạng thái hoặc ngày này chưa có đơn đăng kí khám",
+					HttpStatus.NOT_FOUND);
+
+		List<MedicalRegistryList> mrls = medicalRegistryListService
+				.findByScheduleAndStatusIsApproved2(schedule, statusIsApprovedService
+						.findByStatus("CHECKING"));
+		if (mrls.size() < 1)
+			return new ResponseEntity<>("Không tồn tại đơn đăng kí để xét duyệt vào ngày này",
+					HttpStatus.OK);
+		List<String> emails = confirmRegisterDto.getEmails();
+
+		// cần unique email khi lấy đc các list trong medicalRegistryList / 1 ngày
+		if (!emails.isEmpty()) {
+			mrls.forEach(mrl -> {
+				if (emails.contains(mrl.getUser().getEmail())
+						&& mrl.getStatusIsApproved().getStatus().equals("CHECKING")) {
+					mrl.setStatusIsApproved(statusIsApproved);
+					medicalRegistryListService.saveMedicalRegistryList(mrl);
+
+					try {
+						mailSenderService.sendStatusRegisterEmail(mrl.getUser().getEmail(),
+								confirmRegisterDto.getEmailContent());
+					} catch (UnsupportedEncodingException | MessagingException e1) {
+						System.out.println("Không gửi được mail !");
+					}
+				}
+			});
+			return new ResponseEntity<>("Thành công", HttpStatus.OK);
+		}
+
+		mrls.forEach(mrl -> {
+			if (mrl.getStatusIsApproved().getStatus().equals("CHECKING")) {
+				mrl.setStatusIsApproved(statusIsApproved);
+				medicalRegistryListService.saveMedicalRegistryList(mrl);
+
+				try {
+					mailSenderService.sendStatusRegisterEmail(mrl.getUser().getEmail(),
+							confirmRegisterDto.getEmailContent());
+				} catch (UnsupportedEncodingException | MessagingException e1) {
+					System.out.println("Không gửi được mail !");
+				}
+			}
+		});
+
+		return new ResponseEntity<>(mrls, HttpStatus.OK);
 	}
 
 }

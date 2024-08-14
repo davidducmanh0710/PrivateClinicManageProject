@@ -15,7 +15,7 @@ public class CalendarFormatUtil {
 	private static final SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	public static CalendarFormat parseStringToCalendar(String s) {
+	public static CalendarFormat parseStringToCalendarFormat(String s) {
 		Date d;
 		Calendar calendar = Calendar.getInstance();
 		try {
@@ -39,5 +39,6 @@ public class CalendarFormatUtil {
 
 		return new CalendarFormat(year, month, day);
 	}
+
 
 }

@@ -74,16 +74,20 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
     setLoading(true);
 
     try {
-      const response = await Api.post(endpoints["register"], {
-        ...formRegisterState,
-      }, {
-        validateStatus: function (status) {
-          return status < 500; // Chỉ ném lỗi nếu status code >= 500
+      const response = await Api.post(
+        endpoints["register"],
+        {
+          ...formRegisterState,
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500; // Chỉ ném lỗi nếu status code >= 500
+          },
         }
-      });
+      );
 
       if (response.status === 201) {
-        showSnackbar("Đăng kí thành công","success");
+        showSnackbar("Đăng kí thành công", "success");
         setFormRegisterState({
           name: "",
           email: "",
@@ -95,26 +99,32 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
           otp: "",
         });
         dialog.current.close();
-      } else if (response.status !== 201){
-        showSnackbar(response.data,"error");
+      } else if (response.status !== 201) {
+        showSnackbar(response.data, "error");
       }
     } catch {
       showSnackbar("Lỗi", "error");
     }
+    setTimeout(() => {
+      setLoading(false);
+    }, 2400);
   };
 
   const sendOtp = async (event) => {
     event.preventDefault();
-    setLoading(true);
 
     try {
-      const response = await Api.post(endpoints["sendOtp"], {
-        email: formRegisterState.email,
-      }, {
-        validateStatus: function (status) {
-          return status < 500; // Chỉ ném lỗi nếu status code >= 500
+      const response = await Api.post(
+        endpoints["sendOtp"],
+        {
+          email: formRegisterState.email,
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500; // Chỉ ném lỗi nếu status code >= 500
+          },
         }
-      });
+      );
 
       if (response.status === 200) {
         showSnackbar("Đã gửi OTP cho email !", "success");
@@ -147,7 +157,7 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
 
     setTimeout(() => {
       setOpen(false);
-    }, 5000);
+    }, 2500);
   };
 
   return (
@@ -306,14 +316,20 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
                   {otpButtonDisabled ? otpCountdown : "Gửi OTP"}
                 </button>
               </div>
-              <button
-                type="submit"
-                className={`btn bt-register w-100 ${
-                  activeRegister ? "" : "disabled"
-                }`}
-              >
-                ĐĂNG KÝ
-              </button>
+              {loading ? (
+                <div className="d-flex justify-content-center align-item-center">
+                  <CircularProgress className="mt-3" />
+                </div>
+              ) : (
+                <button
+                  type="submit"
+                  className={`btn bt-register w-100 ${
+                    activeRegister ? "" : "disabled"
+                  }`}
+                >
+                  ĐĂNG KÝ
+                </button>
+              )}
             </form>
           </div>
         </div>

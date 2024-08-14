@@ -43,4 +43,12 @@ public interface MedicalRegistryListService {
 
 	List<MedicalRegistryList> sortBySchedule(List<MedicalRegistryList> mrls, Schedule schedule);
 
+	List<MedicalRegistryList> sortByCreatedDate(List<MedicalRegistryList> mrls, Integer year,
+			Integer month, Integer day);
+
+	List<MedicalRegistryList> findByScheduleAndStatusIsApproved2(Schedule schedule,
+			StatusIsApproved status);
+
+	List<User> findUniqueUser(Schedule schedule, StatusIsApproved status);
+
 }

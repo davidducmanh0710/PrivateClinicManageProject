@@ -28,7 +28,6 @@ public class MailSenderServiceImpl implements MailSenderService {
 	@Autowired
 	private VerifyEmailService verifyEmailService;
 
-
 	@Override
 	@Async
 	public void sendOtpEmail(String email)
@@ -36,7 +35,6 @@ public class MailSenderServiceImpl implements MailSenderService {
 		Random r = new Random();
 		Long c = r.nextLong(100000, 999999);
 		String otp = c.toString();
-
 
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message);
@@ -72,5 +70,25 @@ public class MailSenderServiceImpl implements MailSenderService {
 
 	}
 
+	@Override
+	public void sendStatusRegisterEmail(String email, String content)
+			throws MessagingException, UnsupportedEncodingException {
+
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message);
+
+		helper.setFrom(env.getProperty("spring.mail.username"), "Account Support");
+		helper.setTo(email);
+
+		String subject = "Thư xác nhận đăng kí lịch khám";
+
+		String allContent = "<p>Xin chào " + email + "</p>" + "<p>" + content + "</p>";
+
+		helper.setSubject(subject);
+
+		helper.setText(allContent, true);
+
+		mailSender.send(message);
+	}
 
 }

@@ -78,7 +78,12 @@ public class JwtSecurityConfig {
 				
 				.requestMatchers(HttpMethod.GET,
 						"/api/users/censor-register-schedule",
-						"/api/users/all-register-schedule/")
+						"/api/users/all-register-schedule/",
+						"/api/users/get-all-users/")
+				.hasRole("YTA")
+
+				.requestMatchers(HttpMethod.POST,
+						"/api/users/get-users-schedule-status/")
 				.hasRole("YTA")
 
 				.anyRequest().authenticated())
@@ -107,6 +112,7 @@ public class JwtSecurityConfig {
 		configuration.setAllowedOrigins(Arrays.asList("*"));
 		configuration.setAllowedMethods(Arrays.asList("*"));
 		configuration.addAllowedHeader("*");
+		configuration.addExposedHeader("*");
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;

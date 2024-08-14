@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { CustomerSnackbar, isYTA } from "../Common/Common";
 import "./CensorRegister.css";
 import { authAPI, endpoints } from "../config/Api";
@@ -6,16 +6,24 @@ import { UserContext } from "../config/Context";
 import dayjs from "dayjs";
 import { Alert, Pagination } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import AutoConfirmForm from "../AutoConfirmForm/AutoConfirmForm";
+
 
 export default function CencorRegister() {
   const [statusList, setStatusList] = useState([]);
   const [allRegisterScheduleList, setallRegisterScheduleList] = useState([]);
   const [status, setStatus] = useState("ALL");
   const [search, setSearch] = useState("");
-  const [sortCreatedDate, setSortCreatedDate] = useState(null);
-  const [registerDate , setRegisterDate] = useState("");
+  const [createdDate, setCreatedDate] = useState("");
+  const [registerDate, setRegisterDate] = useState("");
+
+  const [isConfirmRegister , setIsConfirmRegister] = useState(false)
+
+
   const { currentUser } = useContext(UserContext);
   const navigate = useNavigate();
+
+  const autoConfirmFormRef = useRef();
 
   const [params] = useSearchParams();
 
@@ -85,9 +93,12 @@ export default function CencorRegister() {
       if (key) url = `${url}&key=${key}`;
       let statusParam = params.get("status");
       if (statusParam) url = `${url}&key=${key}&status=${statusParam}`;
-      let registerDate = params.get("registerDate");
-      if (registerDate)
-        url = `${url}&key=${key}&status=${statusParam}&registerDate=${registerDate}`;
+      let registerDateParam = params.get("registerDate");
+      if (registerDateParam)
+        url = `${url}&key=${key}&status=${statusParam}&registerDate=${registerDateParam}`;
+      let createdDateParam = params.get("createdDate");
+      if (createdDateParam)
+        url = `${url}&key=${key}&status=${statusParam}&registerDate=${registerDateParam}&createdDate=${createdDateParam}`;
 
       response = await authAPI().get(url, {
         validateStatus: function (status) {
@@ -103,14 +114,18 @@ export default function CencorRegister() {
     } catch {
       showSnackbar("Lỗi", "error");
     }
-  }, [currentUser, page, params]);
+  }, [currentUser, page, params , isConfirmRegister]);
+
+  
+
 
   useEffect(() => {
     if (currentUser !== null) {
       getAllRegisterScheduleList();
       if (statusList.length < 1) getAllStatusIsApproved();
+      // if (userList.length < 1) getAllUsers();
     }
-  }, [currentUser, page, params]);
+  }, [currentUser, page, params , isConfirmRegister]);
 
   const handleStatusChange = (event) => {
     setStatus(event.target.value);
@@ -118,7 +133,18 @@ export default function CencorRegister() {
 
   function handleSortRegisterList(event) {
     event.preventDefault();
-    navigate(`?key=${search}&status=${status}&registerDate=${registerDate}`);
+    navigate(
+      `?key=${search}&status=${status}&registerDate=${registerDate}&createdDate=${createdDate}`
+    );
+  }
+
+  function handleOpenAutoConfirmForm() {
+    setIsConfirmRegister(false)
+    autoConfirmFormRef.current.open();
+  }
+
+  function handleCloseAutoConfirmForm() {
+    autoConfirmFormRef.current.close();
   }
 
   return (
@@ -127,6 +153,14 @@ export default function CencorRegister() {
         open={open}
         message={data.message}
         severity={data.severity}
+      />
+
+      <AutoConfirmForm
+        ref={autoConfirmFormRef}
+        onClose={handleCloseAutoConfirmForm}
+        statusList={statusList}
+        // userList={userList}
+        setIsConfirmRegister={setIsConfirmRegister}
       />
 
       <div className="filter-container d-flex justify-content-center align-item-center">
@@ -152,14 +186,20 @@ export default function CencorRegister() {
               type="date"
               id="createdDate"
               name="createdDate"
-              onChange={(e) => setSortCreatedDate(e.target.value)}
+              onChange={(e) => setCreatedDate(e.target.value)}
             />
             <small className="note text-primary">Lọc ngày đặt lịch</small>
           </div>
 
           <div className="filter-item date-box">
             <i className="fa fa-calendar-alt"></i>
-            <input value={registerDate} type="date" id="registerDate" name="registerDate" onChange={(e) => setRegisterDate(e.target.value)}/>
+            <input
+              value={registerDate}
+              type="date"
+              id="registerDate"
+              name="registerDate"
+              onChange={(e) => setRegisterDate(e.target.value)}
+            />
             <small className="note text-primary">Lọc ngày hẹn khám</small>
           </div>
 
@@ -203,18 +243,35 @@ export default function CencorRegister() {
           </div>
         </form>
       </div>
-      <Pagination
-        count={totalPage}
-        color="primary"
-        className={`mt-4 ${totalElements < 1 ? "d-none" : ""}`}
-        onChange={(event, value) => setPage(value)}
-      />
+      <div className="d-inline-flex w-100 align-items-center justify-content-evenly">
+        <Pagination
+          count={totalPage}
+          color="primary"
+          className={`mt-4 ${totalElements < 1 ? "d-none" : ""}`}
+          onChange={(event, value) => setPage(value)}
+        />
+        <div>
+          <button
+            className="btn btn-danger"
+            onClick={handleOpenAutoConfirmForm}
+          >
+            Tự động chỉnh trạng thái và gửi mail
+          </button>
+        </div>
+        <div>
+          <button className="btn btn-danger">
+            Xuất file PDF danh sách khám
+          </button>
+        </div>
+      </div>
       <div className="table-responsive mt-4 p-4 wrapper rounded-3">
         <table className="table table-scrollable">
           <thead className="bg-light text-center">
             <tr className="align-middle">
-              <th>Action</th>
-              <th>Tên</th>
+              <th>ID</th>
+              <th>SĐT</th>
+              <th>Email</th>
+              <th>Tên người khám</th>
               <th>Ngày đặt</th>
               <th>Ngày hẹn</th>
               <th>Ghi chú</th>
@@ -233,10 +290,12 @@ export default function CencorRegister() {
                 </Alert>
               </>
             ) : (
-              allRegisterScheduleList.content.map((mrl) => {
+              allRegisterScheduleList.content.map((mrl, index) => {
                 return (
-                  <tr className="align-middle">
-                    <td>1</td>
+                  <tr key={index} className="align-middle">
+                    <td>{mrl.id}</td>
+                    <td>{mrl.user.phone}</td>
+                    <td>{mrl.user.email}</td>
                     <td>{mrl.name}</td>
                     <td>
                       {dayjs(mrl.createdDate).format("DD-MM-YYYY HH:mm:ss")}

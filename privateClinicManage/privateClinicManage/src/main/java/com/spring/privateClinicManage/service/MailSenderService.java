@@ -9,4 +9,7 @@ public interface MailSenderService {
 	void sendOtpEmail(String email)
 			throws MessagingException, UnsupportedEncodingException;
 
+	void sendStatusRegisterEmail(String email, String content)
+			throws MessagingException, UnsupportedEncodingException;
+
 }

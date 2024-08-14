@@ -3,8 +3,6 @@ package com.spring.privateClinicManage.entity;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,7 +58,7 @@ public class MedicalRegistryList implements Serializable {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
-	@JsonIgnore
+//	@JsonIgnore
 	private User user;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = {

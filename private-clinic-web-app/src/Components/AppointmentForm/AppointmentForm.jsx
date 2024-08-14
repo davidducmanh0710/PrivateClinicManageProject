@@ -3,6 +3,7 @@ import "./AppointmentForm.css";
 import { CustomerSnackbar } from "../Common/Common";
 import Api, { authAPI, endpoints } from "../config/Api";
 import { useNavigate } from "react-router-dom";
+import { CircularProgress } from "@mui/material";
 
 export default function AppointmentForm() {
   const [registerScheduleState, setRegisterScheduleState] = useState({
@@ -10,6 +11,8 @@ export default function AppointmentForm() {
     date: "",
     favor: "",
   });
+  const [loading, setLoading] = useState();
+
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
@@ -40,8 +43,8 @@ export default function AppointmentForm() {
 
     if (selectedDate < today || selectedDate > maxDate) {
       alert(
-        "Đặt lịch khám khám phải nằm trong khoảng từ ngày mai đến 3 tuần sau.\n" + 
-        "Nếu bạn muốn khám hôm nay , hãy đến cơ sở gần nhất để đăng kí trực tiếp"
+        "Đặt lịch khám khám phải nằm trong khoảng từ ngày mai đến 3 tuần sau.\n" +
+          "Nếu bạn muốn khám hôm nay , hãy đến cơ sở gần nhất để đăng kí trực tiếp"
       );
       setRegisterScheduleState((prev) => ({
         ...prev,
@@ -66,6 +69,8 @@ export default function AppointmentForm() {
   const registerScheduleAct = async (event) => {
     event.preventDefault();
 
+    setLoading(true);
+
     try {
       const response = await authAPI().post(
         endpoints["registerSchedule"],
@@ -83,13 +88,16 @@ export default function AppointmentForm() {
         showSnackbar("Đặt lịch thành công !", "success");
         setTimeout(() => {
           navigate("/user-register-schedule-list");
-        }, 3000);
+        }, 2500);
       } else {
         showSnackbar(response.data, "error");
       }
     } catch {
       showSnackbar("Lỗi", "error");
     }
+    setTimeout(() => {
+      setLoading(false);
+    }, 2400);
   };
 
   return (
@@ -137,7 +145,16 @@ export default function AppointmentForm() {
                 required
               ></textarea>
             </div>
-            <button type="submit">Đặt hẹn</button>
+
+            {loading ? (
+              <>
+                <div className="d-flex justify-content-center align-item-center">
+                  <CircularProgress className="mt-3" />
+                </div>
+              </>
+            ) : (
+              <button type="submit">Đặt hẹn</button>
+            )}
           </form>
         </div>
       </div>

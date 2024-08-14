@@ -21,7 +21,7 @@ public class SpringSecurityConfig {
 				.anyRequest().authenticated())
 				.formLogin((form) -> form.loginPage("/login").loginProcessingUrl("/login")
 						.usernameParameter("email").passwordParameter("password")
-						.defaultSuccessUrl("/admin").permitAll())
+						.defaultSuccessUrl("/admin", true).permitAll())
 				.logout((logout) -> logout.permitAll())
 				.cors(cors -> cors.disable())
 				.csrf(csrf -> csrf.disable());

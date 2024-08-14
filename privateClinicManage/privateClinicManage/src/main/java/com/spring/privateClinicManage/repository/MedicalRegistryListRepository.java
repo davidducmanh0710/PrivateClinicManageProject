@@ -38,11 +38,33 @@ public interface MedicalRegistryListRepository extends JpaRepository<MedicalRegi
 			@Param("statusIsApproved") StatusIsApproved status);
 
 	@Query("SELECT mrl FROM MedicalRegistryList mrl " +
+			"WHERE mrl.schedule = :schedule and mrl.statusIsApproved = :statusIsApproved ")
+	List<MedicalRegistryList> findByScheduleAndStatusIsApproved2(
+			@Param("schedule") Schedule schedule,
+			@Param("statusIsApproved") StatusIsApproved status);
+
+	@Query("SELECT mrl FROM MedicalRegistryList mrl " +
 			"LEFT JOIN mrl.user u " +
 			"WHERE u.name LIKE %:key% "
 			+ "OR u.phone LIKE %:key% "
 			+ "OR u.address LIKE %:key% "
 			+ "OR u.email LIKE %:key% ")
 	List<MedicalRegistryList> findByAnyKey(@Param("key") String key);
+
+	@Query("SELECT m FROM MedicalRegistryList m " +
+			"WHERE YEAR(m.createdDate) = :year " +
+			"AND MONTH(m.createdDate) = :month " +
+			"AND DAY(m.createdDate) = :day " +
+			"AND m IN :mrls")
+	List<MedicalRegistryList> sortByCreatedDate(@Param("mrls") List<MedicalRegistryList> mrls,
+			@Param("year") Integer year,
+			@Param("month") Integer month,
+			@Param("day") Integer day);
+
+	@Query("SELECT mrl.user FROM MedicalRegistryList mrl " +
+			"WHERE mrl.statusIsApproved = :status and mrl.schedule = :schedule " +
+			"GROUP BY mrl.user ")
+	List<User> findUniqueUser(@Param("schedule") Schedule schedule,
+			@Param("status") StatusIsApproved status);
 
 }

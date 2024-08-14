@@ -12,6 +12,9 @@ export let endpoints = {
 	userCancelRegisterSchedule : (registerScheduleId) => `/api/users/cancel-register-schedule/${registerScheduleId}/`,
 	getAllRegisterScheduleList : "/api/users/all-register-schedule",
 	getAllStatusIsApproved : "/api/users/getAllStatusIsApproved/",
+	getAllUsers : "/api/users/get-all-users/",
+	getUsersByRegisterDateAndStatus : "/api/users/get-users-schedule-status/",
+	ytaAutoConfirmRegister : "/api/users/auto-confirm-registers/"
 };
 
 export const authAPI = () => {

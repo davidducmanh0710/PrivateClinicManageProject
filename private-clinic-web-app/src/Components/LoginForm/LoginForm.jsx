@@ -1,18 +1,23 @@
 import Api, { authAPI, endpoints } from "../config/Api";
 import "./LoginForm.css";
-import { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState  } from "react";
+import {
+  forwardRef,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { CircularProgress } from "@mui/material";
 import { CustomerSnackbar } from "../Common/Common";
 import { UserContext } from "../config/Context";
 
 const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
-
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [loading, setLoading] = useState();
   const dialog = useRef();
-  const { currentUser , setCurrentUser } = useContext(UserContext);
-
+  const { currentUser, setCurrentUser } = useContext(UserContext);
 
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
@@ -30,7 +35,7 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
 
     setTimeout(() => {
       setOpen(false);
-    }, 5000);
+    }, 2500);
   };
 
   useImperativeHandle(ref, () => {
@@ -53,14 +58,18 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
     setLoading(true);
 
     try {
-      const response = await Api.post(endpoints["login"], {
-        email: email,
-        password: password,
-      }, {
-        validateStatus: function (status) {
-          return status < 500; // Chỉ ném lỗi nếu status code >= 500
+      const response = await Api.post(
+        endpoints["login"],
+        {
+          email: email,
+          password: password,
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500; // Chỉ ném lỗi nếu status code >= 500
+          },
         }
-      });
+      );
 
       if (response.status === 200) {
         localStorage.setItem("token", response.data);
@@ -68,7 +77,7 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
           const userResponse = await authAPI().get(endpoints["currentUser"], {
             validateStatus: function (status) {
               return status < 500; // Chỉ ném lỗi nếu status code >= 500
-            }
+            },
           });
           if (userResponse.status === 200) {
             showSnackbar("Đăng nhập thành công", "success");
@@ -80,13 +89,14 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
         }, 200);
       } else {
         showSnackbar(response.data, "error");
-        console.log(response.data)
+        console.log(response.data);
       }
     } catch (error) {
       showSnackbar("Lỗi", "error");
     }
-    setTimeout(() => {}, 2000);
-    setLoading(false);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2400);
   };
 
   return (
@@ -126,7 +136,9 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
               />
             </div>
             {loading ? (
-              <CircularProgress className="mt-3" />
+              <div className="d-flex justify-content-center align-item-center">
+                <CircularProgress className="mt-3" />
+              </div>
             ) : (
               <button type="submit" className="btn btn-primary w-100">
                 Đăng nhập
