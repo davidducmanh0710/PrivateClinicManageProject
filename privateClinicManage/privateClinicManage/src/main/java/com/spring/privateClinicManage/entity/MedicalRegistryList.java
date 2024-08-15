@@ -3,6 +3,10 @@ package com.spring.privateClinicManage.entity;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,6 +44,8 @@ public class MedicalRegistryList implements Serializable {
 	@Column(name = "favor", nullable = false)
 	private String favor;
 
+	@Column(name = "qlUrl")
+	private String qrUrl;
 
 	@Column(name = "is_canceled", nullable = false)
 	private Boolean isCanceled;
@@ -71,6 +77,8 @@ public class MedicalRegistryList implements Serializable {
 	@Transient
 	private Integer order;
 
-
+	@Transient
+	@JsonIgnore
+	private MultipartFile file;
 
 }

@@ -31,6 +31,7 @@ export default function Header() {
 
   function logout() {
     localStorage.setItem("token", "");
+    localStorage.setItem("HTML5_QRCODE_DATA","")
     setCurrentUser(null);
     navigate("/");
   }
@@ -178,10 +179,23 @@ export default function Header() {
                     <span className="dropdown-toggle">Dịch vụ</span>
                   </a>
                   <div className="dropdown-menu">
-                    <a className="dropdown-item">Hướng dẫn khách hàng</a>
                     {currentUser !== null && isYTA(currentUser) && (
                       <>
-                        <Link to="/censor-register" className="dropdown-item">Duyệt danh sách khám</Link>
+                        <Link to="/directly-register-schedule" className="dropdown-item">Đặt lịch trực tiếp</Link>
+                      </>
+                    )}
+                    {currentUser !== null && isYTA(currentUser) && (
+                      <>
+                        <Link to="/censor-register" className="dropdown-item">
+                          Duyệt danh sách khám
+                        </Link>
+                      </>
+                    )}
+                    {currentUser !== null && isYTA(currentUser) && (
+                      <>
+                        <Link to="/qr-scan-take-order" className="dropdown-item">
+                          Quét mã QR lấy số thứ tự
+                        </Link>
                       </>
                     )}
                   </div>

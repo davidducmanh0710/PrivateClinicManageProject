@@ -401,7 +401,7 @@ public class ApiUserRestController {
 						.findByStatus("CHECKING"));
 		if (mrls.size() < 1)
 			return new ResponseEntity<>("Không tồn tại đơn đăng kí để xét duyệt vào ngày này",
-					HttpStatus.OK);
+					HttpStatus.NOT_FOUND);
 		List<String> emails = confirmRegisterDto.getEmails();
 
 		// cần unique email khi lấy đc các list trong medicalRegistryList / 1 ngày
@@ -409,11 +409,18 @@ public class ApiUserRestController {
 			mrls.forEach(mrl -> {
 				if (emails.contains(mrl.getUser().getEmail())
 						&& mrl.getStatusIsApproved().getStatus().equals("CHECKING")) {
-					mrl.setStatusIsApproved(statusIsApproved);
-					medicalRegistryListService.saveMedicalRegistryList(mrl);
 
 					try {
-						mailSenderService.sendStatusRegisterEmail(mrl.getUser().getEmail(),
+						medicalRegistryListService.createQRCodeAndUpLoadCloudinaryAndSetStatus(mrl,
+								statusIsApproved);
+						System.out.println(mrl.getQrUrl());
+					} catch (Exception e) {
+
+						System.out.println("Lỗi");
+					}
+
+					try {
+						mailSenderService.sendStatusRegisterEmail(mrl,
 								confirmRegisterDto.getEmailContent());
 					} catch (UnsupportedEncodingException | MessagingException e1) {
 						System.out.println("Không gửi được mail !");
@@ -429,7 +436,7 @@ public class ApiUserRestController {
 				medicalRegistryListService.saveMedicalRegistryList(mrl);
 
 				try {
-					mailSenderService.sendStatusRegisterEmail(mrl.getUser().getEmail(),
+					mailSenderService.sendStatusRegisterEmail(mrl,
 							confirmRegisterDto.getEmailContent());
 				} catch (UnsupportedEncodingException | MessagingException e1) {
 					System.out.println("Không gửi được mail !");

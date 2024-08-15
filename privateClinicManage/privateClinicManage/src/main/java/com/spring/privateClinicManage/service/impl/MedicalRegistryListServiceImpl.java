@@ -1,9 +1,14 @@
 package com.spring.privateClinicManage.service.impl;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +17,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import com.spring.privateClinicManage.QrCode.QRZXingGenerator;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
 import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
@@ -27,6 +36,8 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 
 	@Autowired
 	private MedicalRegistryListRepository medicalRegistryListRepository;
+	@Autowired
+	private Cloudinary cloudinary;
 
 	@Override
 	@Transactional
@@ -158,6 +169,35 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 	public List<User> findUniqueUser(Schedule schedule, StatusIsApproved status) {
 
 		return medicalRegistryListRepository.findUniqueUser(schedule, status);
+	}
+
+	@Override
+	public void setCloudinaryField(MedicalRegistryList medicalRegistryList) {
+		if (!medicalRegistryList.getFile().isEmpty()) {
+			try {
+				Map res = this.cloudinary.uploader().upload(
+						medicalRegistryList.getFile().getBytes(),
+						ObjectUtils.asMap("resource_type", "auto"));
+				medicalRegistryList.setQrUrl(res.get("secure_url").toString());
+				medicalRegistryList.setFile(null);
+				this.medicalRegistryListRepository.save(medicalRegistryList);
+
+			} catch (IOException ex) {
+				Logger.getLogger(UserServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+	}
+
+	@Override
+	public void createQRCodeAndUpLoadCloudinaryAndSetStatus(MedicalRegistryList medicalRegistryList,
+			StatusIsApproved statusIsApproved)
+			throws Exception {
+		BufferedImage b = QRZXingGenerator
+				.generateQRCodeImage(String.valueOf(medicalRegistryList.getId()));
+		MultipartFile qrCodeFile = QRZXingGenerator.convertBufferedImageToMultipartFile(b);
+		medicalRegistryList.setStatusIsApproved(statusIsApproved);
+		medicalRegistryList.setFile(qrCodeFile);
+		this.setCloudinaryField(medicalRegistryList);
 	}
 
 }

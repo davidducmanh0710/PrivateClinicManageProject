@@ -51,4 +51,10 @@ public interface MedicalRegistryListService {
 
 	List<User> findUniqueUser(Schedule schedule, StatusIsApproved status);
 
+	void setCloudinaryField(MedicalRegistryList medicalRegistryList);
+
+	void createQRCodeAndUpLoadCloudinaryAndSetStatus(MedicalRegistryList medicalRegistryList,
+			StatusIsApproved statusIsApproved)
+			throws Exception;
+
 }

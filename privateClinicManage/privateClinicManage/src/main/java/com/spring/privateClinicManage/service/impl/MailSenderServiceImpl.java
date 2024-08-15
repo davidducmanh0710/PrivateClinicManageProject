@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.spring.privateClinicManage.entity.MedicalRegistryList;
 import com.spring.privateClinicManage.entity.VerifyEmail;
 import com.spring.privateClinicManage.service.MailSenderService;
 import com.spring.privateClinicManage.service.VerifyEmailService;
@@ -71,21 +72,38 @@ public class MailSenderServiceImpl implements MailSenderService {
 	}
 
 	@Override
-	public void sendStatusRegisterEmail(String email, String content)
+	public void sendStatusRegisterEmail(MedicalRegistryList mrl, String content)
 			throws MessagingException, UnsupportedEncodingException {
 
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message);
 
 		helper.setFrom(env.getProperty("spring.mail.username"), "Account Support");
-		helper.setTo(email);
+		helper.setTo(mrl.getUser().getEmail());
 
 		String subject = "Thư xác nhận đăng kí lịch khám";
 
-		String allContent = "<p>Xin chào " + email + "</p>" + "<p>" + content + "</p>";
+		String header = "<p>Xin chào " + mrl.getUser().getEmail() + "</p>";
+		String body = "";
+		String footer = "";
+
+		if (mrl.getStatusIsApproved().getStatus().equals("SUCCESS")) {
+			header += "<p class='text-success'><strong>Quý khách đã đăng kí thành công lịch khám !</strong><p/>";
+			body += "<p> Tên người khám : <strong>" + mrl.getName() + "</strong></p>" +
+					"<p> Ngày hẹn khám : <strong>" + mrl.getSchedule().getDate() + "</strong></p>" +
+					"<p> <strong>Khi đến khám hãy đến gặp quầy y tá , quét mã QR này để lấy số thứ tự :</strong></p>"
+					+
+					"<img src='" + mrl.getQrUrl() + "'/>";
+
+			footer = "<h4>Xin chân thành cảm ơn quý khách đã đăng kí phòng khám của chúng tôi !</h4>";
+		} else if (mrl.getStatusIsApproved().getStatus().equals("FAILED")) {
+			header += "<p class='text-danger'><strong>Quý khách đã đăng kí thất bại lịch khám !</strong><p/>";
+			body += "<p>" + content + "</p>";
+			footer = "<h4>Xin chân thành xin lỗi sự bất tiện này và cảm ơn quý khách đã đăng kí phòng khám của chúng tôi !</h4>";
+		}
 
 		helper.setSubject(subject);
-
+		String allContent = header + body + footer;
 		helper.setText(allContent, true);
 
 		mailSender.send(message);

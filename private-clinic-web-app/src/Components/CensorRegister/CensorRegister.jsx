@@ -258,11 +258,6 @@ export default function CencorRegister() {
             Tự động chỉnh trạng thái và gửi mail
           </button>
         </div>
-        <div>
-          <button className="btn btn-danger">
-            Xuất file PDF danh sách khám
-          </button>
-        </div>
       </div>
       <div className="table-responsive mt-4 p-4 wrapper rounded-3">
         <table className="table table-scrollable">

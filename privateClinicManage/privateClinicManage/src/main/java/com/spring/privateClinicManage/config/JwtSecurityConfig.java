@@ -58,13 +58,15 @@ public class JwtSecurityConfig {
 		http.securityMatcher("/api/**").authorizeHttpRequests(auth -> auth
 
 				.requestMatchers(HttpMethod.GET,
-						"/api/users/getAllStatusIsApproved/")
+						"/api/users/getAllStatusIsApproved/",
+						"/api/qr/barcodes/zxing/qrcode/")
 				.permitAll()
 
 				.requestMatchers(HttpMethod.POST,
 						"/api/users/login/",
 						"/api/users/register/",
-						"/api/users/verify-email/")
+						"/api/users/verify-email/",
+						"/api/qr/barcodes/zxing/qrcode/")
 				.permitAll()
 
 				.requestMatchers(HttpMethod.POST,
