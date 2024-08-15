@@ -452,8 +452,18 @@ public class ApiUserRestController {
 	@CrossOrigin
 	public ResponseEntity<Object> getOrderFromQrCode(@RequestBody MrlIdScanQrDto mrlIdScanQrDto) {
 
-		System.out.println(mrlIdScanQrDto.getMrlId());
-		return new ResponseEntity<>(mrlIdScanQrDto.getMrlId(), HttpStatus.OK);
+		MedicalRegistryList mrl = medicalRegistryListService.findById(mrlIdScanQrDto.getMrlId());
+		if (mrl == null)
+			return new ResponseEntity<Object>("Đơn đăng kí này không tồn tại trong hệ thống !",
+					HttpStatus.NOT_FOUND);
+		if (!mrl.getStatusIsApproved().getStatus().equals("SUCCESS"))
+			return new ResponseEntity<Object>("Mã QR này đã qua sử dụng !", HttpStatus.NOT_FOUND);
+		
+		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("PROCESSING");
+		mrl.setStatusIsApproved(statusIsApproved);
+		medicalRegistryListService.saveMedicalRegistryList(mrl);
+
+		return new ResponseEntity<>("", HttpStatus.OK);
 	}
 
 }

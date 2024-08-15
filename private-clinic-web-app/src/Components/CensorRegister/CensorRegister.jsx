@@ -62,6 +62,8 @@ export default function CencorRegister() {
         return "secondary";
       case "FINISHED":
         return "primary";
+      case "PROCESSING":
+        return "info"
       default:
         return "";
     }

@@ -4,11 +4,10 @@ import { CustomerSnackbar } from "../Common/Common";
 import Api, { authAPI, endpoints } from "../config/Api";
 
 const QRScanner = () => {
-  const [scanCount, setScanCount] = useState(0);
-  const [lastResult, setLastResult] = useState("");
   //   const [decodeTextNow , setDecodeTextNow] = useState("")
   let decodeTextNowRef = useRef(null);
-
+  let lastResultRef = useRef("diff");
+  let isFinishedRef = useRef(true);
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
     message: "Đăng kí thành công",
@@ -25,7 +24,7 @@ const QRScanner = () => {
 
     setTimeout(() => {
       setOpen(false);
-    }, 5000);
+    }, 7000);
   };
 
   function domReady(fn) {
@@ -33,7 +32,8 @@ const QRScanner = () => {
       document.readyState === "complete" ||
       document.readyState === "interactive"
     ) {
-      setTimeout(fn, 1);
+      // nếu đã load đc camera
+      setTimeout(fn, 1000);
     } else {
       document.addEventListener("DOMContentLoaded", fn);
     }
@@ -53,27 +53,34 @@ const QRScanner = () => {
     );
     if (response.status === 200) {
       showSnackbar("Quét mã QR lấy số thứ tự thành công!", "success");
-      decodeTextNowRef.current = null;
+
+      setTimeout(() => {
+        decodeTextNowRef.current = null;
+        isFinishedRef.current = true;
+      }, 7000);
     } else {
       showSnackbar(response.data, "error");
-      decodeTextNowRef.current = null
+      setTimeout(() => {
+        decodeTextNowRef.current = null;
+        isFinishedRef.current = true;
+      }, 7000);
     }
-  }, []);
+  }, []); // đã fecth lấy dữ liệu đc , ko cần nạp lại decodeTextNowRef
 
   useEffect(() => {
-    // const myqrElement = document.getElementById("your-qr-result");
-
     domReady(() => {
       function onScanSuccess(decodeText, decodeResult) {
-        if (decodeText !== lastResult) {
-            setScanCount((prevCount) => prevCount + 1);
-            setLastResult(decodeText);
-          if (decodeTextNowRef.current === null) {
-            decodeTextNowRef.current = decodeText;
-            loadTakeOrderFromQrCode();
+        if (isFinishedRef.current == true) {
+          isFinishedRef.current = false;
+          if (decodeText !== lastResultRef.current) {
+            if (decodeTextNowRef.current === null) {
+              lastResultRef.current = decodeText;
+              decodeTextNowRef.current = decodeText;
+              loadTakeOrderFromQrCode();
+            }
+          } else {
+            showSnackbar("Mã QR này đã được quét !", "error");
           }
-        } else {
-          showSnackbar("Mã QR này đã được quét !", "failed");
         }
       }
 
@@ -88,11 +95,10 @@ const QRScanner = () => {
       const hasPermission = HTML5_QRCODE_DATA.hasPermission;
       const lastUsedCameraId = HTML5_QRCODE_DATA.lastUsedCameraId;
 
-      if (hasPermission === false && lastUsedCameraId === null){
+      if (hasPermission === false && lastUsedCameraId === null) {
         htmlScanner.render(onScanSuccess);
-        decodeTextNowRef.current = null
-      }
-      else if (hasPermission === true && lastUsedCameraId !== null) {
+        decodeTextNowRef.current = null;
+      } else if (hasPermission === true && lastUsedCameraId !== null) {
         HTML5_QRCODE_DATA.hasPermission = false;
         HTML5_QRCODE_DATA.lastUsedCameraId = null;
 
@@ -103,10 +109,11 @@ const QRScanner = () => {
           })
         );
         htmlScanner.render(onScanSuccess);
-        decodeTextNowRef.current = null
+        decodeTextNowRef.current = null;
+        isFinishedRef.current = true;
       }
     });
-  }, [decodeTextNowRef]);
+  }, [decodeTextNowRef]); // phải nạp lại nếu có lần scan mới
 
   return (
     <>
