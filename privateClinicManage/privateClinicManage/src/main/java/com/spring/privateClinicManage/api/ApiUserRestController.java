@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.spring.privateClinicManage.dto.ConfirmRegisterDto;
 import com.spring.privateClinicManage.dto.EmailDto;
+import com.spring.privateClinicManage.dto.MrlIdScanQrDto;
 import com.spring.privateClinicManage.dto.RegisterScheduleDto;
 import com.spring.privateClinicManage.dto.RegisterStatusDto;
 import com.spring.privateClinicManage.dto.UserLoginDto;
@@ -445,6 +446,14 @@ public class ApiUserRestController {
 		});
 
 		return new ResponseEntity<>(mrls, HttpStatus.OK);
+	}
+
+	@PostMapping(value = "/take-order-from-qrCode/")
+	@CrossOrigin
+	public ResponseEntity<Object> getOrderFromQrCode(@RequestBody MrlIdScanQrDto mrlIdScanQrDto) {
+
+		System.out.println(mrlIdScanQrDto.getMrlId());
+		return new ResponseEntity<>(mrlIdScanQrDto.getMrlId(), HttpStatus.OK);
 	}
 
 }

@@ -66,7 +66,8 @@ public class JwtSecurityConfig {
 						"/api/users/login/",
 						"/api/users/register/",
 						"/api/users/verify-email/",
-						"/api/qr/barcodes/zxing/qrcode/")
+						"/api/qr/barcodes/zxing/qrcode/",
+						"/api/users/take-order-from-qrCode/")
 				.permitAll()
 
 				.requestMatchers(HttpMethod.POST,
