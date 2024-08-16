@@ -67,4 +67,10 @@ public interface MedicalRegistryListRepository extends JpaRepository<MedicalRegi
 	List<User> findUniqueUser(@Param("schedule") Schedule schedule,
 			@Param("status") StatusIsApproved status);
 
+	@Query("SELECT COUNT(mrl) FROM MedicalRegistryList mrl " +
+			"WHERE mrl.schedule = :schedule and mrl.statusIsApproved = :statusIsApproved")
+	Integer countMRLByScheduleAndProcessingStatus(
+			@Param("schedule") Schedule schedule,
+			@Param("statusIsApproved") StatusIsApproved statusIsApproved);
+
 }

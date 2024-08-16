@@ -1,5 +1,6 @@
 package com.spring.privateClinicManage.api;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Date;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.spring.privateClinicManage.dto.ConfirmRegisterDto;
 import com.spring.privateClinicManage.dto.EmailDto;
 import com.spring.privateClinicManage.dto.MrlIdScanQrDto;
+import com.spring.privateClinicManage.dto.OrderQrCodeDto;
 import com.spring.privateClinicManage.dto.RegisterScheduleDto;
 import com.spring.privateClinicManage.dto.RegisterStatusDto;
 import com.spring.privateClinicManage.dto.UserLoginDto;
@@ -38,6 +40,7 @@ import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
 import com.spring.privateClinicManage.entity.User;
 import com.spring.privateClinicManage.entity.VerifyEmail;
+import com.spring.privateClinicManage.service.DownloadPDFService;
 import com.spring.privateClinicManage.service.JwtService;
 import com.spring.privateClinicManage.service.MailSenderService;
 import com.spring.privateClinicManage.service.MedicalRegistryListService;
@@ -65,12 +68,14 @@ public class ApiUserRestController {
 	private ScheduleService scheduleService;
 	private MedicalRegistryListService medicalRegistryListService;
 	private StatusIsApprovedService statusIsApprovedService;
+	private DownloadPDFService downloadPDFService;
 
 	@Autowired
 	public ApiUserRestController(JwtService jwtService, UserService userService,
 			VerifyEmailService verifyEmailService, MailSenderService mailSenderService,
 			Environment environment, MedicalRegistryListService medicalRegistryListService,
-			ScheduleService scheduleService, StatusIsApprovedService statusIsApprovedService) {
+			ScheduleService scheduleService, StatusIsApprovedService statusIsApprovedService,
+			DownloadPDFService downloadPDFService) {
 		super();
 		this.jwtService = jwtService;
 		this.userService = userService;
@@ -80,6 +85,7 @@ public class ApiUserRestController {
 		this.medicalRegistryListService = medicalRegistryListService;
 		this.scheduleService = scheduleService;
 		this.statusIsApprovedService = statusIsApprovedService;
+		this.downloadPDFService = downloadPDFService;
 	}
 
 	@PostMapping(path = "/login/")
@@ -414,7 +420,6 @@ public class ApiUserRestController {
 					try {
 						medicalRegistryListService.createQRCodeAndUpLoadCloudinaryAndSetStatus(mrl,
 								statusIsApproved);
-						System.out.println(mrl.getQrUrl());
 					} catch (Exception e) {
 
 						System.out.println("Lỗi");
@@ -433,8 +438,12 @@ public class ApiUserRestController {
 
 		mrls.forEach(mrl -> {
 			if (mrl.getStatusIsApproved().getStatus().equals("CHECKING")) {
-				mrl.setStatusIsApproved(statusIsApproved);
-				medicalRegistryListService.saveMedicalRegistryList(mrl);
+				try {
+					medicalRegistryListService.createQRCodeAndUpLoadCloudinaryAndSetStatus(mrl,
+							statusIsApproved);
+				} catch (Exception e) {
+					System.out.println("Lỗi");
+				}
 
 				try {
 					mailSenderService.sendStatusRegisterEmail(mrl,
@@ -458,12 +467,26 @@ public class ApiUserRestController {
 					HttpStatus.NOT_FOUND);
 		if (!mrl.getStatusIsApproved().getStatus().equals("SUCCESS"))
 			return new ResponseEntity<Object>("Mã QR này đã qua sử dụng !", HttpStatus.NOT_FOUND);
-		
+
 		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("PROCESSING");
 		mrl.setStatusIsApproved(statusIsApproved);
 		medicalRegistryListService.saveMedicalRegistryList(mrl);
 
-		return new ResponseEntity<>("", HttpStatus.OK);
+		Integer order = medicalRegistryListService
+				.countMRLByScheduleAndProcessingStatus(mrl.getSchedule(), statusIsApproved);
+		mrl.setOrder(order);
+
+		OrderQrCodeDto orderQrCodeDto = new OrderQrCodeDto(order, mrl.getName(),
+				mrl.getUser().getPhone(), mrl.getSchedule().getDate());
+
+		try {
+			downloadPDFService.generateAndSaveLocation(mrl);
+		} catch (IOException e) {
+			System.out.println("Lỗi lưu file");
+		}
+
+		return new ResponseEntity<>(orderQrCodeDto, HttpStatus.OK);
 	}
+
 
 }

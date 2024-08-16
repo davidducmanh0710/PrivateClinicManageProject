@@ -57,4 +57,7 @@ public interface MedicalRegistryListService {
 			StatusIsApproved statusIsApproved)
 			throws Exception;
 
+	Integer countMRLByScheduleAndProcessingStatus(Schedule schedule,
+			StatusIsApproved statusIsApproved);
+
 }

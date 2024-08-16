@@ -16,6 +16,7 @@ export let endpoints = {
 	getUsersByRegisterDateAndStatus : "/api/users/get-users-schedule-status/",
 	ytaAutoConfirmRegister : "/api/users/auto-confirm-registers/",
 	takeOrderFromQrCode : "/api/users/take-order-from-qrCode/",
+	printOrderPdf : "/api/pdf/generate/",
 };
 
 export const authAPI = () => {

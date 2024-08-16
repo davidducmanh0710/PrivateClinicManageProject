@@ -1,13 +1,23 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { CustomerSnackbar } from "../Common/Common";
-import Api, { authAPI, endpoints } from "../config/Api";
+import Api, {endpoints } from "../config/Api";
+import OrderPDF from "../OrderPDF/OrderPDF";
 
 const QRScanner = () => {
-  //   const [decodeTextNow , setDecodeTextNow] = useState("")
   let decodeTextNowRef = useRef(null);
   let lastResultRef = useRef("diff");
   let isFinishedRef = useRef(true);
+
+  const orderPdfRef = useRef();
+
+  const [orderQrCode, setOrderQrCode] = useState({
+    order: "",
+    name: "",
+    phone: "",
+    registerDate: "",
+  });
+
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
     message: "Đăng kí thành công",
@@ -39,6 +49,7 @@ const QRScanner = () => {
     }
   }
 
+
   const loadTakeOrderFromQrCode = useCallback(async () => {
     const response = await Api.post(
       endpoints["takeOrderFromQrCode"],
@@ -53,10 +64,17 @@ const QRScanner = () => {
     );
     if (response.status === 200) {
       showSnackbar("Quét mã QR lấy số thứ tự thành công!", "success");
-
+      orderPdfRef.current.open();
+      setOrderQrCode((prev) => ({
+        order: response.data.order,
+        name: response.data.name,
+        phone: response.data.phone,
+        registerDate: response.data.registerDate,
+      }));
       setTimeout(() => {
         decodeTextNowRef.current = null;
         isFinishedRef.current = true;
+        orderPdfRef.current.close();
       }, 7000);
     } else {
       showSnackbar(response.data, "error");
@@ -70,7 +88,7 @@ const QRScanner = () => {
   useEffect(() => {
     domReady(() => {
       function onScanSuccess(decodeText, decodeResult) {
-        if (isFinishedRef.current == true) {
+        if (isFinishedRef.current === true) {
           isFinishedRef.current = false;
           if (decodeText !== lastResultRef.current) {
             if (decodeTextNowRef.current === null) {
@@ -122,6 +140,7 @@ const QRScanner = () => {
         message={data.message}
         severity={data.severity}
       />
+      <OrderPDF ref={orderPdfRef} orderQrCode={orderQrCode} />
       <div>
         <div id="your-qr-result"></div>
         <div style={{ display: "flex", justifyContent: "center" }}>

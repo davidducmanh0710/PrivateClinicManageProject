@@ -200,4 +200,11 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 		this.setCloudinaryField(medicalRegistryList);
 	}
 
+	@Override
+	public Integer countMRLByScheduleAndProcessingStatus(Schedule schedule,
+			StatusIsApproved statusIsApproved) {
+		return medicalRegistryListRepository.countMRLByScheduleAndProcessingStatus(schedule,
+				statusIsApproved);
+	}
+
 }
