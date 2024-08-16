@@ -17,6 +17,7 @@ export let endpoints = {
 	ytaAutoConfirmRegister : "/api/users/auto-confirm-registers/",
 	takeOrderFromQrCode : "/api/users/take-order-from-qrCode/",
 	printOrderPdf : "/api/pdf/generate/",
+	directRegister : "/api/users/direct-register/"
 };
 
 export const authAPI = () => {

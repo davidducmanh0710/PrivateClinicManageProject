@@ -86,7 +86,8 @@ public class JwtSecurityConfig {
 				.hasRole("YTA")
 
 				.requestMatchers(HttpMethod.POST,
-						"/api/users/get-users-schedule-status/")
+						"/api/users/get-users-schedule-status/",
+						"/api/users/direct-register/")
 				.hasRole("YTA")
 
 				.anyRequest().authenticated())

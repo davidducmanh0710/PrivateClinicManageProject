@@ -41,7 +41,7 @@ public class DownloadPDFOrderServiceImpl implements DownloadPDFService {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		PdfWriter writer = new PdfWriter(byteArrayOutputStream);
 		PdfDocument pdfDoc = new PdfDocument(writer);
-		Rectangle r = new Rectangle(400, 100);
+		Rectangle r = new Rectangle(300, 300);
 		PageSize p = new PageSize(r);
 		Document document = new Document(pdfDoc, p);
 		document.setMargins(0, 0, 0, 0);

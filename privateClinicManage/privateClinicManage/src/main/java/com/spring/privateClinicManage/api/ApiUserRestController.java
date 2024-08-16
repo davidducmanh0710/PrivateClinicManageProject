@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spring.privateClinicManage.dto.ConfirmRegisterDto;
+import com.spring.privateClinicManage.dto.DirectRegisterDto;
 import com.spring.privateClinicManage.dto.EmailDto;
 import com.spring.privateClinicManage.dto.MrlIdScanQrDto;
 import com.spring.privateClinicManage.dto.OrderQrCodeDto;
@@ -488,5 +489,64 @@ public class ApiUserRestController {
 		return new ResponseEntity<>(orderQrCodeDto, HttpStatus.OK);
 	}
 
+	@PostMapping(value = "/direct-register/")
+	@CrossOrigin
+	public ResponseEntity<Object> directRegister(@RequestBody DirectRegisterDto directRegisterDto) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		User registerUser = userService.findByEmail(directRegisterDto.getEmail());
+
+		if (currentUser == null || registerUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		CalendarFormat c = CalendarFormatUtil
+				.parseStringToCalendarFormat(String.valueOf(new Date()));
+		Schedule schedule = scheduleService.findByDayMonthYear(c.getYear(), c.getMonth(),
+				c.getDay());
+
+		if (schedule == null) {
+			schedule = new Schedule();
+			schedule.setDate(new Date());
+			schedule.setIsDayOff(false);
+			scheduleService.saveSchedule(schedule);
+		}
+
+		Integer countMedicalRegistryList = medicalRegistryListService
+				.countMRLByUserAndScheduleAndisCancelled(currentUser, schedule, false);
+
+		if (countMedicalRegistryList >= Integer
+				.parseInt(environment.getProperty("register_schedule_per_day_max")))
+			return new ResponseEntity<>("Tài khoản này đã đăng kí hạn mức 4 lần / 1 ngày",
+					HttpStatus.UNAUTHORIZED);
+
+		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("SUCCESS");
+		MedicalRegistryList mrl = new MedicalRegistryList();
+		mrl.setCreatedDate(new Date());
+		mrl.setStatusIsApproved(statusIsApproved);
+		mrl.setFavor(directRegisterDto.getFavor());
+		mrl.setIsCanceled(false);
+		mrl.setUser(registerUser);
+
+		mrl.setSchedule(schedule);
+		mrl.setName(directRegisterDto.getName());
+		medicalRegistryListService.saveMedicalRegistryList(mrl);
+
+		try {
+			medicalRegistryListService.createQRCodeAndUpLoadCloudinaryAndSetStatus(mrl,
+					statusIsApproved);
+		} catch (Exception e) {
+			System.out.println("Lỗi");
+		}
+
+		try {
+			mailSenderService.sendStatusRegisterEmail(mrl, "Direct regiter");
+		} catch (UnsupportedEncodingException | MessagingException e1) {
+			System.out.println("Không gửi được mail !");
+		}
+
+		return new ResponseEntity<>(
+				"Đặt lịch thành công , vui lòng kiểm tra mail lấy mã QR để lấy số thứ tự",
+				HttpStatus.CREATED);
+	}
 
 }
