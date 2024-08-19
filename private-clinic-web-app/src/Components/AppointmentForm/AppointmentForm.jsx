@@ -108,7 +108,7 @@ export default function AppointmentForm() {
         severity={data.severity}
       />
 
-      <div className="appointment-form-container">
+      <div className="appointment-form-container ">
         <div className="appointment-form">
           <h2 className="text text-primary">Đặt Lịch Khám Bệnh</h2>
           <form id="appointmentForm" onSubmit={registerScheduleAct}>

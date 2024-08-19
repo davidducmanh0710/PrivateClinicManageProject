@@ -1,16 +1,17 @@
 <!doctype html>
 <html class="no-js" lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<aside th:insert="~{admin/common/headerAdmin :: admin-header-common}" />
+<aside th:insert="~{admin/common/headerAdmin :: admin-header-common}" />
 </head>
 
 <body>
 	<aside th:insert="~{admin/common/adminLeftPanel :: left-panel-common}" />
-	
+
 	<!-- Right Panel -->
 	<div id="right-panel" class="right-panel">
 		<!-- Header-->
-		<aside th:insert="~{admin/common/headerRightPanel :: header-rightPanel-common}" />
+		<aside
+			th:insert="~{admin/common/headerRightPanel :: header-rightPanel-common}" />
 		<!-- /#header -->
 		<!-- Content -->
 		<div class="content">
@@ -418,13 +419,13 @@
 		<div class="clearfix"></div>
 		<!-- Footer -->
 		<aside th:insert="~{admin/common/footerAdmin :: footer-admin-common}" />
-		
+
 		<!-- /.site-footer -->
 	</div>
 	<!-- /#right-panel -->
-	
+
 	<!-- Scripts -->
 	<aside th:insert="~{admin/common/scriptCommon :: script-common}" />
-	
+
 </body>
 </html>

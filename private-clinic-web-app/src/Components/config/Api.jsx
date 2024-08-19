@@ -17,7 +17,10 @@ export let endpoints = {
 	ytaAutoConfirmRegister : "/api/users/auto-confirm-registers/",
 	takeOrderFromQrCode : "/api/users/take-order-from-qrCode/",
 	printOrderPdf : "/api/pdf/generate/",
-	directRegister : "/api/users/direct-register/"
+	directRegister : "/api/users/direct-register/",
+	getAllProcessingUserToday : "/api/users/get-all-processing-user-today/",
+	getAllMedicineGroup : "/api/users/get-all-medicine-group/",
+	getAllMedicinesByGroup : (medicineGroupId) => `/api/users/get-all-medicine-by-group/${medicineGroupId}/`
 };
 
 export const authAPI = () => {

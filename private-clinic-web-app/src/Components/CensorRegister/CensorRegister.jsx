@@ -164,8 +164,8 @@ export default function CencorRegister() {
         // userList={userList}
         setIsConfirmRegister={setIsConfirmRegister}
       />
-
-      <div className="filter-container d-flex justify-content-center align-item-center">
+      <h2 className=" text text-info mt-3 mb-3 text-center">Duyệt danh sách khám</h2>
+      <div className="filter-container d-flex justify-content-center align-item-center shadow mt-3">
         <form
           onSubmit={handleSortRegisterList}
           id="filterForm"
@@ -261,7 +261,7 @@ export default function CencorRegister() {
           </button>
         </div>
       </div>
-      <div className="table-responsive mt-4 p-4 wrapper rounded-3">
+      <div className="table-responsive mt-4 p-4 wrapper rounded-3 shadow-lg">
         <table className="table table-scrollable">
           <thead className="bg-light text-center">
             <tr className="align-middle">

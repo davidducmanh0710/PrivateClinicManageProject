@@ -6,7 +6,7 @@ function DefaultLayout({ children }) {
     return (
         <div className='wrapper'>
             <Header />
-            <div className="container-default-layout">
+            <div className="min-vh-100">
                 <div className="content">{children}</div>
             </div>
             <Footer />

@@ -4,10 +4,6 @@
 <aside th:insert="~{admin/common/headerAdmin :: admin-header-common}" />
 <link rel="stylesheet"
 	th:href="@{/public/resources/adminAssets/css/pagination.css}">
-<link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-	integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
-	crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
@@ -26,7 +22,7 @@
 					<div class="card">
 						<div class="card-header text-center">
 							<h2 class="card-title">
-								<strong>MANAGE USER</strong>
+								<strong>Quản lý người dùng</strong>
 							</h2>
 							<form method="get" th:action="@{/admin/usersList}">
 								<select class="custom-select w-25 ml-3" name="sortIsActived">

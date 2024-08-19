@@ -1,7 +1,7 @@
 body {
     font-family: 'lato', sans-serif;
   }
-  .container-user-register-schedule-list {
+  .container-user-processing-list {
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -10,7 +10,7 @@ body {
     text-align: center;
   }
   
-  .container-user-register-schedule-list h2 {
+  .container-user-processing-list h2 {
     font-size: 26px;
     margin: 20px 0;
     text-align: center;
@@ -19,26 +19,29 @@ body {
     }
   }
   
-  .container-user-register-schedule-list .responsive-table {
+  .container-user-processing-list .responsive-table {
     li {
       border-radius: 3px;
       padding: 25px 30px;
       display: flex;
       justify-content: space-between;
+      text-align: center;
       margin-bottom: 25px;
     }
-    .table-header {
+     .table-header {
       background-color: #95A5A6;
       font-size: 14px;
       text-transform: uppercase;
       letter-spacing: 0.03em;
+      text-align: center;
+
     }
-    .table-row {
+     .table-row {
       background-color: #ffffff;
       box-shadow: 0px 0px 9px 0px rgba(0,0,0,0.1);
     }
     .col-1 {
-      flex-basis: 20%;
+      flex-basis: 5%;
       text-align: center;
     }
     .col-2 {
@@ -63,26 +66,29 @@ body {
     }
     .col-6 {
         flex-basis: 10%;
-        margin-left: 20px;
         text-align: center;
       }
+    .col-7 {
+        flex-basis: 15%;
+        text-align: center;
+    }
     
     @media all and (max-width: 767px) {
-      .container-user-register-schedule-list .table-header {
+      .container-user-processing-list .table-header {
         display: none;
       }
       /* .table-row{
         
       } */
-      .container-user-register-schedule-list li {
+      .container-user-processing-list li {
         display: block;
       }
-      .container-user-register-schedule-list .col {
+      .container-user-processing-list .col {
         
         flex-basis: 100%;
         
       }
-      .container-user-register-schedule-list .col {
+      .container-user-processing-list .col {
         display: flex;
         padding: 10px 0;
         &:before {
@@ -94,4 +100,8 @@ body {
         }
       }
     }
+  }
+
+  .container-user-processing-list .underline {
+    text-decoration: underline;
   }

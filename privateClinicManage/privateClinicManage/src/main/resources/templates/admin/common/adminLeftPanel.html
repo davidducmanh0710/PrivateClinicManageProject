@@ -12,27 +12,83 @@
 				<!-- /.menu-title -->
 				<li class="menu-item-has-children dropdown"><a href="#"
 					class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-					aria-expanded="false"> <i class="fa-solid fa-user mr-4"></i>USER
-						MANAGER
+					aria-expanded="false"> <i class="fa-solid fa-user mr-4"></i>Quản
+						lý người dùng
 				</a>
 					<ul class="sub-menu children dropdown-menu">
 
 						<li><i class="fa fa-bars"></i><a
-							th:href="@{/admin/usersList}">User list</a></li>
-						<li><i class="fa fa-bars"></i><a
-							th:href="@{/admin/addNewUser}">Add new user</a></li>
+							th:href="@{/admin/usersList}">Danh sách người dùng</a></li>
+						<li><i class="fa-solid fa-plus"></i><a
+							th:href="@{/admin/addNewUser}">Thêm mới người dùng</a></li>
 
+					</ul></li>
+
+				<li class="menu-item-has-children dropdown"><a href="#"
+					class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+					aria-expanded="false"> <i class="fa-solid fa-tablets mr-4"></i>Quản
+						lý thuốc
+				</a>
+					<ul class="sub-menu children dropdown-menu">
+
+						<li><i class="fa fa-bars"></i><a
+							th:href="@{/admin/medicinesList}">Danh sách thuốc</a></li>
+						<li><i class="fa-solid fa-plus"></i><a
+							th:href="@{/admin/addNewMedicine}">Thêm mới thuốc</a></li>
+
+					</ul></li>
+
+				<li class="menu-item-has-children dropdown"><a href="#"
+					class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+					aria-expanded="false"> <i class="fa-solid fa-pills mr-4"></i>Quản
+						lý đơn vị thuốc
+				</a>
+					<ul class="sub-menu children dropdown-menu">
+
+						<li><i class="fa fa-bars"></i><a
+							th:href="@{/admin/unit-medicine-type-list}">Danh sách đơn vị thuốc</a></li>
+						<li><i class="fa-solid fa-plus"></i><a
+							th:href="@{/admin/addNewUmt}">Thêm mới đơn vị thuốc</a></li>
+
+					</ul></li>
+
+				<li class="menu-item-has-children dropdown"><a href="#"
+					class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+					aria-expanded="false"> <i class="fa-solid fa-layer-group mr-4"></i>Quản
+						lý nhóm thuốc
+				</a>
+					<ul class="sub-menu children dropdown-menu">
+
+						<li><i class="fa fa-bars"></i><a
+							th:href="@{/admin/medicine-group-list}">Danh sách nhóm thuốc</a></li>
+						<li><i class="fa-solid fa-plus"></i><a
+							th:href="@{/admin/addNewMedicineGroup}">Thêm mới nhóm thuốc</a></li>
 
 					</ul></li>
 
 
 				<li class="menu-item-has-children dropdown"><a href="#"
 					class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-					aria-expanded="false"> <i class="menu-icon fa fa-bar-chart"></i>Stats
+					aria-expanded="false"> <i class="menu-icon fa fa-bar-chart"></i>Thống
+						kê
 				</a>
 					<ul class="sub-menu children dropdown-menu">
 						<li><i class="menu-icon fa fa-line-chart"></i><a
-							th:href="@{/admin/}">Stats</a></li>
+							th:href="@{/admin}">Thống kê doanh thu</a></li>
+
+					</ul></li>
+
+				<li class="menu-item-has-children dropdown"><a href="#"
+					class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+					aria-expanded="false"> <i class="fa-solid fa-gear mr-4"></i>Cấu hình
+				</a>
+					<ul class="sub-menu children dropdown-menu">
+
+						<li><i class="fa-solid fa-gear mr-4"></i><a
+							th:href="@{/admin/usersList}">Cài đặt cá nhân</a></li>
+						<li><i class="fa-solid fa-gear mr-4"></i><a
+							th:href="@{/admin/addNewUser}">Cài đặt thông số mặc định cho
+								hệ thống khám bệnh</a></li>
 
 					</ul></li>
 

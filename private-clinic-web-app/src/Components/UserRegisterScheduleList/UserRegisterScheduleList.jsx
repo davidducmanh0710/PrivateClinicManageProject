@@ -16,10 +16,9 @@ export default function UserRegisterScheduleList() {
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const [params] = useSearchParams();
-  const { currentUser, setCurrentUser } = useContext(UserContext);
+  const { currentUser } = useContext(UserContext);
 
   const[isCanceled , setIsCanceled] = useState(false);
-  const count = useRef(0)
 
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({

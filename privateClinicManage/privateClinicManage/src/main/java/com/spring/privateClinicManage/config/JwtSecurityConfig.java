@@ -90,6 +90,12 @@ public class JwtSecurityConfig {
 						"/api/users/direct-register/")
 				.hasRole("YTA")
 
+				.requestMatchers(HttpMethod.GET,
+						"/api/users/get-all-processing-user-today/",
+						"/api/users/get-all-medicine-group/",
+						"/api/users/get-all-medicine-by-group/{medicineGroupId}/")
+				.hasRole("BACSI")
+
 				.anyRequest().authenticated())
 				.httpBasic(httpbc -> httpbc
 						.authenticationEntryPoint(restServicesEntryPoint()))

@@ -37,6 +37,8 @@ import com.spring.privateClinicManage.dto.RegisterStatusDto;
 import com.spring.privateClinicManage.dto.UserLoginDto;
 import com.spring.privateClinicManage.dto.UserRegisterDto;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
+import com.spring.privateClinicManage.entity.Medicine;
+import com.spring.privateClinicManage.entity.MedicineGroup;
 import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
 import com.spring.privateClinicManage.entity.User;
@@ -45,6 +47,8 @@ import com.spring.privateClinicManage.service.DownloadPDFService;
 import com.spring.privateClinicManage.service.JwtService;
 import com.spring.privateClinicManage.service.MailSenderService;
 import com.spring.privateClinicManage.service.MedicalRegistryListService;
+import com.spring.privateClinicManage.service.MedicineGroupService;
+import com.spring.privateClinicManage.service.MedicineService;
 import com.spring.privateClinicManage.service.ScheduleService;
 import com.spring.privateClinicManage.service.StatusIsApprovedService;
 import com.spring.privateClinicManage.service.UserService;
@@ -70,13 +74,16 @@ public class ApiUserRestController {
 	private MedicalRegistryListService medicalRegistryListService;
 	private StatusIsApprovedService statusIsApprovedService;
 	private DownloadPDFService downloadPDFService;
+	private MedicineGroupService medicineGroupService;
+	private MedicineService medicineService;
 
 	@Autowired
 	public ApiUserRestController(JwtService jwtService, UserService userService,
 			VerifyEmailService verifyEmailService, MailSenderService mailSenderService,
 			Environment environment, MedicalRegistryListService medicalRegistryListService,
 			ScheduleService scheduleService, StatusIsApprovedService statusIsApprovedService,
-			DownloadPDFService downloadPDFService) {
+			DownloadPDFService downloadPDFService, MedicineGroupService medicineGroupService,
+			MedicineService medicineService) {
 		super();
 		this.jwtService = jwtService;
 		this.userService = userService;
@@ -87,6 +94,8 @@ public class ApiUserRestController {
 		this.scheduleService = scheduleService;
 		this.statusIsApprovedService = statusIsApprovedService;
 		this.downloadPDFService = downloadPDFService;
+		this.medicineGroupService = medicineGroupService;
+		this.medicineService = medicineService;
 	}
 
 	@PostMapping(path = "/login/")
@@ -310,11 +319,13 @@ public class ApiUserRestController {
 		Integer page = Integer.parseInt(params.getOrDefault("page", "1"));
 		Integer size = Integer.parseInt(params.getOrDefault("size", "6"));
 
-		List<MedicalRegistryList> mrls = medicalRegistryListService.findAllMrl();
+		List<MedicalRegistryList> mrls;
 
 		String key = params.getOrDefault("key", "");
 		if (!key.isBlank())
 			mrls = medicalRegistryListService.findByAnyKey(key);
+		else
+			mrls = medicalRegistryListService.findAllMrl();
 
 		String createdDate = params.getOrDefault("createdDate", "");
 		if (!createdDate.isBlank()) {
@@ -547,6 +558,77 @@ public class ApiUserRestController {
 		return new ResponseEntity<>(
 				"Đặt lịch thành công , vui lòng kiểm tra mail lấy mã QR để lấy số thứ tự",
 				HttpStatus.CREATED);
+	}
+
+	// ROLE_BACSI
+
+	@GetMapping("/get-all-processing-user-today/")
+	@CrossOrigin
+	public ResponseEntity<Object> getAllProcessingUserToday(
+			@RequestParam Map<String, String> params) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		Integer page = Integer.parseInt(params.getOrDefault("page", "1"));
+		Integer size = Integer.parseInt(params.getOrDefault("size", "3"));
+
+		CalendarFormat c = CalendarFormatUtil
+				.parseStringToCalendarFormat(String.valueOf(new Date()));
+		Schedule schedule = scheduleService.findByDayMonthYear(c.getYear(), c.getMonth(),
+				c.getDay());
+
+		if (schedule == null) {
+			schedule = new Schedule();
+			schedule.setDate(new Date());
+			schedule.setIsDayOff(false);
+			scheduleService.saveSchedule(schedule);
+		}
+		
+		StatusIsApproved statusIsApproved =  statusIsApprovedService.findByStatus("PROCESSING");
+		
+		List<MedicalRegistryList> mrls = medicalRegistryListService
+				.findByScheduleAndStatusIsApproved2(schedule, statusIsApproved);
+
+		for (Integer i = 0; i < mrls.size(); i++)
+			mrls.get(i).setOrder(i + 1);
+
+		Page<MedicalRegistryList> mrlsPaginated = medicalRegistryListService
+				.findMrlsPaginated(page,
+						size, mrls);
+
+		return new ResponseEntity<>(mrlsPaginated, HttpStatus.OK);
+
+	}
+
+	@GetMapping(value = "/get-all-medicine-group/")
+	@CrossOrigin
+	public ResponseEntity<Object> getAllMedicineGroup() {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		return new ResponseEntity<>(medicineGroupService.findAllMedicineGroup(), HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/get-all-medicine-by-group/{medicineGroupId}/")
+	@CrossOrigin
+	public ResponseEntity<Object> getAllMedicineByGroup(
+			@PathVariable("medicineGroupId") Integer medicineGroupId) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+		
+		MedicineGroup medicineGroup = medicineGroupService.findMedicineGroupById(medicineGroupId);
+
+		if (medicineGroup == null)
+			return new ResponseEntity<>("Nhóm thuốc này không tồn tại", HttpStatus.NOT_FOUND);
+
+		List<Medicine> medicines = medicineService.findByMedicineGroup(medicineGroup);
+
+		return new ResponseEntity<>(medicines, HttpStatus.OK);
 	}
 
 }

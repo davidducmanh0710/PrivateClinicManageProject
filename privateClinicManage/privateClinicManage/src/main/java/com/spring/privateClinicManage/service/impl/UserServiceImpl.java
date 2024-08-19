@@ -1,6 +1,7 @@
 package com.spring.privateClinicManage.service.impl;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		User user = userRepository.findByEmail(email);
-		if (user == null)
+		if (user == null || !user.getActive())
 			throw new UsernameNotFoundException("Không tồn tại!");
 		Set<GrantedAuthority> authorities = new HashSet<>();
 		authorities.add(new SimpleGrantedAuthority(user.getRole().getName()));
@@ -190,9 +191,17 @@ public class UserServiceImpl implements UserService {
 
 		int start = (int) pageable.getOffset();
 		int end = Math.min((start + pageable.getPageSize()), users.size());
-		List<User> pagedUsers = users.subList(start, end);
 
-		return new PageImpl<>(pagedUsers, pageable, users.size());
+		List<User> usersPaginated;
+
+		if (users.size() < start) {
+			usersPaginated = Collections.emptyList();
+		} else {
+			end = Math.min((start + pageable.getPageSize()), users.size());
+			usersPaginated = users.subList(start, end);
+		}
+
+		return new PageImpl<>(usersPaginated, pageable, users.size());
 
 	}
 

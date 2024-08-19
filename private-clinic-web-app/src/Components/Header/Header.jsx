@@ -5,7 +5,7 @@ import RegisterForm from "../RegisterForm/RegisterForm";
 import { UserContext } from "../config/Context";
 import { Button, Dropdown, Image, NavDropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { isBENHNHAN, isYTA } from "../Common/Common";
+import { isBACSI, isBENHNHAN, isYTA } from "../Common/Common";
 
 export default function Header() {
   const formLoginRef = useRef();
@@ -31,7 +31,7 @@ export default function Header() {
 
   function logout() {
     localStorage.setItem("token", "");
-    localStorage.setItem("HTML5_QRCODE_DATA","")
+    localStorage.setItem("HTML5_QRCODE_DATA", "");
     setCurrentUser(null);
     navigate("/");
   }
@@ -39,7 +39,7 @@ export default function Header() {
   useEffect(() => {}, [currentUser]);
 
   function handleAppointmentSchedule() {
-    if (currentUser == null) {
+    if (currentUser === null) {
       formLoginRef.current.open();
     }
   }
@@ -181,7 +181,12 @@ export default function Header() {
                   <div className="dropdown-menu">
                     {currentUser !== null && isYTA(currentUser) && (
                       <>
-                        <Link to="/directly-register-schedule" className="dropdown-item">Đặt lịch trực tiếp</Link>
+                        <Link
+                          to="/directly-register-schedule"
+                          className="dropdown-item"
+                        >
+                          Đặt lịch trực tiếp
+                        </Link>
                       </>
                     )}
                     {currentUser !== null && isYTA(currentUser) && (
@@ -193,8 +198,21 @@ export default function Header() {
                     )}
                     {currentUser !== null && isYTA(currentUser) && (
                       <>
-                        <Link to="/qr-scan-take-order" className="dropdown-item">
+                        <Link
+                          to="/qr-scan-take-order"
+                          className="dropdown-item"
+                        >
                           Quét mã QR lấy số thứ tự
+                        </Link>
+                      </>
+                    )}
+                    {currentUser !== null && isBACSI(currentUser) && (
+                      <>
+                        <Link
+                          to="/prepare-examination-form"
+                          className="dropdown-item"
+                        >
+                          Lập phiếu khám
                         </Link>
                       </>
                     )}
@@ -225,9 +243,7 @@ export default function Header() {
                     <i className="fa fa-calendar-alt fa-2x"></i>
                     <span className="text-blue">Đặt lịch khám</span>
                   </Link>
-                ) : currentUser !== null && isYTA(currentUser) ? (
-                  <></>
-                ) : (
+                ) : currentUser === null ? (
                   <button
                     onClick={handleAppointmentSchedule}
                     className="d-flex flex-column text-center align-items-center border-0"
@@ -235,6 +251,8 @@ export default function Header() {
                     <i className="fa fa-calendar-alt fa-2x"></i>
                     <span className="text-blue">Đặt lịch khám</span>
                   </button>
+                ) : (
+                  <></>
                 )}
               </a>
             </div>

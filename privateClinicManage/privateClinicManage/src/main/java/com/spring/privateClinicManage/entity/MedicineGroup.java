@@ -20,12 +20,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "unit_medicine_type")
+@Table(name = "medicine_group")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UnitMedicineType implements Serializable {
+public class MedicineGroup implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,10 +34,10 @@ public class UnitMedicineType implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@Column(name = "unit_name", nullable = false)
-	private String unitName;
+	@Column(name = "group_name", nullable = false)
+	private String groupName;
 
-	@OneToMany(mappedBy = "unitType", fetch = FetchType.LAZY, cascade = {
+	@OneToMany(mappedBy = "medicineGroup", fetch = FetchType.LAZY, cascade = {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})
 	@JsonIgnore

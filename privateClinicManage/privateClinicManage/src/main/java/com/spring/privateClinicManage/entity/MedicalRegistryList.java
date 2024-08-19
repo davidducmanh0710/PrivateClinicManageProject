@@ -16,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
@@ -80,5 +81,8 @@ public class MedicalRegistryList implements Serializable {
 	@Transient
 	@JsonIgnore
 	private MultipartFile file;
+
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "mrl")
+	private MedicalExamination medicalExamination;
 
 }
