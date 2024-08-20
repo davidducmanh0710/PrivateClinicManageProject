@@ -115,6 +115,9 @@
   border: 1px solid #ccc;
   text-align: center;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .medicine-group-container .selection-list li.selected {

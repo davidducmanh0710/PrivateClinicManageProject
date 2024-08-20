@@ -13,9 +13,17 @@ export default function ExaminationForm() {
   const [selectedMGId, setSelectedMGId] = useState(0);
   const [medicinesList, setMedicinesList] = useState([]);
   const [selectedMedicineId, setSelectedMedicineId] = useState(0);
-  const [dayExam, setDayExam] = useState(0);
+  const [dayExam, setDayExam] = useState(1);
   const [newMedicineOpen, setNewMedicineOpen] = useState(false);
   const [allMedicines, setAllMedicines] = useState([]);
+
+  const [textInputs, setTextInputs] = useState({
+    advance: "",
+    predict: "",
+    symptomProcess: "",
+    treatmentProcess: "",
+    followUpDate: "",
+  });
 
   const location = useLocation();
   const { examPatient } = location.state || {};
@@ -257,12 +265,55 @@ export default function ExaminationForm() {
         unitName: existingMedicineDatabase.unitType.unitName,
         description: existingMedicineDatabase.description,
         defaultPerDay: existingMedicineDatabase.defaultPerDay,
-        prognosis: existingMedicineDatabase.defaultPerDay,
+        prognosis: existingMedicineDatabase.defaultPerDay * dayExam,
       });
       setMedicinesExamList(updatedItems);
       setNewMedicineOpen((prev) => false);
     }
   }
+
+  function handleSetTextInputs(e) {
+    const { name, value } = e.target;
+    setTextInputs((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+
+  const handleSubmitMedicalExamination = async (e) => {
+    e.preventDefault();
+
+    const filteredMedicines = medicinesExamList.map((medicine) => ({
+      id: medicine.id,
+      description: medicine.description,
+      prognosis: medicine.prognosis,
+    }));
+    try {
+      const response = await authAPI().post(
+        endpoints["submitMedicalExamination"],
+        {
+          mrlId: examPatient.id,
+          advance: textInputs.advance,
+          predict: textInputs.predict,
+          symptomProcess: textInputs.symptomProcess,
+          treatmentProcess: textInputs.treatmentProcess,
+          followUpDate: textInputs.followUpDate,
+          durationDay: dayExam,
+          medicinesExamList: filteredMedicines,
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500; // Chỉ ném lỗi nếu status code >= 500
+          },
+        }
+      );
+      if (response.status === 201) {
+        showSnackbar("Lưu phiếu khám thành công", "success");
+      } else showSnackbar(response.data, "error");
+    } catch {
+      showSnackbar("Lỗi", "error");
+    }
+  };
 
   return (
     <>
@@ -273,282 +324,321 @@ export default function ExaminationForm() {
       />
       <div className="examination-form-container">
         <h1 className="text text-danger text-center mb-4">LẬP PHIẾU KHÁM</h1>
-        <div className="row">
-          {/* Cột bên trái */}
-          <div className="col-lg-5">
-            {/* Hàng đầu tiên của 2 input */}
-            <div className="row mb-5">
-              <div className="col">
-                <div className="input-card">
-                  <div className="input-card-header">
-                    <h4>Quá trình điều trị</h4>
+        <form onSubmit={(e) => handleSubmitMedicalExamination(e)}>
+          <div className="row">
+            {/* Cột bên trái */}
+            <div className="col-lg-5">
+              {/* Hàng đầu tiên của 2 input */}
+              <div className="row mb-5">
+                <div className="col">
+                  <div className="input-card">
+                    <div className="input-card-header">
+                      <h4>Quá trình điều trị</h4>
+                    </div>
+                    <div className="input-card-content">
+                      <textarea
+                        required
+                        className="w-100"
+                        rows="5"
+                        placeholder="Nhập nội dung..."
+                        value={textInputs.treatmentProcess}
+                        name="treatmentProcess"
+                        onChange={(e) => handleSetTextInputs(e)}
+                      ></textarea>
+                    </div>
                   </div>
-                  <div className="input-card-content">
-                    <textarea
-                      className="w-100"
-                      rows="5"
-                      placeholder="Nhập nội dung..."
-                    ></textarea>
+                </div>
+                <div className="col">
+                  <div className="input-card">
+                    <div className="input-card-header">
+                      <h4>Diễn biến bệnh</h4>
+                    </div>
+                    <div className="input-card-content">
+                      <textarea
+                        required
+                        className="w-100"
+                        rows="5"
+                        placeholder="Nhập nội dung..."
+                        value={textInputs.symptomProcess}
+                        name="symptomProcess"
+                        onChange={(e) => handleSetTextInputs(e)}
+                      ></textarea>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="col">
-                <div className="input-card">
-                  <div className="input-card-header">
-                    <h4>Diễn biến bệnh</h4>
+
+              {/* Hàng thứ hai của 2 bảng */}
+              <div className="row">
+                <div className="col">
+                  <div className="medicine-group-container selection-card">
+                    <div className="selection-card-header">
+                      <h4 className="text-center">Nhóm thuốc</h4>
+                    </div>
+                    <div className="selection-card-content">
+                      <ul className="selection-list">
+                        {medicineGroupList.length > 1 &&
+                          medicineGroupList.map((mg) => {
+                            const mgId = mg.id;
+                            return (
+                              <>
+                                <li
+                                  className={
+                                    selectedMGId === mg.id ? "selected" : ""
+                                  }
+                                  key={mg.id}
+                                  onClick={() =>
+                                    handleSelectedMedicineGroup(mgId)
+                                  }
+                                >
+                                  {mg.groupName}
+                                </li>
+                              </>
+                            );
+                          })}
+                      </ul>
+                    </div>
                   </div>
-                  <div className="input-card-content">
-                    <textarea
-                      className="w-100"
-                      rows="5"
-                      placeholder="Nhập nội dung..."
-                    ></textarea>
+                </div>
+                <div className="col">
+                  <div className="medicine-group-container selection-card">
+                    <div className="selection-card-header">
+                      <h4 className="text-center">Danh sách thuốc</h4>
+                    </div>
+                    <div className="selection-card-content">
+                      <ul className="selection-list">
+                        {medicinesList.length > 0 &&
+                          medicinesList.map((m) => {
+                            return (
+                              <>
+                                <li
+                                  key={m.id}
+                                  className={
+                                    selectedMedicineId === m.id
+                                      ? "selected text-center"
+                                      : "text-center"
+                                  }
+                                  onClick={() => handleSelectedMedicine(m.id)}
+                                >
+                                  {m.name}
+                                </li>
+                              </>
+                            );
+                          })}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Hàng thứ hai của 2 bảng */}
-            <div className="row">
-              <div className="col">
-                <div className="medicine-group-container selection-card">
-                  <div className="selection-card-header">
-                    <h4 className="text-center">Nhóm thuốc</h4>
+            {/* Cột bên phải */}
+            <div className="col-lg-7">
+              <div className="border p-4 shadow bg-white large-box">
+                <div className="examination-container">
+                  <div className="prescription-header">
+                    <h2>ĐƠN THUỐC</h2>
                   </div>
-                  <div className="selection-card-content">
-                    <ul className="selection-list">
-                      {medicineGroupList.length > 1 &&
-                        medicineGroupList.map((mg) => {
-                          const mgId = mg.id;
-                          return (
-                            <>
-                              <li
-                                className={
-                                  selectedMGId === mg.id ? "selected" : ""
-                                }
-                                key={mg.id}
-                                onClick={() =>
-                                  handleSelectedMedicineGroup(mgId)
-                                }
-                              >
-                                {mg.groupName}
-                              </li>
-                            </>
-                          );
-                        })}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div className="col">
-                <div className="medicine-group-container selection-card">
-                  <div className="selection-card-header">
-                    <h4 className="text-center">Danh sách thuốc</h4>
-                  </div>
-                  <div className="selection-card-content">
-                    <ul className="selection-list">
-                      {medicinesList.length > 0 &&
-                        medicinesList.map((m) => {
-                          return (
-                            <>
-                              <li
-                                key={m.id}
-                                className={
-                                  selectedMedicineId === m.id ? "selected" : ""
-                                }
-                                onClick={() => handleSelectedMedicine(m.id)}
-                              >
-                                {m.name}
-                              </li>
-                            </>
-                          );
-                        })}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Cột bên phải */}
-          <div className="col-lg-7">
-            <div className="border p-4 shadow bg-white large-box">
-              <div className="examination-container">
-                <div className="prescription-header">
-                  <h2>ĐƠN THUỐC</h2>
-                </div>
-
-                <div className="prescription-details">
+                  <div className="prescription-details">
+                    <p>
+                      <span>Họ tên:</span> {examPatient.name}
+                    </p>
+                    <p>
+                      <span>Năm sinh:</span>{" "}
+                      {2024 - dayjs(examPatient.user.birthday).year()} (
+                      {dayjs(examPatient.user.birthday).format("DD-MM-YYYY")}) (
+                      {examPatient.user.gender})
+                    </p>
+                  </div>
                   <p>
-                    <span>Họ tên:</span> {examPatient.name}
+                    <span>Chẩn đoán:</span>{" "}
+                    <input
+                      type="text"
+                      required
+                      value={textInputs.predict}
+                      name="predict"
+                      onChange={(e) => handleSetTextInputs(e)}
+                    />
                   </p>
-                  <p>
-                    <span>Năm sinh:</span>{" "}
-                    {2024 - dayjs(examPatient.user.birthday).year()} (
-                    {dayjs(examPatient.user.birthday).format("DD-MM-YYYY")}) (
-                    {examPatient.user.gender})
-                  </p>
-                </div>
-                <p>
-                  <span>Chẩn đoán:</span> <input type="text" />
-                </p>
 
-                <div className="btn-group" role="group">
-                  {Array.from({ length: 6 }, (_, i) => (
+                  <div className="btn-group" role="group">
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <button
+                        type="button"
+                        className={`btn btn-outline-${
+                          dayExam === i + 1
+                            ? "success btn-success text text-white"
+                            : "secondary"
+                        }`}
+                        onClick={() =>
+                          handleAutoUpdateExamValueValueSetDayExam(i + 1)
+                        }
+                        key={i + 1}
+                      >
+                        {i + 1} Ngày
+                      </button>
+                    ))}
                     <button
                       type="button"
                       className={`btn btn-outline-${
-                        dayExam === i + 1
+                        dayExam > 6
                           ? "success btn-success text text-white"
                           : "secondary"
                       }`}
-                      onClick={() =>
-                        handleAutoUpdateExamValueValueSetDayExam(i + 1)
-                      }
-                      key={i + 1}
                     >
-                      {i + 1} Ngày
+                      <input
+                        min={7}
+                        max={30}
+                        style={{ width: 40 + "%" }}
+                        type="number"
+                        onBlur={(e) => {
+                          if (e.target.value.trim() !== "") handleSetDayExam(e);
+                          else {
+                            e.target.value = 1;
+                            handleSetDayExam(e);
+                          }
+                        }}
+                      />
+                      Ngày
                     </button>
-                  ))}
-                  <button
-                    type="button"
-                    className={`btn btn-outline-${
-                      dayExam > 6
-                        ? "success btn-success text text-white"
-                        : "secondary"
-                    }`}
-                  >
-                    <input
-                      min={7}
-                      max={30}
-                      style={{ width: 40 + "%" }}
-                      type="number"
-                      onBlur={(e) => {
-                        if (e.target.value.trim() !== "") handleSetDayExam(e);
-                        else {
-                          e.target.value = 1;
-                          handleSetDayExam(e);
-                        }
-                      }}
-                    />
-                    Ngày
-                  </button>
-                </div>
+                  </div>
 
-                <div className="medicine-list-container container mt-4">
-                  {medicinesExamList.length > 0 &&
-                    medicinesExamList.map((m, index) => {
-                      return (
-                        <>
-                          <div
-                            key={m.id}
-                            className="row align-items-center border-bottom py-2"
-                          >
-                            <div className="col-1">
-                              <strong>{index}.</strong>
-                            </div>
-                            <div className="col-6">
-                              <strong>{m.name}</strong>
-                              <p>
-                                Cách dùng :{" "}
-                                <input
-                                  type="text"
-                                  value={m.description}
-                                  onChange={(e) =>
-                                    handleUpdateDescriptionMedicineExamItem(
-                                      m.id,
-                                      e
-                                    )
-                                  }
-                                />
-                              </p>
-                            </div>
-                            <div className="col-4 text-end">
-                              <strong>Số lượng</strong>
-                              <div className="col-12 text-end">
-                                <strong>
+                  <div className="medicine-list-container container mt-4">
+                    {medicinesExamList.length > 0 &&
+                      medicinesExamList.map((m, index) => {
+                        return (
+                          <>
+                            <div
+                              key={m.id}
+                              className="row align-items-center border-bottom py-2"
+                            >
+                              <div className="col-1">
+                                <strong>{index}.</strong>
+                              </div>
+                              <div className="col-6">
+                                <strong>{m.name}</strong>
+                                <p>
+                                  Cách dùng :{" "}
                                   <input
-                                    className="text-center"
                                     type="text"
-                                    value={
-                                      // m.prognosis === m.defaultPerDay
-                                      //   ? m.defaultPerDay * dayExam
-                                      //   :
-                                      m.prognosis
-                                    }
-                                    style={{ width: 20 + "%" }}
+                                    value={m.description}
                                     onChange={(e) =>
-                                      handleUpdatePrognosisMedicineExamItem(
+                                      handleUpdateDescriptionMedicineExamItem(
                                         m.id,
                                         e
                                       )
                                     }
-                                  />{" "}
-                                  {m.unitName}
-                                </strong>
+                                  />
+                                </p>
+                              </div>
+                              <div className="col-4 text-end">
+                                <strong>Số lượng</strong>
+                                <div className="col-12 text-end">
+                                  <strong>
+                                    <input
+                                      className="text-center"
+                                      type="text"
+                                      value={m.prognosis}
+                                      style={{ width: 20 + "%" }}
+                                      onChange={(e) =>
+                                        handleUpdatePrognosisMedicineExamItem(
+                                          m.id,
+                                          e
+                                        )
+                                      }
+                                    />{" "}
+                                    {m.unitName}
+                                  </strong>
+                                </div>
+                              </div>
+                              <div className="col-1 text-end">
+                                <button
+                                  onClick={() =>
+                                    handleDeleteMedicineExamItem(m.id)
+                                  }
+                                  type="button"
+                                  className="btn-close"
+                                  aria-label="Close"
+                                ></button>
                               </div>
                             </div>
-                            <div className="col-1 text-end">
-                              <button
-                                onClick={() =>
-                                  handleDeleteMedicineExamItem(m.id)
-                                }
-                                type="button"
-                                className="btn-close"
-                                aria-label="Close"
-                              ></button>
-                            </div>
-                          </div>
-                        </>
-                      );
-                    })}
-                  <div className="col-12 text-end">
+                          </>
+                        );
+                      })}
+                    <div className="col-12 text-end">
+                      <button
+                        onClick={() => handleSetNewMedicineOpen()}
+                        type="button"
+                        className="btn-open text-white border border-none bg-danger"
+                        aria-label="Add"
+                      >
+                        {newMedicineOpen === true ? "X" : "+"}
+                      </button>
+                    </div>
+                    {newMedicineOpen === true && (
+                      <Typeahead
+                        id="basic-typeahead"
+                        labelKey="name"
+                        options={allMedicines}
+                        placeholder="Thêm thuốc mới vào đơn"
+                        onBlur={(e) => {
+                          if (e.target.value.trim() !== "")
+                            handleAddNewMedicineInput(e);
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  <div className="footer-examination-form">
+                    <div className="left-col">
+                      <label>Lời dặn :</label>
+                      <div className="">
+                        <textarea
+                          required
+                          className="textarea-advance"
+                          value={textInputs.advance}
+                          name="advance"
+                          onChange={(e) => handleSetTextInputs(e)}
+                        ></textarea>
+                      </div>
+                      <div className="">
+                        <label>Ngày tái khám :</label>
+                        <input
+                          type="date"
+                          value={textInputs.followUpDate}
+                          name="followUpDate"
+                          onChange={(e) => handleSetTextInputs(e)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="right-col">
+                      <div className="date">
+                        <strong>
+                          {dayjs(examPatient.schedule.date).format(
+                            "DD/MM/YYYY"
+                          )}
+                        </strong>
+                      </div>
+
+                      <p className="doctor-title">BÁC SĨ</p>
+                      <p className="doctor-name">{currentUser.name}</p>
+                    </div>
+                  </div>
+                  <div className="d-flex justify-content-center align-item-center mt-5">
                     <button
-                      onClick={() => handleSetNewMedicineOpen()}
-                      type="button"
-                      className="btn-open text-white border border-none bg-danger"
-                      aria-label="Add"
+                      type="submit"
+                      className="btn btn-danger text-center"
                     >
-                      {newMedicineOpen === true ? "X" : "+"}
+                      Lưu
                     </button>
-                  </div>
-                  {newMedicineOpen === true && (
-                    <Typeahead
-                      id="basic-typeahead"
-                      labelKey="name"
-                      options={allMedicines}
-                      placeholder="Thêm thuốc mới vào đơn"
-                      onBlur={(e) => {
-                        if (e.target.value.trim() !== "")
-                          handleAddNewMedicineInput(e);
-                      }}
-                    />
-                  )}
-                </div>
-
-                <div className="footer-examination-form">
-                  <div className="left-col">
-                    <label>Lời dặn :</label>
-                    <div className="">
-                      <textarea className="textarea-advance"></textarea>
-                    </div>
-                  </div>
-
-                  <div className="right-col">
-                    <div className="date">
-                      <strong>
-                        {dayjs(examPatient.schedule.date).format("DD/MM/YYYY")}
-                      </strong>
-                    </div>
-
-                    <p className="doctor-title">BÁC SĨ</p>
-                    <p className="doctor-name">{currentUser.name}</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </>
   );

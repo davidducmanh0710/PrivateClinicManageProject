@@ -38,11 +38,20 @@ public class MedicalExamination implements Serializable {
 	@Column(name = "created_date")
 	private Date createdDate;
 
+	@Column(name = "predict")
+	private String predict;
+
 	@Column(name = "advance")
 	private String advance;
 
-	@Column(name = "symptom", nullable = false)
-	private String symptom;
+	@Column(name = "symptom_process", nullable = false)
+	private String symptomProcess;
+
+	@Column(name = "treatment_process", nullable = false)
+	private String treatmentProcess;
+
+	@Column(name = "duration_day")
+	private Integer durationDay;
 
 	@Column(name = "follow_up_date")
 	private Date followUpDate;

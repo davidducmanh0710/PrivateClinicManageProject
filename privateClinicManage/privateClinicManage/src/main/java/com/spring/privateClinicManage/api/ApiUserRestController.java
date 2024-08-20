@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.spring.privateClinicManage.dto.ConfirmRegisterDto;
 import com.spring.privateClinicManage.dto.DirectRegisterDto;
 import com.spring.privateClinicManage.dto.EmailDto;
+import com.spring.privateClinicManage.dto.MedicalExamDto;
 import com.spring.privateClinicManage.dto.MrlIdScanQrDto;
 import com.spring.privateClinicManage.dto.OrderQrCodeDto;
 import com.spring.privateClinicManage.dto.RegisterScheduleDto;
@@ -656,6 +657,16 @@ public class ApiUserRestController {
 			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
 
 		return new ResponseEntity<>(medicineService.findAllMedicines(), HttpStatus.OK);
+	}
+
+	@PostMapping(value = "/submit-medical-examination/")
+	@CrossOrigin
+	public ResponseEntity<Object> submitMedicalExamination(
+			@RequestBody MedicalExamDto medicalExamDto) {
+
+		System.out.println(medicalExamDto.getMedicinesExamList().get(0).getPrognosis());
+
+		return new ResponseEntity<>("Thành công !", HttpStatus.CREATED);
 	}
 
 }

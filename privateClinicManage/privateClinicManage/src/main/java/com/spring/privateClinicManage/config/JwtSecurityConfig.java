@@ -74,11 +74,11 @@ public class JwtSecurityConfig {
 						"/api/users/register-schedule/",
 						"/api/users/user-register-schedule-list/")
 				.hasRole("BENHNHAN")
-				
+
 				.requestMatchers(HttpMethod.PATCH,
 						"/api/users/cancel-register-schedule/{registerScheduleId}/")
 				.hasRole("BENHNHAN")
-				
+
 				.requestMatchers(HttpMethod.GET,
 						"/api/users/censor-register-schedule",
 						"/api/users/all-register-schedule/",
@@ -96,6 +96,10 @@ public class JwtSecurityConfig {
 						"/api/users/get-all-medicine-by-group/{medicineGroupId}/",
 						"/api/users/get-medicine-by-id/{medicineId}/",
 						"/api/users/get-all-medicines/")
+				.hasRole("BACSI")
+
+				.requestMatchers(HttpMethod.POST,
+						"/api/users/submit-medical-examination/")
 				.hasRole("BACSI")
 
 				.anyRequest().authenticated())

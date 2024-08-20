@@ -23,6 +23,7 @@ export let endpoints = {
 	getAllMedicinesByGroup : (medicineGroupId) => `/api/users/get-all-medicine-by-group/${medicineGroupId}/`,
 	getMedicineById : (medicineId) => `/api/users/get-medicine-by-id/${medicineId}/`,
 	getAllMedicines : '/api/users/get-all-medicines/',
+	submitMedicalExamination : '/api/users/submit-medical-examination/'
 
 };
 
