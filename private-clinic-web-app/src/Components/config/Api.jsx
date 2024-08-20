@@ -20,7 +20,10 @@ export let endpoints = {
 	directRegister : "/api/users/direct-register/",
 	getAllProcessingUserToday : "/api/users/get-all-processing-user-today/",
 	getAllMedicineGroup : "/api/users/get-all-medicine-group/",
-	getAllMedicinesByGroup : (medicineGroupId) => `/api/users/get-all-medicine-by-group/${medicineGroupId}/`
+	getAllMedicinesByGroup : (medicineGroupId) => `/api/users/get-all-medicine-by-group/${medicineGroupId}/`,
+	getMedicineById : (medicineId) => `/api/users/get-medicine-by-id/${medicineId}/`,
+	getAllMedicines : '/api/users/get-all-medicines/',
+
 };
 
 export const authAPI = () => {

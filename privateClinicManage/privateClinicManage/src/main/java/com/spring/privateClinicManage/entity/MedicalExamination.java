@@ -38,17 +38,14 @@ public class MedicalExamination implements Serializable {
 	@Column(name = "created_date")
 	private Date createdDate;
 
-	@Column(name = "medication_usage")
-	private String usage;
+	@Column(name = "advance")
+	private String advance;
 
 	@Column(name = "symptom", nullable = false)
 	private String symptom;
 
-	@Column(name = "prognosis", nullable = false)
-	private String prognosis;
-
 	@Column(name = "follow_up_date")
-	private Date followUpDAte;
+	private Date followUpDate;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "medical_register_list_id", referencedColumnName = "id")

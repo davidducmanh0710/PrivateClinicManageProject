@@ -32,8 +32,11 @@ public class PrescriptionItems implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@Column(name = "quantity")
-	private Integer quantity;
+	@Column(name = "prognosis", nullable = false)
+	private String prognosis;
+
+	@Column(name = "medical_usage")
+	private String usage;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH

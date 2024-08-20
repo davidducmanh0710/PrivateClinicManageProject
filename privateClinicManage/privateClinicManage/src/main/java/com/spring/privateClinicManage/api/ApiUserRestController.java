@@ -631,4 +631,31 @@ public class ApiUserRestController {
 		return new ResponseEntity<>(medicines, HttpStatus.OK);
 	}
 
+	@GetMapping(value = "/get-medicine-by-id/{medicineId}/")
+	@CrossOrigin
+	public ResponseEntity<Object> getMedicineById(@PathVariable("medicineId") Integer medicineId) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		Medicine medicine = medicineService.findById(medicineId);
+
+		if (medicine == null)
+			return new ResponseEntity<>("Thuốc này không tồn tại", HttpStatus.NOT_FOUND);
+
+		return new ResponseEntity<>(medicine, HttpStatus.OK);
+
+	}
+
+	@GetMapping(value = "/get-all-medicines/")
+	@CrossOrigin
+	public ResponseEntity<Object> getAllMedicines() {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		return new ResponseEntity<>(medicineService.findAllMedicines(), HttpStatus.OK);
+	}
+
 }

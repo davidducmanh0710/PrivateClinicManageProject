@@ -93,7 +93,9 @@ public class JwtSecurityConfig {
 				.requestMatchers(HttpMethod.GET,
 						"/api/users/get-all-processing-user-today/",
 						"/api/users/get-all-medicine-group/",
-						"/api/users/get-all-medicine-by-group/{medicineGroupId}/")
+						"/api/users/get-all-medicine-by-group/{medicineGroupId}/",
+						"/api/users/get-medicine-by-id/{medicineId}/",
+						"/api/users/get-all-medicines/")
 				.hasRole("BACSI")
 
 				.anyRequest().authenticated())

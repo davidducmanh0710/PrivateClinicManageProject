@@ -55,18 +55,17 @@ public class Medicine implements Serializable {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})
 	@JoinColumn(name = "unitMedicineType_id", referencedColumnName = "id")
-	@JsonIgnore
 	private UnitMedicineType unitType;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})
 	@JoinColumn(name = "medicineGroup_id", referencedColumnName = "id")
-	@JsonIgnore
 	private MedicineGroup medicineGroup;
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	}, mappedBy = "medicine")
+	@JsonIgnore
 	private List<PrescriptionItems> ptis;
 }
