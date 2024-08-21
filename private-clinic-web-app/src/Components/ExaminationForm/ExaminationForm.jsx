@@ -575,7 +575,9 @@ export default function ExaminationForm() {
                       <button
                         onClick={() => handleSetNewMedicineOpen()}
                         type="button"
-                        className="btn-open text-white border border-none bg-danger"
+                        className={`btn-open text-white border border-none bg-${
+                          newMedicineOpen === true ? "danger" : "success"
+                        }`}
                         aria-label="Add"
                       >
                         {newMedicineOpen === true ? "X" : "+"}

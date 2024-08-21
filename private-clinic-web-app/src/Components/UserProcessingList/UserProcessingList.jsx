@@ -71,7 +71,7 @@ export default function UserProcessingList() {
       />
       <div className="container container-user-processing-list">
         <h2 className="text text-primary">Danh sách bệnh nhân đang đợi</h2>
-        {userProcessingList.totalElements > 0 && (
+        {userProcessingList.empty !== false && (
           <Pagination
             count={totalPage}
             color="primary"
@@ -89,7 +89,7 @@ export default function UserProcessingList() {
             <div className="col col-6">Triệu chứng</div>
             <div className="col col-7">Hành động</div>
           </li>
-          {userProcessingList.totalElements < 1 ? (
+          {userProcessingList.empty === true ? (
             <>
               <Alert variant="filled" severity="info" className="w-50 mx-auto">
                 Hiện không có phiếu đăng kí nào
@@ -97,46 +97,47 @@ export default function UserProcessingList() {
             </>
           ) : (
             <>
-              {userProcessingList.content.map((up) => {
-                return (
-                  <>
-                    <li key={up.id} className="table-row">
-                      <div className="col col-1" data-label="ID">
-                        {up.id}
-                      </div>
-                      <div
-                        role="button"
-                        className="col col-2 text text-info underline"
-                        data-label="Name Register"
-                        onClick={() => setExamPatient(up)}
-                      >
-                        {up.name}
-                      </div>
-                      <div className="col col-4" data-label="Date Register">
-                        {dayjs(up.schedule.date).format("DD-MM-YYYY")}
-                      </div>
-                      <div className="col col-5" data-label="Phone">
-                        {up.user.phone}
-                      </div>
-                      <div className="col col-6" data-label="Address">
-                        {up.user.address}
-                      </div>
-                      <div className="col col-6" data-label="Favor">
-                        {up.favor}
-                      </div>
-                      <div className="col col-7" data-label="Action">
-                        <button>Test</button>
-                      </div>
-                    </li>
-                    {examPatient.id === up.id && (
-                      <PatientTabs
-                        examPatient={examPatient}
-                        setExamPatient={setExamPatient}
-                      />
-                    )}
-                  </>
-                );
-              })}
+              {userProcessingList.empty === false &&
+                userProcessingList.content.map((up) => {
+                  return (
+                    <>
+                      <li key={up.id} className="table-row">
+                        <div className="col col-1" data-label="ID">
+                          {up.id}
+                        </div>
+                        <div
+                          role="button"
+                          className="col col-2 text text-info underline"
+                          data-label="Name Register"
+                          onClick={() => setExamPatient(up)}
+                        >
+                          {up.name}
+                        </div>
+                        <div className="col col-4" data-label="Date Register">
+                          {dayjs(up.schedule.date).format("DD-MM-YYYY")}
+                        </div>
+                        <div className="col col-5" data-label="Phone">
+                          {up.user.phone}
+                        </div>
+                        <div className="col col-6" data-label="Address">
+                          {up.user.address}
+                        </div>
+                        <div className="col col-6" data-label="Favor">
+                          {up.favor}
+                        </div>
+                        <div className="col col-7" data-label="Action">
+                          <button>Test</button>
+                        </div>
+                      </li>
+                      {examPatient.id === up.id && (
+                        <PatientTabs
+                          examPatient={examPatient}
+                          setExamPatient={setExamPatient}
+                        />
+                      )}
+                    </>
+                  );
+                })}
             </>
           )}
         </ul>

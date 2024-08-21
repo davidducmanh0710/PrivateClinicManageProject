@@ -71,35 +71,35 @@ public class JwtSecurityConfig {
 				.permitAll()
 
 				.requestMatchers(HttpMethod.POST,
-						"/api/users/register-schedule/",
-						"/api/users/user-register-schedule-list/")
+						"/api/benhnhan/register-schedule/",
+						"/api/benhnhan/user-register-schedule-list/")
 				.hasRole("BENHNHAN")
 
 				.requestMatchers(HttpMethod.PATCH,
-						"/api/users/cancel-register-schedule/{registerScheduleId}/")
+						"/api/benhnhan/cancel-register-schedule/{registerScheduleId}/")
 				.hasRole("BENHNHAN")
 
 				.requestMatchers(HttpMethod.GET,
-						"/api/users/censor-register-schedule",
-						"/api/users/all-register-schedule/",
-						"/api/users/get-all-users/")
+						"/api/yta/all-register-schedule/",
+						"/api/yta/get-all-users/")
 				.hasRole("YTA")
 
 				.requestMatchers(HttpMethod.POST,
-						"/api/users/get-users-schedule-status/",
-						"/api/users/direct-register/")
+						"/api/yta/get-users-schedule-status/",
+						"/api/yta/auto-confirm-registers/",
+						"/api/yta/direct-register/")
 				.hasRole("YTA")
 
 				.requestMatchers(HttpMethod.GET,
-						"/api/users/get-all-processing-user-today/",
-						"/api/users/get-all-medicine-group/",
-						"/api/users/get-all-medicine-by-group/{medicineGroupId}/",
-						"/api/users/get-medicine-by-id/{medicineId}/",
-						"/api/users/get-all-medicines/")
+						"/api/bacsi/get-all-processing-user-today/",
+						"/api/bacsi/get-all-medicine-group/",
+						"/api/bacsi/get-all-medicine-by-group/{medicineGroupId}/",
+						"/api/bacsi/get-medicine-by-id/{medicineId}/",
+						"/api/bacsi/get-all-medicines/")
 				.hasRole("BACSI")
 
 				.requestMatchers(HttpMethod.POST,
-						"/api/users/submit-medical-examination/")
+						"/api/bacsi/submit-medical-examination/")
 				.hasRole("BACSI")
 
 				.anyRequest().authenticated())
