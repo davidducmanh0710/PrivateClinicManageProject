@@ -33,7 +33,7 @@ public class PrescriptionItems implements Serializable {
 	private Integer id;
 
 	@Column(name = "prognosis", nullable = false)
-	private String prognosis;
+	private Integer prognosis;
 
 	@Column(name = "medical_usage")
 	private String usage;

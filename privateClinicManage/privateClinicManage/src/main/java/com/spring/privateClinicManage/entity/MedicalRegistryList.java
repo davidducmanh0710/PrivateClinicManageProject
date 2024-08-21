@@ -83,6 +83,7 @@ public class MedicalRegistryList implements Serializable {
 	private MultipartFile file;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "mrl")
+	@JsonIgnore
 	private MedicalExamination medicalExamination;
 
 }

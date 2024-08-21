@@ -79,6 +79,9 @@ public class ApiUserRestController {
 		if (!userService.authUser(loginDto.getEmail(), loginDto.getPassword()))
 			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.UNAUTHORIZED);
 
+		if (!userService.isActived(loginDto.getEmail()))
+			return new ResponseEntity<>("Tài khoản đã bị khóa", HttpStatus.UNAUTHORIZED);
+
 		String token = jwtService.generateTokenLogin(loginDto.getEmail());
 
 		return new ResponseEntity<>(token, HttpStatus.OK);

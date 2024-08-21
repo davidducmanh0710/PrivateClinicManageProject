@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PrescriptionItemDto {
-	private Integer medicineId;
+	private Integer id;
 	private String description;
 	private Integer prognosis;
 }

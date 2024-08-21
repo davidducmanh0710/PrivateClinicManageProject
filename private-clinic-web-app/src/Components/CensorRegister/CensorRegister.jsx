@@ -8,7 +8,6 @@ import { Alert, Pagination } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AutoConfirmForm from "../AutoConfirmForm/AutoConfirmForm";
 
-
 export default function CencorRegister() {
   const [statusList, setStatusList] = useState([]);
   const [allRegisterScheduleList, setallRegisterScheduleList] = useState([]);
@@ -17,8 +16,7 @@ export default function CencorRegister() {
   const [createdDate, setCreatedDate] = useState("");
   const [registerDate, setRegisterDate] = useState("");
 
-  const [isConfirmRegister , setIsConfirmRegister] = useState(false)
-
+  const [isConfirmRegister, setIsConfirmRegister] = useState(false);
 
   const { currentUser } = useContext(UserContext);
   const navigate = useNavigate();
@@ -63,7 +61,7 @@ export default function CencorRegister() {
       case "FINISHED":
         return "primary";
       case "PROCESSING":
-        return "info"
+        return "info";
       default:
         return "";
     }
@@ -116,10 +114,7 @@ export default function CencorRegister() {
     } catch {
       showSnackbar("Lỗi", "error");
     }
-  }, [currentUser, page, params , isConfirmRegister]);
-
-  
-
+  }, [currentUser, page, params, isConfirmRegister]);
 
   useEffect(() => {
     if (currentUser !== null) {
@@ -127,7 +122,7 @@ export default function CencorRegister() {
       if (statusList.length < 1) getAllStatusIsApproved();
       // if (userList.length < 1) getAllUsers();
     }
-  }, [currentUser, page, params , isConfirmRegister]);
+  }, [currentUser, page, params, isConfirmRegister]);
 
   const handleStatusChange = (event) => {
     setStatus(event.target.value);
@@ -141,7 +136,7 @@ export default function CencorRegister() {
   }
 
   function handleOpenAutoConfirmForm() {
-    setIsConfirmRegister(false)
+    setIsConfirmRegister(false);
     autoConfirmFormRef.current.open();
   }
 
@@ -164,7 +159,9 @@ export default function CencorRegister() {
         // userList={userList}
         setIsConfirmRegister={setIsConfirmRegister}
       />
-      <h2 className=" text text-info mt-3 mb-3 text-center">Duyệt danh sách khám</h2>
+      <h2 className=" text text-info mt-3 mb-3 text-center">
+        Duyệt danh sách khám
+      </h2>
       <div className="filter-container d-flex justify-content-center align-item-center shadow mt-3">
         <form
           onSubmit={handleSortRegisterList}
@@ -246,12 +243,14 @@ export default function CencorRegister() {
         </form>
       </div>
       <div className="d-inline-flex w-100 align-items-center justify-content-evenly">
-        <Pagination
-          count={totalPage}
-          color="primary"
-          className={`mt-4 ${totalElements < 1 ? "d-none" : ""}`}
-          onChange={(event, value) => setPage(value)}
-        />
+        {allRegisterScheduleList.empty === false && (
+          <Pagination
+            count={totalPage}
+            color="primary"
+            className={`mt-4 ${totalElements < 1 ? "d-none" : ""}`}
+            onChange={(event, value) => setPage(value)}
+          />
+        )}
         <div>
           <button
             className="btn btn-danger"
@@ -276,7 +275,7 @@ export default function CencorRegister() {
             </tr>
           </thead>
           <tbody className="table-hover text-center" id="userDetails">
-            {totalElements < 1 ? (
+            {allRegisterScheduleList.empty === true ? (
               <>
                 <Alert
                   variant="filled"
@@ -287,6 +286,7 @@ export default function CencorRegister() {
                 </Alert>
               </>
             ) : (
+              allRegisterScheduleList.empty === false &&
               allRegisterScheduleList.content.map((mrl, index) => {
                 return (
                   <tr key={index} className="align-middle">

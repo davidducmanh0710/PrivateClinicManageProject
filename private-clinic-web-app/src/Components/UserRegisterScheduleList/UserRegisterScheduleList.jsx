@@ -113,12 +113,12 @@ export default function UserRegisterScheduleList() {
         message={data.message}
         severity={data.severity}
       />
-      <Pagination
+      {userRegisterScheduleList.empty !== true && <Pagination
         count={totalPage}
         color="primary"
         className="mt-4"
         onChange={(event, value) => setPage(value)}
-      />
+      />}
       <div className="container container-user-register-schedule-list">
         <h2 className="text text-primary">Danh sách đặt lịch khám</h2>
         <ul className="responsive-table">
@@ -130,7 +130,7 @@ export default function UserRegisterScheduleList() {
             <div className="col col-5">Ghi chú</div>
             <div className="col col-6">Hủy lịch khám</div>
           </li>
-          {userRegisterScheduleList.length < 1 ? (
+          {userRegisterScheduleList.empty === true ? (
             <>
               <Alert variant="filled" severity="info" className="w-50 mx-auto">
                 Hiện không có phiếu đăng kí nào
@@ -138,7 +138,7 @@ export default function UserRegisterScheduleList() {
             </>
           ) : (
             <>
-              {userRegisterScheduleList.content.map((urs) => {
+              {userRegisterScheduleList.empty === false && userRegisterScheduleList.content.map((urs) => {
                 const ursId = urs.id;
                 return (
                   <li key={urs.id} className="table-row">

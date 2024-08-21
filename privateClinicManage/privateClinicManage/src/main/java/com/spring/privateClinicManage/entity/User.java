@@ -85,5 +85,9 @@ public class User implements Serializable {
 	@JsonIgnore
 	private List<MedicalRegistryList> medicalRegistryLists;
 
+	@OneToMany(mappedBy = "userCreated", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<MedicalExamination> medicalExaminations;
+
 
 }

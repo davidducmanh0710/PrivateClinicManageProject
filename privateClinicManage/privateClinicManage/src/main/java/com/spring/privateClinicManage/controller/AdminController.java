@@ -149,43 +149,20 @@ public class AdminController {
 			@RequestParam Map<String, String> params,
 			@RequestPart("avatarFile") MultipartFile avatarFile) throws ParseException {
 
-		String isActived = params.getOrDefault("active", "false");
-		String gender = params.getOrDefault("inlineRadioOptions", "male");
-		String roleName = params.getOrDefault("selectRole", "ROLE_BENHNHAN");
-		Role role = roleService.findByName(roleName);
-
-		if (user.getId() != null && user.getId() > 0) {
+		if (user.getId() != null) {
 			User existUser = userService.findUserById(user.getId());
-			if (isActived != null && isActived.equals("true"))
-				existUser.setActive(true);
-			else
-				existUser.setActive(false);
-			existUser.setGender(gender);
-			existUser.setRole(role);
-			existUser.setBirthday(user.getBirthday());
-			userService.saveUser(existUser);
-
-			if (avatarFile.getOriginalFilename() != ""
-					|| !avatarFile.getOriginalFilename().isEmpty()) {
-				existUser.setFile(avatarFile);
-				userService.setCloudinaryField(existUser);
-			}
-
-			return "redirect:/admin/usersList";
+			user.setPassword(existUser.getPassword());
+		} else {
+			user.setPassword(encoder.encode(user.getPassword()));
 		}
 
-		if (isActived != null && isActived.equals("true"))
-			user.setActive(true);
-		else
-			user.setActive(false);
+		if (avatarFile.getOriginalFilename() != ""
+				|| !avatarFile.getOriginalFilename().isEmpty()) {
+			user.setFile(avatarFile);
+			userService.setCloudinaryField(user);
+		}
 
-		user.setGender(gender);
-
-		user.setRole(role);
-
-		user.setPassword(encoder.encode(user.getPassword()));
-		user.setFile(avatarFile);
-		userService.setCloudinaryField(user);
+		userService.saveUser(user);
 
 		return "redirect:/admin/usersList";
 	}

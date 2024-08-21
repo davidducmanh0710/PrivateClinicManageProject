@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -55,6 +56,12 @@ public class MedicalExamination implements Serializable {
 
 	@Column(name = "follow_up_date")
 	private Date followUpDate;
+
+	@ManyToOne(fetch = FetchType.EAGER, cascade = {
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
+	})
+	@JoinColumn(name = "user_created_id", referencedColumnName = "id")
+	private User userCreated;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "medical_register_list_id", referencedColumnName = "id")

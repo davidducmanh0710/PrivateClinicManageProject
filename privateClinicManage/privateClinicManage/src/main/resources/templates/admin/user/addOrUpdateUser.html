@@ -19,9 +19,9 @@
 			<div class="col-lg-12">
 				<div class="card">
 					<div class="card-header">
-						<strong th:if="${user.id > 0}">Cập nhật thông tin người</strong>
-						<strong th:if="${user.id == null}">Thêm mới người dùng</strong>
-						
+						<strong th:if="${user.id > 0}">Cập nhật thông tin người</strong> <strong
+							th:if="${user.id == null}">Thêm mới người dùng</strong>
+
 					</div>
 					<div class="card-body card-block">
 						<form th:action="@{/admin/addOrUpdateUser}" method="post"
@@ -63,13 +63,13 @@
 								</div>
 								<div class="col-12 col-md-9">
 									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio"
+										<input th:field="${user.gender}" class="form-check-input" type="radio"
 											th:checked="${user.gender == 'male'}"
 											name="inlineRadioOptions" id="male" value="male" required />
 										<label class="form-check-label" for="maleGender">Male</label>
 									</div>
 									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio"
+										<input th:field="${user.gender}" class="form-check-input" type="radio"
 											th:checked="${user.gender == 'female'}"
 											name="inlineRadioOptions" id="female" value="female" /> <label
 											class="form-check-label" for="femaleGender">Female</label>
@@ -136,7 +136,7 @@
 										<label for="inline-checkbox1" class="form-check-label ">
 											<input th:checked="${user.active}" type="checkbox"
 											id="inline-checkbox1" name="active" value="true"
-											class="form-check-input">
+											class="form-check-input" th:field="${user.active}">
 										</label>
 									</div>
 								</div>
@@ -158,9 +158,9 @@
 										vụ</label>
 								</div>
 								<div class="col-12 col-md-9">
-									<select required name="selectRole" id="selectLg"
-										class="form-control-lg form-control">
-										<option th:each="r : ${roles}" th:value="${r.name}"
+									<select th:field="${user.role}" required name="selectRole"
+										id="selectLg" class="form-control-lg form-control">
+										<option th:each="r : ${roles}" th:value="${r.id}"
 											th:selected="${user.role == r}" th:text="${r.name}"></option>
 									</select>
 								</div>

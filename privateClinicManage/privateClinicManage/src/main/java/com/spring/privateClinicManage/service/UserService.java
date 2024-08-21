@@ -45,4 +45,6 @@ public interface UserService extends UserDetailsService {
 
 	Page<User> findSortedPaginateUser(Integer size, Integer page, List<User> users);
 
+	boolean isActived(String email);
+
 }

@@ -107,11 +107,15 @@ const AutoConfirmForm = forwardRef(function AutoConfirmForm(
     event.preventDefault();
     setLoading(true);
 
+    let emails = [];
+    if (
+      userSelectRef.current !== undefined &&
+      userSelectRef.current.props.value !== null
+    )
+      userSelectRef.current.props.value.forEach((u) => emails.push(u.value));
+
     let response;
     try {
-      let emails = [];
-      if (userSelectRef.current !== undefined)
-        userSelectRef.current.props.value.forEach((u) => emails.push(u.value));
       response = await authAPI().post(
         endpoints["ytaAutoConfirmRegister"],
         {
@@ -119,12 +123,12 @@ const AutoConfirmForm = forwardRef(function AutoConfirmForm(
           registerDate: autoRegisterDate,
           emails: emails,
           emailContent: emailContent,
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500; // Chỉ ném lỗi nếu status code >= 500
+          },
         }
-        // {
-        //   validateStatus: function (status) {
-        //     return status < 500; // Chỉ ném lỗi nếu status code >= 500
-        //   },
-        // }
       );
 
       if (response.status === 200) {
@@ -150,6 +154,7 @@ const AutoConfirmForm = forwardRef(function AutoConfirmForm(
       setLoading(false);
     }, 2400);
     userSelectRef.current = undefined;
+    setLoading(false);
   };
 
   return (
@@ -164,7 +169,7 @@ const AutoConfirmForm = forwardRef(function AutoConfirmForm(
           <div onClick={onClose} className="close-button">
             X
           </div>
-          <form onSubmit={ytaAutoConfirmRegister}>
+          <form onSubmit={(e) => ytaAutoConfirmRegister(e)}>
             <div className="auto-form-group">
               <div className="auto-form-control-group">
                 <label id="lableStatusSelect" htmlFor="statusSelect">

@@ -3,9 +3,10 @@ import "./ExaminationForm.css";
 import { CustomerSnackbar, isBACSI } from "../Common/Common";
 import { authAPI, endpoints } from "../config/Api";
 import { UserContext } from "../config/Context";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { Typeahead } from "react-bootstrap-typeahead";
+import { CircularProgress } from "@mui/material";
 
 export default function ExaminationForm() {
   const [medicineGroupList, setMedicineGroupList] = useState([]);
@@ -26,9 +27,13 @@ export default function ExaminationForm() {
   });
 
   const location = useLocation();
+  const navigate = useNavigate();
+
   const { examPatient } = location.state || {};
 
   const [medicinesExamList, setMedicinesExamList] = useState([]);
+
+  const [loading, setLoading] = useState(false);
 
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
@@ -46,7 +51,7 @@ export default function ExaminationForm() {
 
     setTimeout(() => {
       setOpen(false);
-    }, 2000);
+    }, 3000);
   };
 
   const getAllMedicines = useCallback(async () => {
@@ -288,6 +293,7 @@ export default function ExaminationForm() {
   const handleSubmitMedicalExamination = async (e) => {
     e.preventDefault();
 
+    setLoading(true);
     const filteredMedicines = medicinesExamList.map((medicine) => ({
       id: medicine.id,
       description: medicine.description,
@@ -314,6 +320,10 @@ export default function ExaminationForm() {
       );
       if (response.status === 201) {
         showSnackbar("Lưu phiếu khám thành công", "success");
+        setTimeout(() => {
+          setLoading(false);
+          navigate("/prepare-examination-form");
+        }, 3000);
       } else showSnackbar(response.data, "error");
     } catch {
       showSnackbar("Lỗi", "error");
@@ -634,12 +644,18 @@ export default function ExaminationForm() {
                     </div>
                   </div>
                   <div className="d-flex justify-content-center align-item-center mt-5">
-                    <button
-                      type="submit"
-                      className="btn btn-danger text-center"
-                    >
-                      Lưu
-                    </button>
+                    {loading ? (
+                      <div className="d-flex justify-content-center align-item-center">
+                        <CircularProgress className="mt-3" />
+                      </div>
+                    ) : (
+                      <button
+                        type="submit"
+                        className="btn btn-danger text-center"
+                      >
+                        Lưu
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

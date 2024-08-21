@@ -71,7 +71,7 @@ export default function UserProcessingList() {
       />
       <div className="container container-user-processing-list">
         <h2 className="text text-primary">Danh sách bệnh nhân đang đợi</h2>
-        {userProcessingList.empty !== false && (
+        {userProcessingList.empty === false && (
           <Pagination
             count={totalPage}
             color="primary"
