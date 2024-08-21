@@ -664,7 +664,7 @@ public class ApiUserRestController {
 	public ResponseEntity<Object> submitMedicalExamination(
 			@RequestBody MedicalExamDto medicalExamDto) {
 
-		System.out.println(medicalExamDto.getMedicinesExamList().get(0).getPrognosis());
+		System.out.println(medicalExamDto.getFollowUpDate());
 
 		return new ResponseEntity<>("Thành công !", HttpStatus.CREATED);
 	}

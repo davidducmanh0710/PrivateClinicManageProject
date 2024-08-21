@@ -248,11 +248,16 @@ export default function ExaminationForm() {
     );
     const existingMedicineDatabase = allMedicines[medicineIndex];
 
-    const existingMedicineIndex = updatedItems.findIndex(
-      (medicineItem) => medicineItem.id === existingMedicineDatabase.id
-    );
+    let existingMedicineIndex = null;
+    let existingMedicineInExam = null;
 
-    const existingMedicineInExam = updatedItems[existingMedicineIndex];
+    if (existingMedicineDatabase) {
+      existingMedicineIndex = updatedItems.findIndex(
+        (medicineItem) => medicineItem.id === existingMedicineDatabase.id
+      );
+
+      existingMedicineInExam = updatedItems[existingMedicineIndex];
+    }
 
     if (!existingMedicineDatabase) {
       showSnackbar("Loại thuốc này không tồn tại !", "error");

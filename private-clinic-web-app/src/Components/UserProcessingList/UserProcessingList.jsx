@@ -71,12 +71,14 @@ export default function UserProcessingList() {
       />
       <div className="container container-user-processing-list">
         <h2 className="text text-primary">Danh sách bệnh nhân đang đợi</h2>
-        <Pagination
-          count={totalPage}
-          color="primary"
-          className="mt-2 mb-4"
-          onChange={(event, value) => setPage(value)}
-        />
+        {userProcessingList.totalElements > 0 && (
+          <Pagination
+            count={totalPage}
+            color="primary"
+            className="mt-2 mb-4"
+            onChange={(event, value) => setPage(value)}
+          />
+        )}
         <ul className="responsive-table">
           <li className="table-header">
             <div className="col col-1">Mã</div>
@@ -87,7 +89,7 @@ export default function UserProcessingList() {
             <div className="col col-6">Triệu chứng</div>
             <div className="col col-7">Hành động</div>
           </li>
-          {userProcessingList.length < 1 ? (
+          {userProcessingList.totalElements < 1 ? (
             <>
               <Alert variant="filled" severity="info" className="w-50 mx-auto">
                 Hiện không có phiếu đăng kí nào
