@@ -1,4 +1,4 @@
-import Api, { authAPI, endpoints } from "../config/Api";
+import Api, { authAPI, BASE_URL, endpoints } from "../config/Api";
 import "./LoginForm.css";
 import {
   forwardRef,
@@ -11,6 +11,8 @@ import {
 import { CircularProgress } from "@mui/material";
 import { CustomerSnackbar } from "../Common/Common";
 import { UserContext } from "../config/Context";
+import SockJS from "sockjs-client";
+import { over } from "stompjs";
 
 const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
   const [email, setEmail] = useState();
@@ -83,6 +85,7 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
             showSnackbar("Đăng nhập thành công", "success");
             setCurrentUser(userResponse.data);
             dialog.current.close();
+            // connectWsInit();
           } else {
             showSnackbar(userResponse.data, "error");
           }
@@ -98,6 +101,32 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
       setLoading(false);
     }, 2400);
   };
+
+  // const connectWsInit = () => {
+  //   let stompClient = null;
+  //   let socket = new SockJS(`${BASE_URL}/ws`);
+  //   stompClient = over(socket);
+  //   stompClient.connect(
+  //     {},
+  //     () => {
+  //       stompClient.subscribe("/notify/registerContainer/", (payload) => {
+  //         console.log(payload)
+  //       });
+  //     },
+  //     onError
+  //   );
+  // };
+
+  // function onConnected() {
+  //     stompClient.subscribe('/notify/registerContainer/', onNotifyReceived); // subscribe là hàm callback
+  // }
+  function onError() {
+    showSnackbar("Lỗi", "error");
+  }
+
+  // function onNotifyReceived(payload) {
+  //   console.log(payload)
+  // }
 
   return (
     <>

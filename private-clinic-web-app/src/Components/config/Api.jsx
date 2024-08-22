@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = 'http://localhost:8888';
+export const BASE_URL = 'http://localhost:8888';
 
 export let endpoints = {
 	login: "/api/users/login/",

@@ -9,6 +9,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -38,17 +39,20 @@ public class ApiBenhNhanRestController {
 	private ScheduleService scheduleService;
 	private MedicalRegistryListService medicalRegistryListService;
 	private StatusIsApprovedService statusIsApprovedService;
+	private SimpMessagingTemplate messagingTemplate;
 
 	@Autowired
 	public ApiBenhNhanRestController(UserService userService, Environment environment,
 			ScheduleService scheduleService, MedicalRegistryListService medicalRegistryListService,
-			StatusIsApprovedService statusIsApprovedService) {
+			StatusIsApprovedService statusIsApprovedService,
+			SimpMessagingTemplate messagingTemplate) {
 		super();
 		this.userService = userService;
 		this.environment = environment;
 		this.scheduleService = scheduleService;
 		this.medicalRegistryListService = medicalRegistryListService;
 		this.statusIsApprovedService = statusIsApprovedService;
+		this.messagingTemplate = messagingTemplate;
 	}
 
 	// ROLE_BENHNHAN
@@ -92,6 +96,9 @@ public class ApiBenhNhanRestController {
 		medicalRegistryList.setSchedule(schedule);
 
 		medicalRegistryListService.saveMedicalRegistryList(medicalRegistryList);
+
+		messagingTemplate.convertAndSend("/notify/registerContainer/",
+				medicalRegistryList);
 
 		return new ResponseEntity<>(medicalRegistryList, HttpStatus.CREATED);
 

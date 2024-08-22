@@ -32,7 +32,6 @@ export default function AppointmentForm() {
       setOpen(false);
     }, 5000);
 
-    console.log(registerScheduleState);
   };
 
   function handleDateChange(e) {

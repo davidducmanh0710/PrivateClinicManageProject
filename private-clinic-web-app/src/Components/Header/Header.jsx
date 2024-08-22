@@ -6,6 +6,7 @@ import { UserContext } from "../config/Context";
 import { Button, Dropdown, Image, NavDropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { isBACSI, isBENHNHAN, isYTA } from "../Common/Common";
+import NotificationContainer from "../NotificationContainer/NotificationContainer";
 
 export default function Header() {
   const formLoginRef = useRef();
@@ -84,6 +85,8 @@ export default function Header() {
                     <i className="fab fa-instagram"></i>
                   </a>
                 </div>
+                { currentUser && <NotificationContainer />}
+
                 {currentUser ? (
                   <>
                     <Dropdown className="dropdown text-end ms-2">
