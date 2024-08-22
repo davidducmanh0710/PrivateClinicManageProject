@@ -15,6 +15,8 @@ export default function NotificationContainer() {
   const stompClientRef = useRef(null);
   const { currentUser } = useContext(UserContext);
 
+  const [countIsReadFalse, setCountIsReadFalse] = useState(0);
+
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const navigate = useNavigate();
@@ -38,16 +40,26 @@ export default function NotificationContainer() {
     }, 4000);
   };
 
-  function getRemainingTime(timeSent) {
-    const currentTime = Date.now();
-    const remainingTime = currentTime - timeSent;
-    
-    if (remainingTime > 0) {
-      const remainingMinutes = Math.floor(remainingTime / (1000 * 60));
-      const remainingSeconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-      console.log(`Thời gian còn lại: ${remainingMinutes} phút ${remainingSeconds} giây`);
+  function formatDuration(seconds) {
+    seconds = seconds / 1000;
+    if (seconds < 60) {
+      seconds = Math.floor(seconds);
+      return `${seconds} giây`;
+    } else if (seconds < 3600) {
+      const minutes = Math.floor(seconds / 60);
+      return `${minutes} phút`;
+    } else if (seconds < 86400) {
+      const hours = Math.floor(seconds / 3600);
+      return `${hours} giờ`;
+    } else if (seconds < 2592000) {
+      const days = Math.floor(seconds / 86400);
+      return `${days} ngày`;
+    } else if (seconds < 31536000) {
+      const months = Math.floor(seconds / 2592000);
+      return `${months} tháng`;
     } else {
-      console.log('Đã hết thời gian!');
+      const years = Math.floor(seconds / 31536000);
+      return `${years} năm`;
     }
   }
 
@@ -61,10 +73,10 @@ export default function NotificationContainer() {
       {},
       () => {
         stompClient.subscribe("/notify/registerContainer/", (payload) => {
-          setNotifications((prevNotifications) => [
-            JSON.parse(payload.body),
-            ...prevNotifications,
-          ]);
+          const p = JSON.parse(payload.body);
+          p.timeSent = Date.now();
+          p.isRead = false;
+          setNotifications((prevNotifications) => [p, ...prevNotifications]);
           showSnackbar("Bạn có thông báo mới", "success");
           forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
         });
@@ -82,10 +94,23 @@ export default function NotificationContainer() {
   useEffect(() => {
     if (currentUser !== null && !stompClientRef.current && isYTA(currentUser))
       ytaConnectNotificationWsInit();
-  }, []);
+    handleCountIsReadFalse(notifications)
+  }, [notifications]);
 
   function onError() {
     console.log("Lỗi");
+  }
+
+  function handleCountIsReadFalse(notifications) {
+    let count = 0;
+    if (notifications.length < 1) {
+      setCountIsReadFalse(count);
+      return;
+    }
+    notifications.map((n) => {
+      if (n.isRead === false) ++count;
+    });
+    setCountIsReadFalse(count);
   }
 
   return (
@@ -110,7 +135,7 @@ export default function NotificationContainer() {
               style={{ marginRight: "10px" }}
             ></i>
             <Badge className="bg-danger" variant="danger">
-              {notifications.length}
+              {countIsReadFalse}
             </Badge>
           </Dropdown.Toggle>
 
@@ -130,10 +155,14 @@ export default function NotificationContainer() {
               notifications.map((notification) => (
                 <Dropdown.Item
                   onClick={() => {
+                    notification.isRead = true;
                     navigate("/censor-register");
+                    handleCountIsReadFalse(notifications)
                   }}
                   key={notification.id}
-                  className="d-flex align-items-start"
+                  className={`d-flex align-items-start border ${
+                    notification.isRead ? "" : "bg-warning"
+                  }`}
                   style={{
                     fontSize: "12px",
                     color: "#000",
@@ -159,6 +188,16 @@ export default function NotificationContainer() {
                       <small style={{ fontSize: "12px", color: "#000" }}>
                         Đặt lịch khám vào ngày{" "}
                         {dayjs(notification.schedule.date).format("DD/MM/YYYY")}
+                      </small>
+                      <small
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          color: "red",
+                        }}
+                      >
+                        {formatDuration(Date.now() - notification.timeSent)}{" "}
+                        trước
                       </small>
                     </p>
                   </div>

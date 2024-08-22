@@ -15,7 +15,6 @@ export default function UserRegisterScheduleList() {
 
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
-  const [params] = useSearchParams();
   const { currentUser } = useContext(UserContext);
 
   const[isCanceled , setIsCanceled] = useState(false);
@@ -61,11 +60,12 @@ export default function UserRegisterScheduleList() {
         showSnackbar("Lỗi", "error");
       }
     }
-  }, [page, currentUser]);
+  }, [page, currentUser,isCanceled]);
 
   useEffect(() => {
     if (currentUser !== null) {
       loadUserRegisterScheduleList();
+      setIsCanceled(false)
     }
   }, [page, currentUser,isCanceled]);
 
