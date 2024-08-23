@@ -141,6 +141,16 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 	}
 
 	@Override
+	public List<MedicalRegistryList> sortBy2StatusIsApproved(List<MedicalRegistryList> mrls,
+			String s1, String s2) {
+		mrls.sort(Comparator.comparing(MedicalRegistryList::getCreatedDate).reversed());
+		return mrls.stream()
+				.filter(mrl -> mrl.getStatusIsApproved().getStatus().equals(s1) ||
+						mrl.getStatusIsApproved().getStatus().equals(s2))
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public List<MedicalRegistryList> findByAnyKey(String key) {
 		return medicalRegistryListRepository.findByAnyKey(key);
 	}
@@ -205,6 +215,11 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 			StatusIsApproved statusIsApproved) {
 		return medicalRegistryListRepository.countMRLByScheduleAndProcessingStatus(schedule,
 				statusIsApproved);
+	}
+
+	@Override
+	public List<MedicalRegistryList> findAllMrlByUserAndName(User user, String nameRegister) {
+		return medicalRegistryListRepository.findAllMrlByUserAndName(user, nameRegister);
 	}
 
 }

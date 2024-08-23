@@ -23,7 +23,9 @@ export let endpoints = {
 	getAllMedicinesByGroup : (medicineGroupId) => `/api/bacsi/get-all-medicine-by-group/${medicineGroupId}/`,
 	getMedicineById : (medicineId) => `/api/bacsi/get-medicine-by-id/${medicineId}/`,
 	getAllMedicines : '/api/bacsi/get-all-medicines/',
-	submitMedicalExamination : '/api/bacsi/submit-medical-examination/'
+	submitMedicalExamination : '/api/bacsi/submit-medical-examination/',
+	getHistoryUserRegister : '/api/bacsi/get-history-user-register/',
+	getPrescriptionItemsByMedicalExamId : (medicalExamId) => `/api/bacsi/get-prescriptionItems-by-medicalExam-id/${medicalExamId}/`
 };
 
 export const authAPI = () => {

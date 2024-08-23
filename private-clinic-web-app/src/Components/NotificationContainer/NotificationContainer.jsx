@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function NotificationContainer() {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  const [YTAnotifications, setNotifications] = useState([]);
   const stompClientRef = useRef(null);
   const { currentUser } = useContext(UserContext);
 
@@ -94,20 +94,20 @@ export default function NotificationContainer() {
   useEffect(() => {
     if (currentUser !== null && !stompClientRef.current && isYTA(currentUser))
       ytaConnectNotificationWsInit();
-    handleCountIsReadFalse(notifications)
-  }, [notifications]);
+    handleCountIsReadFalse(YTAnotifications);
+  }, [YTAnotifications]);
 
   function onError() {
     console.log("Lỗi");
   }
 
-  function handleCountIsReadFalse(notifications) {
+  function handleCountIsReadFalse(YTAnotifications) {
     let count = 0;
-    if (notifications.length < 1) {
+    if (YTAnotifications.length < 1) {
       setCountIsReadFalse(count);
       return;
     }
-    notifications.map((n) => {
+    YTAnotifications.map((n) => {
       if (n.isRead === false) ++count;
     });
     setCountIsReadFalse(count);
@@ -141,7 +141,14 @@ export default function NotificationContainer() {
 
           <Dropdown.Menu
             className="shadow-lg"
-            style={{ width: "300px", right: "0", left: "auto" }}
+            style={{
+              width: "300px",
+              maxHeight: "400px",
+              minHeight: "100px",
+              overflowY: "scroll",
+              right: "0",
+              left: "auto",
+            }}
           >
             {/* <div className="d-flex justify-content-between align-items-center px-3 py-2 shadow-lg">
               <span>Notifications</span>
@@ -151,13 +158,13 @@ export default function NotificationContainer() {
             </div> */}
             <Dropdown.Divider />
 
-            {notifications.length > 0 &&
-              notifications.map((notification) => (
+            {YTAnotifications.length > 0 &&
+              YTAnotifications.map((notification) => (
                 <Dropdown.Item
                   onClick={() => {
                     notification.isRead = true;
                     navigate("/censor-register");
-                    handleCountIsReadFalse(notifications)
+                    handleCountIsReadFalse(YTAnotifications);
                   }}
                   key={notification.id}
                   className={`d-flex align-items-start border ${
@@ -205,17 +212,24 @@ export default function NotificationContainer() {
               ))}
 
             <Dropdown.Divider />
-            <Dropdown.Item
-              href="#"
-              className="text-center text-primary"
-              style={{
-                fontSize: "12px",
-                color: "#000",
-                backgroundColor: "#fff",
-              }}
-            >
-              See All Notifications
-            </Dropdown.Item>
+            {YTAnotifications.length > 0 ? (
+              <Dropdown.Item
+                className="text-center text-primary"
+                style={{
+                  fontSize: "12px",
+                  color: "#000",
+                  backgroundColor: "#fff",
+                }}
+              >
+                Đóng
+              </Dropdown.Item>
+            ) : (
+              <>
+                <p className="text-center">
+                  <strong>Hiện tại không có thông báo nào</strong>
+                </p>
+              </>
+            )}
           </Dropdown.Menu>
         </Dropdown>
       </div>

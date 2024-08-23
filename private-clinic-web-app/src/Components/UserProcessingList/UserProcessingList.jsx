@@ -12,6 +12,7 @@ export default function UserProcessingList() {
   const { currentUser } = useContext(UserContext);
 
   const [examPatient, setExamPatient] = useState({});
+  const [historyExamsPatient, setHistoryExamPatient] = useState([]);
 
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
@@ -51,16 +52,45 @@ export default function UserProcessingList() {
           setTotalPage(response.data.totalPages);
         } else showSnackbar(response.data, "error");
       } catch {
-        showSnackbar("Lỗi", "error");
+        showSnackbar("Lỗi1", "error");
       }
     }
   }, [currentUser, page]);
+
+  const getHistoryUserRegister = async () => {
+    let response;
+    if (isBACSI(currentUser) && currentUser !== null && examPatient !== null) {
+      try {
+        let url = `${endpoints["getHistoryUserRegister"]}`;
+        response = await authAPI().post(
+          url,
+          {
+            email: examPatient.user.email,
+            nameRegister: examPatient.name,
+          },
+          {
+            validateStatus: function (status) {
+              return status < 500; // Chỉ ném lỗi nếu status code >= 500
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          setHistoryExamPatient(response.data);
+          console.log(response.data);
+        } else showSnackbar(response.data, "error");
+      } catch {
+        console.log(response);
+        showSnackbar("Lỗi2", "error");
+      }
+    }
+  };
 
   useEffect(() => {
     if (currentUser !== null) {
       getAllProcessingUserToday();
     }
-  }, [currentUser, page]);
+  }, [currentUser, page, examPatient]);
 
   return (
     <>
@@ -103,7 +133,7 @@ export default function UserProcessingList() {
                     <>
                       <li key={up.id} className="table-row">
                         <div className="col col-1" data-label="ID">
-                          {up.id}
+                          #MSLH{up.id}
                         </div>
                         <div
                           role="button"
@@ -133,6 +163,9 @@ export default function UserProcessingList() {
                         <PatientTabs
                           examPatient={examPatient}
                           setExamPatient={setExamPatient}
+                          historyExamsPatient={historyExamsPatient}
+                          setHistoryExamPatient={setHistoryExamPatient}
+                          getHistoryUserRegister={getHistoryUserRegister}
                         />
                       )}
                     </>

@@ -60,4 +60,11 @@ public interface MedicalRegistryListService {
 	Integer countMRLByScheduleAndProcessingStatus(Schedule schedule,
 			StatusIsApproved statusIsApproved);
 
+	List<MedicalRegistryList> findAllMrlByUserAndName(User user,
+			String nameRegister);
+
+
+	List<MedicalRegistryList> sortBy2StatusIsApproved(List<MedicalRegistryList> mrls, String s1,
+			String s2);
+
 }

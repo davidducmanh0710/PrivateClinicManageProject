@@ -95,11 +95,13 @@ public class JwtSecurityConfig {
 						"/api/bacsi/get-all-medicine-group/",
 						"/api/bacsi/get-all-medicine-by-group/{medicineGroupId}/",
 						"/api/bacsi/get-medicine-by-id/{medicineId}/",
-						"/api/bacsi/get-all-medicines/")
+						"/api/bacsi/get-all-medicines/",
+						"/api/bacsi/get-prescriptionItems-by-medicalExam-id/{medicalExamId}/")
 				.hasRole("BACSI")
 
 				.requestMatchers(HttpMethod.POST,
-						"/api/bacsi/submit-medical-examination/")
+						"/api/bacsi/submit-medical-examination/",
+						"/api/bacsi/get-history-user-register/")
 				.hasRole("BACSI")
 
 				.anyRequest().authenticated())

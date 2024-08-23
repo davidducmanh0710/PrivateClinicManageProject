@@ -73,4 +73,9 @@ public interface MedicalRegistryListRepository extends JpaRepository<MedicalRegi
 			@Param("schedule") Schedule schedule,
 			@Param("statusIsApproved") StatusIsApproved statusIsApproved);
 
+	@Query("SELECT mrl FROM MedicalRegistryList mrl " +
+			"WHERE mrl.user = :user and mrl.name = :nameRegister")
+	List<MedicalRegistryList> findAllMrlByUserAndName(@Param("user") User user,
+			@Param("nameRegister") String nameRegister);
+
 }
