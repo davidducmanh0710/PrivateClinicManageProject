@@ -29,7 +29,7 @@ export default function ExaminationForm() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { examPatient } = location.state || {};
+  const { examPatient, precriptionItems, h } = location.state || {};
 
   const [medicinesExamList, setMedicinesExamList] = useState([]);
 
@@ -53,6 +53,32 @@ export default function ExaminationForm() {
       setOpen(false);
     }, 3000);
   };
+
+  function loadMedicalExaminationInHistory() {
+    setTextInputs((prev) => ({
+      treatmentProcess: h.treatmentProcess,
+      symptomProcess: h.symptomProcess,
+      advance: h.advance,
+      predict: h.predict,
+    }));
+    setDayExam((prev) => h.durationDay);
+
+    if (precriptionItems.length > 0) {
+      const updatedItems = [];
+      precriptionItems.map((p) => {
+        updatedItems.push({
+          id: p.medicine.id,
+          name: p.name,
+          unitName: p.medicine.unitType.unitName,
+          description: p.medicine.description,
+          defaultPerDay: p.medicine.defaultPerDay,
+          prognosis: p.medicine.defaultPerDay * h.durationDay,
+        });
+      });
+
+      setMedicinesExamList(updatedItems);
+    }
+  }
 
   const getAllMedicines = useCallback(async () => {
     let response;
@@ -158,6 +184,7 @@ export default function ExaminationForm() {
   useEffect(() => {
     if (currentUser !== null && medicineGroupList.length < 1) {
       getAllMedicineGroup();
+      if (h && precriptionItems) loadMedicalExaminationInHistory();
     }
   }, [currentUser, selectedMedicineId, medicinesExamList, dayExam]);
 
@@ -507,6 +534,7 @@ export default function ExaminationForm() {
                         max={30}
                         style={{ width: 40 + "%" }}
                         type="number"
+                        defaultValue={h.durationDay ? h.durationDay : dayExam}
                         onBlur={(e) => {
                           if (e.target.value.trim() !== "") handleSetDayExam(e);
                           else {

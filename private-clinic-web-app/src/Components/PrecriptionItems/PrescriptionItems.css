@@ -49,7 +49,7 @@
   
   .prescriptionItems-container .table thead th {
     font-weight: bold; /* In đậm tiêu đề cột */
-    color: red
+    color: rgb(69, 137, 56)
   }
   
   .prescriptionItems-container .table td {

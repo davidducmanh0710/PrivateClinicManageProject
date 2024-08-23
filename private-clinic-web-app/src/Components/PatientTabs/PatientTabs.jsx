@@ -140,7 +140,7 @@ export default function PatientTabs({
                       <th>Ngày lập phiếu</th>
                       <th>Người khám</th>
                       <th>Triệu chứng</th>
-                      <th>Chuẩn đoán</th>
+                      <th>Số ngày cấp thuốc</th>
                     </tr>
                   </thead>
                   <tbody className="table-hover text-center">
@@ -165,12 +165,18 @@ export default function PatientTabs({
                               </td>
                               <td>{h.userCreated.name}</td>
                               <td>{h.symptomProcess}</td>
-                              <td>{h.predict}</td>
+                              <td>{h.durationDay}</td>
                             </tr>
                             {selectMedicalExamId === h.id && (
-                              <PrescriptionItems
-                                precriptionItems={precriptionItems}
-                              />
+                              <>
+                                <PrescriptionItems
+                                  precriptionItems={precriptionItems}
+                                  setSelectMedicalExamId={setSelectMedicalExamId}
+                                  predict={h.predict}
+                                  examPatient={examPatient}
+                                  h={h}
+                                />
+                              </>
                             )}
                           </>
                         );

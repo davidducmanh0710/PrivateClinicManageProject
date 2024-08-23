@@ -2,8 +2,15 @@ import { Tab, Tabs } from "react-bootstrap";
 import "./PrescriptionItems.css";
 import { useState } from "react";
 import { Alert } from "@mui/material";
+import { Link } from "react-router-dom";
 
-export default function PrescriptionItems({ precriptionItems }) {
+export default function PrescriptionItems({
+  precriptionItems,
+  setSelectMedicalExamId,
+  predict,
+  examPatient,
+  h,
+}) {
   return (
     <>
       <div className="medical-info-tabs">
@@ -59,6 +66,25 @@ export default function PrescriptionItems({ precriptionItems }) {
                     )}
                   </tbody>
                 </table>
+                <h4 className="text-primary text-start">
+                  Chẩn đoán : <strong className="text-danger">{predict}</strong>
+                </h4>
+
+                <div className="d-flex justify-content-evenly align-item-center">
+                  <Link
+                    className="btn btn-primary mt-3"
+                    to="/examination-form"
+                    state={{ examPatient, precriptionItems, h }}
+                  >
+                    Nạp đơn lên phiếu khám
+                  </Link>
+                  <button
+                    onClick={() => setSelectMedicalExamId(0)}
+                    className="btn btn-danger mt-3"
+                  >
+                    Đóng
+                  </button>
+                </div>
               </div>
             </div>
           </Tab>
