@@ -2,6 +2,8 @@ package com.spring.privateClinicManage.api;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -171,12 +173,20 @@ public class ApiUserRestController {
 		if (!mrl.getStatusIsApproved().getStatus().equals("SUCCESS"))
 			return new ResponseEntity<Object>("Mã QR này đã qua sử dụng !", HttpStatus.NOT_FOUND);
 
-		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("PROCESSING");
-		mrl.setStatusIsApproved(statusIsApproved);
+		StatusIsApproved statusProcessing = statusIsApprovedService.findByStatus("PROCESSING");
+		mrl.setStatusIsApproved(statusProcessing);
 		medicalRegistryListService.saveMedicalRegistryList(mrl);
 
+		StatusIsApproved statusFinished = statusIsApprovedService.findByStatus("FINISHED");
+		StatusIsApproved statusFollowUp = statusIsApprovedService.findByStatus("FOLLOWUP");
+
+		List<StatusIsApproved> statuses = new ArrayList<>();
+		statuses.add(statusProcessing);
+		statuses.add(statusFinished);
+		statuses.add(statusFollowUp);
+
 		Integer order = medicalRegistryListService
-				.countMRLByScheduleAndProcessingStatus(mrl.getSchedule(), statusIsApproved);
+				.countMRLByScheduleAndStatuses(mrl.getSchedule(), statuses);
 		mrl.setOrder(order);
 
 		OrderQrCodeDto orderQrCodeDto = new OrderQrCodeDto(order, mrl.getName(),

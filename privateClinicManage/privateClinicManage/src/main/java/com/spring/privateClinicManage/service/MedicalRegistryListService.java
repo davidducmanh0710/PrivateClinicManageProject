@@ -57,8 +57,8 @@ public interface MedicalRegistryListService {
 			StatusIsApproved statusIsApproved)
 			throws Exception;
 
-	Integer countMRLByScheduleAndProcessingStatus(Schedule schedule,
-			StatusIsApproved statusIsApproved);
+	Integer countMRLByScheduleAndStatuses(Schedule schedule,
+			List<StatusIsApproved> statuses);
 
 	List<MedicalRegistryList> findAllMrlByUserAndName(User user,
 			String nameRegister);

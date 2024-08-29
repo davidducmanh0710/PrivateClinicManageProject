@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { Link } from "react-router-dom";
 import PrescriptionItems from "../PrecriptionItems/PrecriptionItems";
 import { authAPI, endpoints } from "../config/Api";
+import { Alert } from "@mui/material";
 
 export default function PatientTabs({
   examPatient,
@@ -144,7 +145,7 @@ export default function PatientTabs({
                     </tr>
                   </thead>
                   <tbody className="table-hover text-center">
-                    {historyExamsPatient.length > 0 &&
+                    {historyExamsPatient.length > 0 ? (
                       historyExamsPatient.map((h) => {
                         return (
                           <>
@@ -171,7 +172,9 @@ export default function PatientTabs({
                               <>
                                 <PrescriptionItems
                                   precriptionItems={precriptionItems}
-                                  setSelectMedicalExamId={setSelectMedicalExamId}
+                                  setSelectMedicalExamId={
+                                    setSelectMedicalExamId
+                                  }
                                   predict={h.predict}
                                   examPatient={examPatient}
                                   h={h}
@@ -180,7 +183,22 @@ export default function PatientTabs({
                             )}
                           </>
                         );
-                      })}
+                      })
+                    ) : (
+                      <>
+                        <tr>
+                          <td colSpan="6" className="text-center">
+                            <Alert
+                              variant="filled"
+                              severity="info"
+                              className="w-100"
+                            >
+                              Không có lịch sử khám
+                            </Alert>
+                          </td>
+                        </tr>
+                      </>
+                    )}
                   </tbody>
                 </table>
               </div>

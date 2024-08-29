@@ -211,10 +211,10 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 	}
 
 	@Override
-	public Integer countMRLByScheduleAndProcessingStatus(Schedule schedule,
-			StatusIsApproved statusIsApproved) {
-		return medicalRegistryListRepository.countMRLByScheduleAndProcessingStatus(schedule,
-				statusIsApproved);
+	public Integer countMRLByScheduleAndStatuses(Schedule schedule,
+			List<StatusIsApproved> statuses) {
+		return medicalRegistryListRepository.countMRLByScheduleAndStatuses(schedule,
+				statuses);
 	}
 
 	@Override

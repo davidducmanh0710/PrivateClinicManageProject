@@ -10,6 +10,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,13 +48,15 @@ public class ApiYtaRestController {
 	private ScheduleService scheduleService;
 	private MedicalRegistryListService medicalRegistryListService;
 	private StatusIsApprovedService statusIsApprovedService;
+	private SimpMessagingTemplate messagingTemplate;
+
 
 	@Autowired
 	public ApiYtaRestController(UserService userService, MailSenderService mailSenderService,
 			Environment environment, ScheduleService scheduleService,
 			MedicalRegistryListService medicalRegistryListService,
 			StatusIsApprovedService statusIsApprovedService,
-			DownloadPDFService downloadPDFService) {
+			DownloadPDFService downloadPDFService, SimpMessagingTemplate messagingTemplate) {
 		super();
 		this.userService = userService;
 		this.mailSenderService = mailSenderService;
@@ -61,6 +64,7 @@ public class ApiYtaRestController {
 		this.scheduleService = scheduleService;
 		this.medicalRegistryListService = medicalRegistryListService;
 		this.statusIsApprovedService = statusIsApprovedService;
+		this.messagingTemplate = messagingTemplate;
 	}
 
 	// ROLE_YTA
@@ -282,6 +286,9 @@ public class ApiYtaRestController {
 		} catch (UnsupportedEncodingException | MessagingException e1) {
 			System.out.println("Không gửi được mail !");
 		}
+
+		messagingTemplate.convertAndSend("/notify/directRegister/" + registerUser.getId(),
+				mrl);
 
 		return new ResponseEntity<>(
 				"Đặt lịch thành công , vui lòng kiểm tra mail lấy mã QR để lấy số thứ tự",

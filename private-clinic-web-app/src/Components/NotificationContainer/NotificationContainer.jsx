@@ -6,16 +6,23 @@ import { over } from "stompjs";
 import { BASE_URL } from "../config/Api";
 import { UserContext } from "../config/Context";
 import dayjs from "dayjs";
-import { CustomerSnackbar, isYTA } from "../Common/Common";
+import { CustomerSnackbar, isBENHNHAN, isYTA } from "../Common/Common";
 import { useNavigate } from "react-router-dom";
 
 export default function NotificationContainer() {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [YTAnotifications, setNotifications] = useState([]);
-  const stompClientRef = useRef(null);
+  const [showDropdownYTA, setShowDropdownYTA] = useState(false);
+  const [showDropdownBN, setShowDropdownBN] = useState(false);
+
+  const [YTAnotifications, setYTANotifications] = useState([]);
+  const [BENHNHANnotifications, setBENHNHANNotifications] = useState([]);
+
+  const stompYTAClientRef = useRef(null);
+  const stompBENHNHANClientRef = useRef(null);
+
   const { currentUser } = useContext(UserContext);
 
   const [countIsReadFalse, setCountIsReadFalse] = useState(0);
+  const [countIsReadFalseBN, setCountIsReadFalseBN] = useState(0);
 
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
@@ -64,19 +71,22 @@ export default function NotificationContainer() {
   }
 
   const ytaConnectNotificationWsInit = () => {
-    let stompClient = null;
+    let stompYTAClient = null;
     let socket = new SockJS(`${BASE_URL}/ws`);
-    stompClient = over(socket);
-    stompClient.debug = () => {}; // tắt log của stomp in ra console
-    stompClientRef.current = stompClient;
-    stompClient.connect(
+    stompYTAClient = over(socket);
+    stompYTAClient.debug = () => {}; // tắt log của stomp in ra console
+    stompYTAClientRef.current = stompYTAClient;
+    stompYTAClient.connect(
       {},
       () => {
-        stompClient.subscribe("/notify/registerContainer/", (payload) => {
+        stompYTAClient.subscribe("/notify/registerContainer/", (payload) => {
           const p = JSON.parse(payload.body);
           p.timeSent = Date.now();
           p.isRead = false;
-          setNotifications((prevNotifications) => [p, ...prevNotifications]);
+          setYTANotifications((prevYTANotifications) => [
+            p,
+            ...prevYTANotifications,
+          ]);
           showSnackbar("Bạn có thông báo mới", "success");
           forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
         });
@@ -84,18 +94,63 @@ export default function NotificationContainer() {
       onError
     );
     return () => {
-      if (stompClientRef.current) {
-        stompClientRef.current.disconnect();
-        stompClientRef.current = null;
+      if (stompYTAClientRef.current) {
+        stompYTAClientRef.current.disconnect();
+        stompYTAClientRef.current = null;
+      }
+    };
+  };
+
+  const benhnhanConnectNotificationWsInit = () => {
+    let stompBENHNHANClient = null;
+    let socket = new SockJS(`${BASE_URL}/ws`);
+    stompBENHNHANClient = over(socket);
+    // stompYTAClient.debug = () => {}; // tắt log của stomp in ra console
+    stompBENHNHANClientRef.current = stompBENHNHANClient;
+    stompBENHNHANClient.connect(
+      {},
+      () => {
+        stompBENHNHANClient.subscribe(
+          "/notify/directRegister/" + currentUser.id,
+          (payload) => {
+            const p = JSON.parse(payload.body);
+            p.timeSent = Date.now();
+            p.isRead = false;
+            setBENHNHANNotifications((prevBNNotifications) => [
+              p,
+              ...prevBNNotifications,
+            ]);
+            showSnackbar("Bạn có thông báo mới", "success");
+            forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
+          }
+        );
+      },
+      onError
+    );
+    return () => {
+      if (stompBENHNHANClientRef.current) {
+        stompBENHNHANClientRef.current.disconnect();
+        stompBENHNHANClientRef.current = null;
       }
     };
   };
 
   useEffect(() => {
-    if (currentUser !== null && !stompClientRef.current && isYTA(currentUser))
+    if (
+      currentUser !== null &&
+      !stompYTAClientRef.current &&
+      isYTA(currentUser)
+    )
       ytaConnectNotificationWsInit();
+    else if (
+      currentUser !== null &&
+      !stompBENHNHANClientRef.current &&
+      isBENHNHAN(currentUser)
+    )
+      benhnhanConnectNotificationWsInit();
     handleCountIsReadFalse(YTAnotifications);
-  }, [YTAnotifications]);
+    handleCountIsReadFalseBN(BENHNHANnotifications);
+  }, [YTAnotifications, BENHNHANnotifications]);
 
   function onError() {
     console.log("Lỗi");
@@ -110,8 +165,21 @@ export default function NotificationContainer() {
     YTAnotifications.map((n) => {
       if (n.isRead === false) ++count;
     });
-    setCountIsReadFalse(count);
+     setCountIsReadFalse(count);
   }
+
+  function handleCountIsReadFalseBN(BENHNHANnotifications) {
+    let count = 0;
+    if (BENHNHANnotifications.length < 1) {
+      setCountIsReadFalseBN(count);
+      return;
+    }
+    BENHNHANnotifications.map((n) => {
+      if (n.isRead === false) ++count;
+    });
+     setCountIsReadFalseBN(count);
+  }
+
 
   return (
     <>
@@ -120,119 +188,231 @@ export default function NotificationContainer() {
         message={data.message}
         severity={data.severity}
       />
-      <div className="notification-container">
-        <Dropdown
-          show={showDropdown}
-          onToggle={() => setShowDropdown(!showDropdown)}
-        >
-          <Dropdown.Toggle
-            className="d-flex text-center justify-content-between align-items-center bg-success"
-            variant="light"
-            id="dropdown-basic"
+      {isYTA(currentUser) && (
+        <div className="notification-container">
+          <Dropdown
+            show={showDropdownYTA}
+            onToggle={() => setShowDropdownYTA(!showDropdownYTA)}
           >
-            <i
-              className="fa fa-bell text-white mr-3"
-              style={{ marginRight: "10px" }}
-            ></i>
-            <Badge className="bg-danger" variant="danger">
-              {countIsReadFalse}
-            </Badge>
-          </Dropdown.Toggle>
+            <Dropdown.Toggle
+              className="d-flex text-center justify-content-between align-items-center bg-success"
+              variant="light"
+              id="dropdown-basic"
+            >
+              <i
+                className="fa fa-bell text-white mr-3"
+                style={{ marginRight: "10px" }}
+              ></i>
+              <Badge className="bg-danger" variant="danger">
+                {countIsReadFalse}
+              </Badge>
+            </Dropdown.Toggle>
 
-          <Dropdown.Menu
-            className="shadow-lg"
-            style={{
-              width: "300px",
-              maxHeight: "400px",
-              minHeight: "100px",
-              overflowY: "scroll",
-              right: "0",
-              left: "auto",
-            }}
-          >
-            {/* <div className="d-flex justify-content-between align-items-center px-3 py-2 shadow-lg">
-              <span>Notifications</span>
-              <Button variant="primary" size="sm">
-                5 new
-              </Button>
-            </div> */}
-            <Dropdown.Divider />
+            <Dropdown.Menu
+              className="shadow-lg"
+              style={{
+                width: "300px",
+                maxHeight: "400px",
+                minHeight: "100px",
+                overflowY: "scroll",
+                right: "0",
+                left: "auto",
+              }}
+            >
+              <Dropdown.Divider />
 
-            {YTAnotifications.length > 0 &&
-              YTAnotifications.map((notification) => (
+              {isYTA(currentUser) &&
+                YTAnotifications.length > 0 &&
+                YTAnotifications.map((notification) => (
+                  <Dropdown.Item
+                    onClick={() => {
+                      notification.isRead = true;
+                      navigate("/censor-register");
+                      handleCountIsReadFalse(YTAnotifications);
+                    }}
+                    key={notification.id}
+                    className={`d-flex align-items-start border ${
+                      notification.isRead ? "" : "bg-warning"
+                    }`}
+                    style={{
+                      fontSize: "12px",
+                      color: "#000",
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    <img
+                      src={notification.user.avatar}
+                      alt="Avatar"
+                      className="rounded-circle"
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        marginRight: "10px",
+                      }}
+                    />
+                    <div>
+                      <strong>{notification.user.name}</strong>
+                      <p
+                        className="mb-0"
+                        style={{ fontSize: "12px", color: "#fff" }}
+                      >
+                        <small style={{ fontSize: "12px", color: "#000" }}>
+                          Đặt lịch khám vào ngày{" "}
+                          {dayjs(notification.schedule.date).format(
+                            "DD/MM/YYYY"
+                          )}
+                        </small>
+                        <small
+                          style={{
+                            display: "block",
+                            fontSize: "12px",
+                            color: "red",
+                          }}
+                        >
+                          {formatDuration(Date.now() - notification.timeSent)}{" "}
+                          trước
+                        </small>
+                      </p>
+                    </div>
+                  </Dropdown.Item>
+                ))}
+
+              <Dropdown.Divider />
+              {YTAnotifications.length > 0 ? (
                 <Dropdown.Item
-                  onClick={() => {
-                    notification.isRead = true;
-                    navigate("/censor-register");
-                    handleCountIsReadFalse(YTAnotifications);
-                  }}
-                  key={notification.id}
-                  className={`d-flex align-items-start border ${
-                    notification.isRead ? "" : "bg-warning"
-                  }`}
+                  className="text-center text-primary"
                   style={{
                     fontSize: "12px",
                     color: "#000",
                     backgroundColor: "#fff",
                   }}
                 >
-                  <img
-                    src={notification.user.avatar}
-                    alt="Avatar"
-                    className="rounded-circle"
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      marginRight: "10px",
-                    }}
-                  />
-                  <div>
-                    <strong>{notification.user.name}</strong>
-                    <p
-                      className="mb-0"
-                      style={{ fontSize: "12px", color: "#fff" }}
-                    >
-                      <small style={{ fontSize: "12px", color: "#000" }}>
-                        Đặt lịch khám vào ngày{" "}
-                        {dayjs(notification.schedule.date).format("DD/MM/YYYY")}
-                      </small>
-                      <small
-                        style={{
-                          display: "block",
-                          fontSize: "12px",
-                          color: "red",
-                        }}
-                      >
-                        {formatDuration(Date.now() - notification.timeSent)}{" "}
-                        trước
-                      </small>
-                    </p>
-                  </div>
+                  Đóng
                 </Dropdown.Item>
-              ))}
+              ) : (
+                <>
+                  <p className="text-center">
+                    <strong>Hiện tại không có thông báo nào</strong>
+                  </p>
+                </>
+              )}
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+      )}
 
-            <Dropdown.Divider />
-            {YTAnotifications.length > 0 ? (
-              <Dropdown.Item
-                className="text-center text-primary"
-                style={{
-                  fontSize: "12px",
-                  color: "#000",
-                  backgroundColor: "#fff",
-                }}
-              >
-                Đóng
-              </Dropdown.Item>
-            ) : (
-              <>
-                <p className="text-center">
-                  <strong>Hiện tại không có thông báo nào</strong>
-                </p>
-              </>
-            )}
-          </Dropdown.Menu>
-        </Dropdown>
-      </div>
+      {isBENHNHAN(currentUser) && (
+        <div className="notification-container">
+          <Dropdown
+            show={showDropdownBN}
+            onToggle={() => setShowDropdownBN(!showDropdownBN)}
+          >
+            <Dropdown.Toggle
+              className="d-flex text-center justify-content-between align-items-center bg-success"
+              variant="light"
+              id="dropdown-basic"
+            >
+              <i
+                className="fa fa-bell text-white mr-3"
+                style={{ marginRight: "10px" }}
+              ></i>
+              <Badge className="bg-danger" variant="danger">
+                {countIsReadFalseBN}
+              </Badge>
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu
+              className="shadow-lg"
+              style={{
+                width: "350px",
+                maxHeight: "400px",
+                minHeight: "100px",
+                overflowY: "scroll",
+                right: "0",
+                left: "auto",
+              }}
+            >
+              <Dropdown.Divider />
+
+              {isBENHNHAN(currentUser) &&
+                BENHNHANnotifications.length > 0 &&
+                BENHNHANnotifications.map((notification) => (
+                  <Dropdown.Item
+                    onClick={() => {
+                      notification.isRead = true;
+                      navigate("/user-register-schedule-list");
+                      handleCountIsReadFalseBN(BENHNHANnotifications);
+                    }}
+                    key={notification.id}
+                    className={`d-flex align-items-start border ${
+                      notification.isRead ? "" : "bg-warning"
+                    }`}
+                    style={{
+                      fontSize: "12px",
+                      color: "#000",
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    <img
+                      src={notification.user.avatar}
+                      alt="Avatar"
+                      className="rounded-circle"
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        marginRight: "10px",
+                      }}
+                    />
+                    <div>
+                      <strong>Đặt lịch khám trực tiếp thành công !</strong>
+                      <p
+                        className="mb-0"
+                        style={{ fontSize: "12px", color: "#fff" }}
+                      >
+                        <small style={{ fontSize: "12px", color: "#000" }}>
+                          Đặt lịch khám vào ngày{" "}
+                          {dayjs(notification.schedule.date).format(
+                            "DD/MM/YYYY"
+                          )}
+                        </small>
+                        <small
+                          style={{
+                            display: "block",
+                            fontSize: "12px",
+                            color: "red",
+                          }}
+                        >
+                          {formatDuration(Date.now() - notification.timeSent)}{" "}
+                          trước
+                        </small>
+                      </p>
+                    </div>
+                  </Dropdown.Item>
+                ))}
+
+              <Dropdown.Divider />
+              {BENHNHANnotifications.length > 0 ? (
+                <Dropdown.Item
+                  className="text-center text-primary"
+                  style={{
+                    fontSize: "12px",
+                    color: "#000",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  Đóng
+                </Dropdown.Item>
+              ) : (
+                <>
+                  <p className="text-center">
+                    <strong>Hiện tại không có thông báo nào</strong>
+                  </p>
+                </>
+              )}
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+      )}
     </>
   );
 }

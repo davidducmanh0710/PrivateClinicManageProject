@@ -534,7 +534,7 @@ export default function ExaminationForm() {
                         max={30}
                         style={{ width: 40 + "%" }}
                         type="number"
-                        defaultValue={h.durationDay ? h.durationDay : dayExam}
+                        defaultValue={h !== undefined && h.durationDay ? h.durationDay : dayExam}
                         onBlur={(e) => {
                           if (e.target.value.trim() !== "") handleSetDayExam(e);
                           else {
@@ -557,7 +557,7 @@ export default function ExaminationForm() {
                               className="row align-items-center border-bottom py-2"
                             >
                               <div className="col-1">
-                                <strong>{index}.</strong>
+                                <strong>{index + 1}.</strong>
                               </div>
                               <div className="col-6">
                                 <strong>{m.name}</strong>
