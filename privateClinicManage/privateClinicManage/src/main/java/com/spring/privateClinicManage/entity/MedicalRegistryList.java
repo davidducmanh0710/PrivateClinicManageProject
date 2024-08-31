@@ -86,4 +86,8 @@ public class MedicalRegistryList implements Serializable {
 	@JsonIgnore
 	private MedicalExamination medicalExamination;
 
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name = "payment_phase1_id", referencedColumnName = "id")
+	@JsonIgnore
+	private PaymentDetailPhase1 paymentPhase1;
 }

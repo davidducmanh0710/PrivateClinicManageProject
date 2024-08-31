@@ -7,17 +7,18 @@ import dayjs from "dayjs";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DeleteConfirmationForm from "../DeleteConfirmationForm/DeleteConfirmationForm";
 import { UserContext } from "../config/Context";
-
+import PaymentPhase1Form from "../PaymentPhase1Form/PaymentPhase1Form";
 
 export default function UserRegisterScheduleList() {
   const [userRegisterScheduleList, setUserRegisterScheduleList] = useState([]);
   const [registerScheduleId, setRegisterScheduleId] = useState(null);
+  const [paymentPhase1UrlForm , setPaymentPhase1UrlForm] = useState(null)
 
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const { currentUser } = useContext(UserContext);
 
-  const[isCanceled , setIsCanceled] = useState(false);
+  const [isCanceled, setIsCanceled] = useState(false);
 
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
@@ -39,9 +40,9 @@ export default function UserRegisterScheduleList() {
   };
 
   const deleteFormRef = useRef();
+  const paymentPhase1FormRef = useRef();
 
   const loadUserRegisterScheduleList = useCallback(async () => {
-    
     let response;
     if (isBENHNHAN(currentUser) && currentUser != null) {
       try {
@@ -60,16 +61,14 @@ export default function UserRegisterScheduleList() {
         showSnackbar("Lỗi", "error");
       }
     }
-  }, [page, currentUser,isCanceled]);
+  }, [page, currentUser, isCanceled]);
 
   useEffect(() => {
     if (currentUser !== null) {
       loadUserRegisterScheduleList();
-      setIsCanceled(false)
+      setIsCanceled(false);
     }
-  }, [page, currentUser,isCanceled]);
-
-
+  }, [page, currentUser, isCanceled]);
 
   const handleCancelRegisterSchedule = async (registerScheduleId) => {
     try {
@@ -84,7 +83,7 @@ export default function UserRegisterScheduleList() {
       if (response.status === 200) {
         showSnackbar("Hủy lịch thành công !", "success");
         handleCloseDeleteConfirmForm();
-        setIsCanceled(true)
+        setIsCanceled(true);
       } else showSnackbar(response.data, "error");
     } catch {
       showSnackbar("Lỗi", "error");
@@ -101,6 +100,15 @@ export default function UserRegisterScheduleList() {
     deleteFormRef.current.close();
   }
 
+  function handleOpenPaymentPhase1Form(paymentPhase1UrlForm) {
+    setPaymentPhase1UrlForm(() => paymentPhase1UrlForm)
+    paymentPhase1FormRef.current.open();
+  }
+
+  function handleClosePaymentPhase1Form() {
+    paymentPhase1FormRef.current.close();
+  }
+
   return (
     <>
       <DeleteConfirmationForm
@@ -113,12 +121,20 @@ export default function UserRegisterScheduleList() {
         message={data.message}
         severity={data.severity}
       />
-      {userRegisterScheduleList.empty !== true && <Pagination
-        count={totalPage}
-        color="primary"
-        className="mt-4"
-        onChange={(event, value) => setPage(value)}
-      />}
+      <PaymentPhase1Form
+        ref={paymentPhase1FormRef}
+        onCancel={handleClosePaymentPhase1Form}
+        paymentPhase1UrlForm={paymentPhase1UrlForm}
+        
+      />
+      {userRegisterScheduleList.empty !== true && (
+        <Pagination
+          count={totalPage}
+          color="primary"
+          className="mt-4"
+          onChange={(event, value) => setPage(value)}
+        />
+      )}
       <div className="container container-user-register-schedule-list">
         <h2 className="text text-primary">Danh sách đặt lịch khám</h2>
         <ul className="responsive-table">
@@ -138,39 +154,50 @@ export default function UserRegisterScheduleList() {
             </>
           ) : (
             <>
-              {userRegisterScheduleList.empty === false && userRegisterScheduleList.content.map((urs) => {
-                const ursId = urs.id;
-                return (
-                  <li key={urs.id} className="table-row">
-                    <div className="col col-1" data-label="Date Created">
-                      {dayjs(urs.createdDate).format("DD-MM-YYYY HH:mm:ss")}
-                    </div>
-                    <div className="col col-2" data-label="Name Register">
-                      {urs.name}
-                    </div>
-                    <div className="col col-3" data-label="Date Register">
-                      {dayjs(urs.schedule.date).format("DD-MM-YYYY HH:mm:ss")}
-                    </div>
-                    <div className="col col-4" data-label="Status Register">
-                      {urs.statusIsApproved.status}
-                    </div>
-                    <div className="col col-5" data-label="Note">
-                      {urs.statusIsApproved.note}
-                    </div>
-                    <button
-                      onClick={() => handleOpenDeleteConfirmForm(ursId)}
-                      className={`col col-6 btn  ${
-                        urs.statusIsApproved.status !== "CHECKING"
-                          ? "btn-secondary disabled"
-                          : "btn-danger"
-                      }`}
-                      data-label="Canceled Register"
-                    >
-                      Hủy
-                    </button>
-                  </li>
-                );
-              })}
+              {userRegisterScheduleList.empty === false &&
+                userRegisterScheduleList.content.map((urs) => {
+                  return (
+                    <li key={urs.id} className="table-row">
+                      <div className="col col-1" data-label="Date Created">
+                        {dayjs(urs.createdDate).format("DD-MM-YYYY HH:mm:ss")}
+                      </div>
+                      <div className="col col-2" data-label="Name Register">
+                        {urs.name}
+                      </div>
+                      <div className="col col-3" data-label="Date Register">
+                        {dayjs(urs.schedule.date).format("DD-MM-YYYY HH:mm:ss")}
+                      </div>
+                      <div className="col col-4" data-label="Status Register">
+                        {urs.statusIsApproved.status}
+                      </div>
+                      <div className="col col-5" data-label="Note">
+                        {urs.statusIsApproved.note}
+                      </div>
+                      {urs.statusIsApproved.status !== "PAYMENTPHASE1" ? (
+                        <button
+                          onClick={() => handleOpenDeleteConfirmForm(urs.id)}
+                          className={`col col-6 btn ${
+                            urs.statusIsApproved.status !== "CHECKING"
+                              ? "btn-secondary disabled"
+                              : "btn-danger"
+                          }`}
+                          data-label="Canceled Register"
+                        >
+                          Hủy lịch khám
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            className="col col-6 btn btn-success"
+                            onClick={() => handleOpenPaymentPhase1Form(urs)}
+                          >
+                            Thanh toán lấy mã QR
+                          </button>
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
             </>
           )}
         </ul>

@@ -25,7 +25,9 @@ export let endpoints = {
 	getAllMedicines : '/api/bacsi/get-all-medicines/',
 	submitMedicalExamination : '/api/bacsi/submit-medical-examination/',
 	getHistoryUserRegister : '/api/bacsi/get-history-user-register/',
-	getPrescriptionItemsByMedicalExamId : (medicalExamId) => `/api/bacsi/get-prescriptionItems-by-medicalExam-id/${medicalExamId}/`
+	getPrescriptionItemsByMedicalExamId : (medicalExamId) => `/api/bacsi/get-prescriptionItems-by-medicalExam-id/${medicalExamId}/`,
+	benhnhanMOMOPaymentPhase1 : '/api/payment/momo/phase1/',
+	benhnhanVNPAYPaymentPhase1 : '/api/payment/vnpay/phase1/',
 };
 
 export const authAPI = () => {

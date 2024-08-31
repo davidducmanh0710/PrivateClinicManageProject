@@ -142,6 +142,10 @@ public class ApiBenhNhanRestController {
 			return new ResponseEntity<>("Phiếu đăng kí này không tồn tại hoặc đã được hủy !",
 					HttpStatus.NOT_FOUND);
 
+		if (!medicalRegistryList.getStatusIsApproved().getStatus().equals("CHECKING"))
+			return new ResponseEntity<>("Đã thanh toán , không thể hủy !",
+					HttpStatus.NOT_FOUND);
+
 		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("CANCELED");
 
 		medicalRegistryList.setIsCanceled(true);

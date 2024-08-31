@@ -73,4 +73,9 @@ public class MedicalExamination implements Serializable {
 	@JsonIgnore
 	private List<PrescriptionItems> prescriptionItems;
 
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name = "payment_phase2_id", referencedColumnName = "id")
+	@JsonIgnore
+	private PaymentDetailPhase2 paymentPhase2;
+
 }

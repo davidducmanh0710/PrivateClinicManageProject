@@ -40,7 +40,7 @@ const AutoConfirmForm = forwardRef(function AutoConfirmForm(
   let userSelectRef = useRef(undefined);
 
   const [autoRegisterDate, setAutoRegisterDate] = useState("");
-  const [autoStatus, setAutoStatus] = useState("SUCCESS");
+  const [autoStatus, setAutoStatus] = useState("PAYMENTPHASE1");
   const [userList, setUserList] = useState([]);
 
   const [emailContent, setEmailContent] = useState("");
@@ -186,15 +186,12 @@ const AutoConfirmForm = forwardRef(function AutoConfirmForm(
                     statusList.map((s) => {
                       return (
                         <>
-                          {s.status !== "PROCESSING" &&
-                            s.status !== "CANCELED" &&
-                            s.status !== "CHECKING" && (
-                              <option key={s.id} value={s.status}>
-                                <strong className="text-white">
-                                  {s.status}
-                                </strong>
-                              </option>
-                            )}
+                          {(s.status === "FAILED" ||
+                            s.status === "PAYMENTPHASE1") && (
+                            <option key={s.id} value={s.status}>
+                              <strong className="text-white">{s.status}</strong>
+                            </option>
+                          )}
                         </>
                       );
                     })}

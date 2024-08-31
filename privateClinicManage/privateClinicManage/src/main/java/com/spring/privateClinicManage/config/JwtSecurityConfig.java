@@ -59,7 +59,9 @@ public class JwtSecurityConfig {
 
 				.requestMatchers(HttpMethod.GET,
 						"/api/users/getAllStatusIsApproved/",
-						"/api/qr/barcodes/zxing/qrcode/")
+						"/api/qr/barcodes/zxing/qrcode/",
+						"/api/payment/momo/phase1-return/",
+						"/api/payment/vnpay/phase1-return/")
 				.permitAll()
 
 				.requestMatchers(HttpMethod.POST,
@@ -72,7 +74,8 @@ public class JwtSecurityConfig {
 
 				.requestMatchers(HttpMethod.POST,
 						"/api/benhnhan/register-schedule/",
-						"/api/benhnhan/user-register-schedule-list/")
+						"/api/benhnhan/user-register-schedule-list/",
+						"/api/payment/**")
 				.hasRole("BENHNHAN")
 
 				.requestMatchers(HttpMethod.PATCH,

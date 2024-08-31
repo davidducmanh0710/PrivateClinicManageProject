@@ -93,19 +93,19 @@ export default function NotificationContainer() {
       },
       onError
     );
-    return () => {
-      if (stompYTAClientRef.current) {
-        stompYTAClientRef.current.disconnect();
-        stompYTAClientRef.current = null;
-      }
-    };
+    // return () => {
+    //   if (stompYTAClientRef.current) {
+    //     stompYTAClientRef.current.disconnect();
+    //     stompYTAClientRef.current = null;
+    //   }
+    // };
   };
 
   const benhnhanConnectNotificationWsInit = () => {
     let stompBENHNHANClient = null;
     let socket = new SockJS(`${BASE_URL}/ws`);
     stompBENHNHANClient = over(socket);
-    // stompYTAClient.debug = () => {}; // tắt log của stomp in ra console
+    stompBENHNHANClient.debug = () => {}; // tắt log của stomp in ra console
     stompBENHNHANClientRef.current = stompBENHNHANClient;
     stompBENHNHANClient.connect(
       {},
@@ -127,12 +127,12 @@ export default function NotificationContainer() {
       },
       onError
     );
-    return () => {
-      if (stompBENHNHANClientRef.current) {
-        stompBENHNHANClientRef.current.disconnect();
-        stompBENHNHANClientRef.current = null;
-      }
-    };
+    // return () => {
+    //   if (stompBENHNHANClientRef.current) {
+    //     stompBENHNHANClientRef.current.disconnect();
+    //     stompBENHNHANClientRef.current = null;
+    //   }
+    // };
   };
 
   useEffect(() => {
@@ -154,6 +154,24 @@ export default function NotificationContainer() {
 
   function onError() {
     console.log("Lỗi");
+    console.log("stompYTAClientRef", stompYTAClientRef);
+    console.log("stompBENHNHANClientRef", stompBENHNHANClientRef);
+
+    // setTimeout(() => {
+    //   if (
+    //     currentUser !== null &&
+    //     stompYTAClientRef.current === null &&
+    //     isYTA(currentUser)
+    //   )
+    //     ytaConnectNotificationWsInit();
+    //   else if (
+    //     currentUser !== null &&
+    //     stompBENHNHANClientRef.current === null &&
+    //     isBENHNHAN(currentUser)
+    //   )
+    //     benhnhanConnectNotificationWsInit();
+    // }, 5000);
+
   }
 
   function handleCountIsReadFalse(YTAnotifications) {
@@ -165,7 +183,7 @@ export default function NotificationContainer() {
     YTAnotifications.map((n) => {
       if (n.isRead === false) ++count;
     });
-     setCountIsReadFalse(count);
+    setCountIsReadFalse(count);
   }
 
   function handleCountIsReadFalseBN(BENHNHANnotifications) {
@@ -177,9 +195,8 @@ export default function NotificationContainer() {
     BENHNHANnotifications.map((n) => {
       if (n.isRead === false) ++count;
     });
-     setCountIsReadFalseBN(count);
+    setCountIsReadFalseBN(count);
   }
-
 
   return (
     <>

@@ -186,21 +186,13 @@ public class ApiYtaRestController {
 		List<String> emails = confirmRegisterDto.getEmails();
 
 		if (!emails.isEmpty()) {
+
 			mrls.forEach(mrl -> {
 				if (emails.contains(mrl.getUser().getEmail())
 						&& mrl.getStatusIsApproved().getStatus().equals("CHECKING")) {
-
-					try {
-						medicalRegistryListService.createQRCodeAndUpLoadCloudinaryAndSetStatus(mrl,
-								statusIsApproved);
-					} catch (Exception e) {
-
-						System.out.println("Lỗi");
-					}
-
 					try {
 						mailSenderService.sendStatusRegisterEmail(mrl,
-								confirmRegisterDto.getEmailContent());
+								confirmRegisterDto.getEmailContent(), statusIsApproved);
 					} catch (UnsupportedEncodingException | MessagingException e1) {
 						System.out.println("Không gửi được mail !");
 					}
@@ -211,16 +203,10 @@ public class ApiYtaRestController {
 
 		mrls.forEach(mrl -> {
 			if (mrl.getStatusIsApproved().getStatus().equals("CHECKING")) {
-				try {
-					medicalRegistryListService.createQRCodeAndUpLoadCloudinaryAndSetStatus(mrl,
-							statusIsApproved);
-				} catch (Exception e) {
-					System.out.println("Lỗi");
-				}
 
 				try {
 					mailSenderService.sendStatusRegisterEmail(mrl,
-							confirmRegisterDto.getEmailContent());
+							confirmRegisterDto.getEmailContent(), statusIsApproved);
 				} catch (UnsupportedEncodingException | MessagingException e1) {
 					System.out.println("Không gửi được mail !");
 				}
@@ -282,7 +268,7 @@ public class ApiYtaRestController {
 		}
 
 		try {
-			mailSenderService.sendStatusRegisterEmail(mrl, "Direct regiter");
+			mailSenderService.sendStatusRegisterEmail(mrl, "Direct regiter", statusIsApproved);
 		} catch (UnsupportedEncodingException | MessagingException e1) {
 			System.out.println("Không gửi được mail !");
 		}
