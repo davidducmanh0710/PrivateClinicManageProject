@@ -101,6 +101,8 @@ const QRScanner = () => {
             }
           } else {
             showSnackbar("Mã QR này đã được quét !", "error");
+            isFinishedRef.current = true;
+            decodeTextNowRef.current = null
           }
         }
       }

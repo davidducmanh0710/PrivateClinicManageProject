@@ -6,5 +6,4 @@ public interface PaymentDetailPhase1Service {
 
 	void savePdp1(PaymentDetailPhase1 paymentDetailPhase1);
 
-	Integer getMrlIdFromMSPDKLK(String des);
 }

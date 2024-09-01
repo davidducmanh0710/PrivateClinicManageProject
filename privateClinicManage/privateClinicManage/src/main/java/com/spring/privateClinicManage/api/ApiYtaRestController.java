@@ -173,6 +173,8 @@ public class ApiYtaRestController {
 
 		Schedule schedule = scheduleService.findByDate(confirmRegisterDto.getRegisterDate());
 
+		System.out.println(statusIsApproved.getStatus());
+
 		if (statusIsApproved == null || schedule == null)
 			return new ResponseEntity<>("Trạng thái hoặc ngày này chưa có đơn đăng kí khám",
 					HttpStatus.NOT_FOUND);

@@ -92,7 +92,7 @@ public class MailSenderServiceImpl implements MailSenderService {
 		String body = "";
 		String footer = "";
 
-		if (mrl.getStatusIsApproved().getStatus().equals("CHECKING")) {
+		if (statusIsApproved.getStatus().equals("CHECKING")) {
 
 			header += "<p class='text-success'><strong>Quý khách đã đăng kí thành công lịch khám !</strong><p/>";
 //			
@@ -103,13 +103,13 @@ public class MailSenderServiceImpl implements MailSenderService {
 
 			footer = "<h4>Xin chân thành cảm ơn quý khách đã đăng kí phòng khám của chúng tôi !</h4>";
 
-		} else if (mrl.getStatusIsApproved().getStatus().equals("FAILED")) {
+		} else if (statusIsApproved.getStatus().equals("FAILED")) {
 
 			header += "<p class='text-danger'><strong>Quý khách đã đăng kí thất bại lịch khám !</strong><p/>";
 			body += "<p>" + content + "</p>";
 			footer = "<h4>Xin chân thành xin lỗi sự bất tiện này và cảm ơn quý khách đã đăng kí phòng khám của chúng tôi !</h4>";
 
-		} else if (mrl.getStatusIsApproved().getStatus().equals("SUCCESS")) {
+		} else if (statusIsApproved.getStatus().equals("SUCCESS")) {
 
 			header += "<p class='text-success'><strong>Quý khách đã thanh toán và đăng kí thành công lịch khám !</strong><p/>";
 			body += "<p> Tên người khám : <strong>" + mrl.getName() + "</strong></p>" +
