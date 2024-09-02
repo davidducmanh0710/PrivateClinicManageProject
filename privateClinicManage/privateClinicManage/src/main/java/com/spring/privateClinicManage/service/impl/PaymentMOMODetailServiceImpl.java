@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.spring.privateClinicManage.config.PaymentMomoConfig;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
+import com.spring.privateClinicManage.entity.Voucher;
 import com.spring.privateClinicManage.service.PaymentMOMODetailService;
 
 @Service
@@ -23,7 +24,8 @@ public class PaymentMOMODetailServiceImpl implements PaymentMOMODetailService {
 	private RestTemplate restTemplate;
 
 	@Override
-	public Map<String, Object> generateUrlPayment(Long amount, MedicalRegistryList mrl) {
+	public Map<String, Object> generateUrlPayment(Long amount, MedicalRegistryList mrl,
+			Voucher voucher) {
 
 		String apiUrl = PaymentMomoConfig.momo_ApiUrl;
 		String sercretKey = PaymentMomoConfig.momo_secretKey;
@@ -41,8 +43,11 @@ public class PaymentMOMODetailServiceImpl implements PaymentMOMODetailService {
 		String extraData = ""; // default blank
 		String lang = "vi";
 
+
 		Map<String, Object> extraDataBody = new HashMap<>();
 		extraDataBody.put("mrl", mrl);
+		if (voucher != null)
+			extraDataBody.put("voucher", voucher);
 
 		extraData = PaymentMomoConfig.Base64Encode(extraDataBody);
 

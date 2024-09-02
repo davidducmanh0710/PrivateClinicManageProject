@@ -20,15 +20,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.spring.privateClinicManage.dto.ApplyVoucherDto;
 import com.spring.privateClinicManage.dto.RegisterScheduleDto;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
 import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
 import com.spring.privateClinicManage.entity.User;
+import com.spring.privateClinicManage.entity.UserVoucher;
+import com.spring.privateClinicManage.entity.Voucher;
 import com.spring.privateClinicManage.service.MedicalRegistryListService;
 import com.spring.privateClinicManage.service.ScheduleService;
 import com.spring.privateClinicManage.service.StatusIsApprovedService;
 import com.spring.privateClinicManage.service.UserService;
+import com.spring.privateClinicManage.service.UserVoucherService;
+import com.spring.privateClinicManage.service.VoucherService;
 
 @RestController
 @RequestMapping("/api/benhnhan/")
@@ -40,12 +45,15 @@ public class ApiBenhNhanRestController {
 	private MedicalRegistryListService medicalRegistryListService;
 	private StatusIsApprovedService statusIsApprovedService;
 	private SimpMessagingTemplate messagingTemplate;
+	private VoucherService voucherService;
+	private UserVoucherService userVoucherService;
 
 	@Autowired
 	public ApiBenhNhanRestController(UserService userService, Environment environment,
 			ScheduleService scheduleService, MedicalRegistryListService medicalRegistryListService,
 			StatusIsApprovedService statusIsApprovedService,
-			SimpMessagingTemplate messagingTemplate) {
+			SimpMessagingTemplate messagingTemplate, VoucherService voucherService,
+			UserVoucherService userVoucherService) {
 		super();
 		this.userService = userService;
 		this.environment = environment;
@@ -53,6 +61,8 @@ public class ApiBenhNhanRestController {
 		this.medicalRegistryListService = medicalRegistryListService;
 		this.statusIsApprovedService = statusIsApprovedService;
 		this.messagingTemplate = messagingTemplate;
+		this.voucherService = voucherService;
+		this.userVoucherService = userVoucherService;
 	}
 
 	// ROLE_BENHNHAN
@@ -153,6 +163,40 @@ public class ApiBenhNhanRestController {
 		medicalRegistryListService.saveMedicalRegistryList(medicalRegistryList);
 
 		return new ResponseEntity<>("Đã hủy lịch thành công !", HttpStatus.OK);
+
+	}
+
+	@PostMapping(value = "/apply-voucher/")
+	@CrossOrigin
+	public ResponseEntity<Object> applyVoucher(@RequestBody ApplyVoucherDto applyVoucherDto) {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+		
+		String code = applyVoucherDto.getCode();
+		
+		Voucher voucher = voucherService.findVoucherByCode(code);
+
+		if (voucher == null)
+			return new ResponseEntity<>("Mã giảm giá này không tồn tại !", HttpStatus.NOT_FOUND);
+
+		if (voucher.getIsActived() == false)
+			return new ResponseEntity<>("Mã giảm giá này không có hiệu lực !",
+					HttpStatus.UNAUTHORIZED);
+
+		Date expiredDate = voucher.getVoucherCondition().getExpiredDate();
+		if (expiredDate.compareTo(new Date()) < 0)
+			return new ResponseEntity<>("Mã giảm giá này đã hết hạn sử dụng !",
+					HttpStatus.UNAUTHORIZED);
+		
+		UserVoucher userVoucher = userVoucherService.findByUserAndVoucher(currentUser,
+				voucher);
+		if (userVoucher != null)
+			if (userVoucher.getIsUsed())
+				return new ResponseEntity<>("Bạn đã sử dụng mã giảm giá này !",
+						HttpStatus.UNAUTHORIZED);
+
+		return new ResponseEntity<>(voucher, HttpStatus.OK);
 
 	}
 

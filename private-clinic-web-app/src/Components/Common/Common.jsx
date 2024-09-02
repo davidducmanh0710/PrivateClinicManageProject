@@ -7,7 +7,7 @@ export const CustomerSnackbar = ({ open, message, severity }) => {
       open={open}
       key={"top center"}
     >
-      <Alert severity={severity} variant="filled" sx={{ width: "100%" }}>
+      <Alert severity={severity} variant="filled" sx={{ width: "100%"}}>
         {message}
       </Alert>
     </Snackbar>

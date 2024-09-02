@@ -21,12 +21,16 @@ import com.spring.privateClinicManage.entity.MedicalRegistryList;
 import com.spring.privateClinicManage.entity.PaymentDetailPhase1;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
 import com.spring.privateClinicManage.entity.User;
+import com.spring.privateClinicManage.entity.UserVoucher;
+import com.spring.privateClinicManage.entity.Voucher;
 import com.spring.privateClinicManage.service.MailSenderService;
 import com.spring.privateClinicManage.service.MedicalRegistryListService;
 import com.spring.privateClinicManage.service.PaymentDetailPhase1Service;
 import com.spring.privateClinicManage.service.PaymentMOMODetailService;
 import com.spring.privateClinicManage.service.StatusIsApprovedService;
 import com.spring.privateClinicManage.service.UserService;
+import com.spring.privateClinicManage.service.UserVoucherService;
+import com.spring.privateClinicManage.service.VoucherService;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,6 +53,10 @@ public class ApiMOMOPaymentController {
 	private StatusIsApprovedService statusIsApprovedService;
 	@Autowired
 	private MailSenderService mailSenderService;
+	@Autowired
+	private VoucherService voucherService;
+	@Autowired
+	private UserVoucherService userVoucherService;
 
 	@PostMapping(path = "/phase1/")
 	@CrossOrigin
@@ -75,9 +83,19 @@ public class ApiMOMOPaymentController {
 		if (mrl.getIsCanceled())
 			return new ResponseEntity<>("Không thể thanh toán vì đã hủy lịch hẹn !",
 					HttpStatus.UNAUTHORIZED);
+		Integer voucherId = paymentIniPhase1Dto.getVoucherId();
+		Voucher voucher = null;
+
+		if (voucherId != null) {
+			voucher = voucherService.findVoucherById(voucherId);
+			if (voucher == null)
+				return new ResponseEntity<>("Mã giảm giá này không tồn tại !",
+						HttpStatus.NOT_FOUND);
+		}
 
 		Map<String, Object> responseData = paymentMOMODetailService
-				.generateUrlPayment(paymentIniPhase1Dto.getAmount(), mrl);
+				.generateUrlPayment(paymentIniPhase1Dto.getAmount(), mrl,
+						voucher);
 
 		String momoResultCode = String.valueOf(responseData.get("resultCode"));
 		if (!momoResultCode.equals("0"))
@@ -105,7 +123,6 @@ public class ApiMOMOPaymentController {
 			String orderId = (String) params.get("orderId");
 			String partnerCode = (String) params.get("partnerCode");
 
-
 			PaymentDetailPhase1 pdp1 = new PaymentDetailPhase1();
 			pdp1.setAmount(amount);
 			pdp1.setDescription(orderInfo);
@@ -123,6 +140,23 @@ public class ApiMOMOPaymentController {
 			mrl.setPaymentPhase1(pdp1);
 
 			paymentDetailPhase1Service.savePdp1(pdp1);
+
+			Voucher tempVoucher = (Voucher) extraDataBody.get("voucher");
+			Voucher voucher = voucherService.findVoucherById(tempVoucher.getId());
+
+			UserVoucher userVoucher = userVoucherService.findByUserAndVoucher(mrl.getUser(),
+					voucher);
+			if (userVoucher != null) {
+				userVoucher.setIsUsed(true);
+			} else {
+				userVoucher = new UserVoucher();
+				userVoucher.setIsOwned(false);
+				userVoucher.setIsUsed(true);
+				userVoucher.setUser(mrl.getUser());
+				userVoucher.setVoucher(voucher);
+			}
+
+			userVoucherService.saveUserVoucher(userVoucher);
 
 			StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("SUCCESS");
 			try {

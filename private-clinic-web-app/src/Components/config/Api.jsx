@@ -28,6 +28,7 @@ export let endpoints = {
 	getPrescriptionItemsByMedicalExamId : (medicalExamId) => `/api/bacsi/get-prescriptionItems-by-medicalExam-id/${medicalExamId}/`,
 	benhnhanMOMOPaymentPhase1 : '/api/payment/momo/phase1/',
 	benhnhanVNPAYPaymentPhase1 : '/api/payment/vnpay/phase1/',
+	applyVoucherPayment : '/api/benhnhan/apply-voucher/'
 };
 
 export const authAPI = () => {

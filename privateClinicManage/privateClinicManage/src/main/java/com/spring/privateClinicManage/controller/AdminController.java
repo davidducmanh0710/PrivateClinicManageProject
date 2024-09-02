@@ -27,11 +27,15 @@ import com.spring.privateClinicManage.entity.MedicineGroup;
 import com.spring.privateClinicManage.entity.Role;
 import com.spring.privateClinicManage.entity.UnitMedicineType;
 import com.spring.privateClinicManage.entity.User;
+import com.spring.privateClinicManage.entity.Voucher;
+import com.spring.privateClinicManage.entity.VoucherCondition;
 import com.spring.privateClinicManage.service.MedicineGroupService;
 import com.spring.privateClinicManage.service.MedicineService;
 import com.spring.privateClinicManage.service.RoleService;
 import com.spring.privateClinicManage.service.UnitMedicineTypeService;
 import com.spring.privateClinicManage.service.UserService;
+import com.spring.privateClinicManage.service.VoucherConditionService;
+import com.spring.privateClinicManage.service.VoucherService;
 
 import jakarta.validation.Valid;
 
@@ -50,6 +54,10 @@ public class AdminController {
 	private MedicineGroupService medicineGroupService;
 	@Autowired
 	private MedicineService medicineService;
+	@Autowired
+	private VoucherService voucherService;
+	@Autowired
+	private VoucherConditionService voucherConditionService;
 
 	@ModelAttribute
 	public void addAttributes(Model model) {
@@ -430,6 +438,98 @@ public class AdminController {
 		medicineService.saveMedicine(medicine);
 
 		return "redirect:/admin/medicinesList";
+
+	}
+
+	@GetMapping("/admin/vouchers-list")
+	public String getVoucherList(Model model, @RequestParam Map<String, String> params) {
+
+		Integer page = Integer.parseInt(params.getOrDefault("page", "1"));
+		Integer size = Integer.parseInt(params.getOrDefault("size", "5"));
+		String name = params.getOrDefault("name", "");
+
+		List<Voucher> vouchers = new ArrayList<>();
+
+		if (!name.isBlank()) {
+			vouchers = voucherService.findAllVouchersByCodeContaining(name);
+
+		} else
+			vouchers = voucherService.findAllVouchers();
+
+		Page<Voucher> vouchersPaginated = voucherService.vouchersPaginated(page, size,
+				vouchers);
+
+		page = page > 0 ? page : 1;
+		size = size > 0 ? size : 5;
+
+		Integer totalPages = vouchersPaginated.getTotalPages();
+		if (totalPages > 0) {
+			List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
+					.boxed()
+					.collect(Collectors.toList());
+			model.addAttribute("pageNumbers", pageNumbers);
+		}
+
+		model.addAttribute("vouchersPaginated", vouchersPaginated);
+		model.addAttribute("page", page);
+		model.addAttribute("size", size);
+		model.addAttribute("name", name);
+
+		return "admin/voucher/vouchersList";
+	}
+
+	@GetMapping("/admin/addNewVoucher")
+	public String getFormAddNewVoucher(Model model) {
+		Voucher voucher = new Voucher();
+		model.addAttribute("voucher", voucher);
+
+		return "/admin/voucher/addOrUpdateVoucher";
+	}
+
+	@GetMapping("/admin/updateVoucher/{voucherId}")
+	public String getFormUpdateVoucher(Model model,
+			@PathVariable("voucherId") Integer voucherId) {
+		Voucher voucher = voucherService.findVoucherById(voucherId);
+		model.addAttribute("voucher", voucher);
+
+		return "admin/voucher/addOrUpdateVoucher";
+	}
+
+	@PostMapping("/admin/addOrUpdateVoucher")
+	public String addOrUpdateVoucher(Model model,
+			@Valid @ModelAttribute("voucher") Voucher voucher,
+			BindingResult bindingResult,
+			@RequestParam Map<String, Object> params)
+			throws ParseException {
+
+		Voucher existVoucher = voucherService.findVoucherByCode(voucher.getCode());
+
+		if (voucher.getId() == null && existVoucher != null)
+			bindingResult.rejectValue("code", null,
+					"Đã tồn tại mã giảm giá này !");
+
+		if (bindingResult.hasErrors()) {
+			model.addAttribute("voucher", voucher);
+			return "admin/voucher/addOrUpdateVoucher";
+		}
+		/*
+		 * voucher khi packing bean thì nó chứa địa chỉ của voucher , ae packing bean
+		 * phần VoucherCondition nó ko có địa chỉ , thành ra sẽ tự create 1 object mới
+		 * bất chấp
+		 */
+		if (voucher.getId() != null) {
+			
+			VoucherCondition voucherCondition = existVoucher.getVoucherCondition();
+
+			voucherCondition.setExpiredDate(voucher.getVoucherCondition().getExpiredDate());
+			voucherCondition.setPercentSale(voucher.getVoucherCondition().getPercentSale());
+			voucher.setVoucherCondition(voucherCondition);
+
+		}
+
+		voucherService.saveVoucher(voucher);
+
+		return "redirect:/admin/vouchers-list";
 
 	}
 

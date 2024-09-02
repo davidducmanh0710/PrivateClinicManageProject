@@ -89,5 +89,9 @@ public class User implements Serializable {
 	@JsonIgnore
 	private List<MedicalExamination> medicalExaminations;
 
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
+	@JsonIgnore
+	private List<UserVoucher> userVoucher;
+
 
 }

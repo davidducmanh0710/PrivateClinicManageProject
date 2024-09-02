@@ -9,8 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaymentIniPhase1Dto {
-	private Long amount;
-	private Integer mrlId;
-	private Integer voucherId;
+public class ApplyVoucherDto {
+	private String code;
 }

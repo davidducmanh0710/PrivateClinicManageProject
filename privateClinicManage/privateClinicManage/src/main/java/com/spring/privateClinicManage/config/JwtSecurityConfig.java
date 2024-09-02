@@ -75,6 +75,7 @@ public class JwtSecurityConfig {
 				.requestMatchers(HttpMethod.POST,
 						"/api/benhnhan/register-schedule/",
 						"/api/benhnhan/user-register-schedule-list/",
+						"/api/benhnhan/apply-voucher/",
 						"/api/payment/**")
 				.hasRole("BENHNHAN")
 

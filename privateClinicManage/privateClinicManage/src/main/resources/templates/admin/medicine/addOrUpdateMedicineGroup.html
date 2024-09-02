@@ -24,10 +24,10 @@
 
 					</div>
 					<div class="card-body card-block">
-						<form th:action="@{/admin/addOrUpdateMedicine}" method="post"
+						<form th:action="@{/admin/addOrUpdateMedicineGroup}" method="post"
 							th:object="${medicineGroup}" class="form-horizontal">
 
-							<input type="hidden" th:field="${medicine.id}" th:value="${medicine.id}" />
+							<input type="hidden" th:field="${medicineGroup.id}" th:value="${medicineGroup.id}" />
 
 
 							<div class="row form-group">
@@ -38,9 +38,9 @@
 								<div class="col-12 col-md-9">
 									<input th:field="${medicineGroup.groupName}" required type="text"
 										id="text-input" name="text-input"
-										placeholder="Tên đơn vị thuốc" class="form-control">
-									<p th:errors="*{name}" class="text-danger"
-										th:if="${#fields.hasErrors('name')}"></p>
+										placeholder="Tên nhóm thuốc" class="form-control">
+									<p th:errors="*{groupName}" class="text-danger"
+										th:if="${#fields.hasErrors('groupName')}"></p>
 								</div>
 
 							</div>
