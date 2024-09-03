@@ -1,16 +1,12 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import "./VoucherForm.css";
 import { CustomerSnackbar } from "../Common/Common";
-import { authAPI, endpoints } from "../config/Api";
 
 const VoucherForm = forwardRef(function VoucherForm(
   {
     onCancel,
     handleApplyVoucher,
-    code,
     setCode,
-    voucher,
-    setVoucher,
     open,
     data,
   },
@@ -69,7 +65,7 @@ const VoucherForm = forwardRef(function VoucherForm(
             <h6 className="mt-3">Mã giảm giá phí dịch vụ khám bệnh</h6>
             <p className="text-muted">Có thể chọn 1 Voucher</p>
 
-            <div className="voucher-list">
+            {/* <div className="voucher-list">
               <div className="voucher-item p-2 mb-3 border rounded">
                 <div className="d-flex">
                   <div className="voucher-icon">
@@ -131,12 +127,12 @@ const VoucherForm = forwardRef(function VoucherForm(
                   Vui lòng mua hàng trên ứng dụng Shopee để sử dụng ưu đãi.
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
-          <div className="modal-footer">
+          {/* <div className="modal-footer">
             <button className="btn btn-secondary">TRỞ LẠI</button>
             <button className="btn btn-danger">OK</button>
-          </div>
+          </div> */}
         </div>
       </dialog>
     </>

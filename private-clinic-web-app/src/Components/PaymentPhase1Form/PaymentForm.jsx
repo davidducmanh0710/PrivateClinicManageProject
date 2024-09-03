@@ -74,7 +74,7 @@ const PaymentForm = forwardRef(function PaymentForm(
           amount,
           mrlId,
           voucherId: voucher ? voucher.id : null,
-          meId : me ? me.id : null,
+          meId: me ? me.id : null,
         },
         {
           validateStatus: function (status) {
@@ -110,7 +110,7 @@ const PaymentForm = forwardRef(function PaymentForm(
           amount,
           mrlId,
           voucherId: voucher ? voucher.id : null,
-          meId : me ? me.id : null,
+          meId: me ? me.id : null,
         },
         {
           validateStatus: function (status) {
@@ -139,7 +139,7 @@ const PaymentForm = forwardRef(function PaymentForm(
     }
   };
 
-  function handleVoucherForm() {
+  function handleOpenVoucherForm() {
     voucherFormRef.current.open();
   }
 
@@ -176,24 +176,15 @@ const PaymentForm = forwardRef(function PaymentForm(
   };
 
   useEffect(() => {
-    if (voucher !== null) {
-      if (me === null && urs !== null && pis === null) {
-        setFinalPrice(
-          100000 - (100000 * voucher.voucherCondition.percentSale) / 100
-        );
-      } else if (me !== null && pis !== null) {
-        let sum = handleTotalPisPrice(pis);
-        setTotalPisPrice(sum);
-        setFinalPrice(sum - (sum * voucher.voucherCondition.percentSale) / 100);
-      }
-    } else {
-      if (me === null && urs !== null && pis === null) {
-        setFinalPrice(100000);
-      } else if (me !== null && pis !== null) {
-        let sum = handleTotalPisPrice(pis);
-        setTotalPisPrice(sum);
-        setFinalPrice(sum);
-      }
+    const applyDiscount = (price) =>
+      price - (price * voucher?.voucherCondition?.percentSale) / 100; // voucher null sẽ tính là 0
+
+    if (me === null && urs !== null && pis === null) {
+      setFinalPrice(applyDiscount(100000));
+    } else if (me !== null && pis !== null) {
+      let sum = handleTotalPisPrice(pis);
+      setTotalPisPrice(sum);
+      setFinalPrice(applyDiscount(sum));
     }
   }, [voucher, finalPrice, me, pis]);
 
@@ -202,6 +193,19 @@ const PaymentForm = forwardRef(function PaymentForm(
       return total + p.medicine.price * p.prognosis;
     }, 0);
   }
+
+  const discountAmount = (price, percent) => (price * percent) / 100;
+
+  const discountDisplay = voucher !== null && (
+    <td className="text-center">
+      -
+      {discountAmount(
+        me === null && pis === null ? 100000 : totalPisPrice,
+        voucher.voucherCondition.percentSale
+      ).toLocaleString("vi-VN")}
+      ({voucher.voucherCondition.percentSale}%)
+    </td>
+  );
 
   return (
     <>
@@ -480,28 +484,7 @@ const PaymentForm = forwardRef(function PaymentForm(
                         <td></td>
                         <td></td>
                         <td> </td>
-                        {voucher !== null && me === null && pis === null && (
-                          <td className="text-center">
-                            -
-                            {(
-                              (100000 * voucher.voucherCondition.percentSale) /
-                              100
-                            ).toLocaleString("vi-VN")}
-                            ({voucher.voucherCondition.percentSale}%)
-                          </td>
-                        )}
-
-                        {voucher !== null && me !== null && pis !== null && (
-                          <td className="text-center">
-                            -
-                            {(
-                              (totalPisPrice *
-                                voucher.voucherCondition.percentSale) /
-                              100
-                            ).toLocaleString("vi-VN")}
-                            ({voucher.voucherCondition.percentSale}%)
-                          </td>
-                        )}
+                        {discountDisplay}
                       </tr>
                     </tbody>
                   </table>
@@ -515,9 +498,9 @@ const PaymentForm = forwardRef(function PaymentForm(
                     <div className="text text-primary">
                       <button
                         className="btn btn-primary"
-                        onClick={handleVoucherForm}
+                        onClick={handleOpenVoucherForm}
                       >
-                        Chọn hoặc nhập mã
+                        Nhập mã
                       </button>{" "}
                     </div>
                   </div>
