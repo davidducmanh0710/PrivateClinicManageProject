@@ -21,14 +21,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spring.privateClinicManage.dto.ApplyVoucherDto;
+import com.spring.privateClinicManage.dto.PaymentPhase2OutputDto;
 import com.spring.privateClinicManage.dto.RegisterScheduleDto;
+import com.spring.privateClinicManage.entity.MedicalExamination;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
+import com.spring.privateClinicManage.entity.PrescriptionItems;
 import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
 import com.spring.privateClinicManage.entity.User;
 import com.spring.privateClinicManage.entity.UserVoucher;
 import com.spring.privateClinicManage.entity.Voucher;
 import com.spring.privateClinicManage.service.MedicalRegistryListService;
+import com.spring.privateClinicManage.service.PrescriptionItemsService;
 import com.spring.privateClinicManage.service.ScheduleService;
 import com.spring.privateClinicManage.service.StatusIsApprovedService;
 import com.spring.privateClinicManage.service.UserService;
@@ -47,13 +51,15 @@ public class ApiBenhNhanRestController {
 	private SimpMessagingTemplate messagingTemplate;
 	private VoucherService voucherService;
 	private UserVoucherService userVoucherService;
+	private PrescriptionItemsService prescriptionItemsService;
 
 	@Autowired
 	public ApiBenhNhanRestController(UserService userService, Environment environment,
 			ScheduleService scheduleService, MedicalRegistryListService medicalRegistryListService,
 			StatusIsApprovedService statusIsApprovedService,
 			SimpMessagingTemplate messagingTemplate, VoucherService voucherService,
-			UserVoucherService userVoucherService) {
+			UserVoucherService userVoucherService,
+			PrescriptionItemsService prescriptionItemsService) {
 		super();
 		this.userService = userService;
 		this.environment = environment;
@@ -63,6 +69,7 @@ public class ApiBenhNhanRestController {
 		this.messagingTemplate = messagingTemplate;
 		this.voucherService = voucherService;
 		this.userVoucherService = userVoucherService;
+		this.prescriptionItemsService = prescriptionItemsService;
 	}
 
 	// ROLE_BENHNHAN
@@ -113,7 +120,6 @@ public class ApiBenhNhanRestController {
 		return new ResponseEntity<>(medicalRegistryList, HttpStatus.CREATED);
 
 	}
-
 
 	@GetMapping(value = "/user-register-schedule-list/")
 	@CrossOrigin
@@ -172,9 +178,9 @@ public class ApiBenhNhanRestController {
 		User currentUser = userService.getCurrentLoginUser();
 		if (currentUser == null)
 			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
-		
+
 		String code = applyVoucherDto.getCode();
-		
+
 		Voucher voucher = voucherService.findVoucherByCode(code);
 
 		if (voucher == null)
@@ -188,7 +194,7 @@ public class ApiBenhNhanRestController {
 		if (expiredDate.compareTo(new Date()) < 0)
 			return new ResponseEntity<>("Mã giảm giá này đã hết hạn sử dụng !",
 					HttpStatus.UNAUTHORIZED);
-		
+
 		UserVoucher userVoucher = userVoucherService.findByUserAndVoucher(currentUser,
 				voucher);
 		if (userVoucher != null)
@@ -198,6 +204,32 @@ public class ApiBenhNhanRestController {
 
 		return new ResponseEntity<>(voucher, HttpStatus.OK);
 
+	}
+
+	@GetMapping(value = "/get-medical-exam-by-mrlId/{mrlId}/")
+	public ResponseEntity<Object> getMedicalExamByMrlId(@PathVariable("mrlId") Integer mrlId) {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		MedicalRegistryList mrl = medicalRegistryListService.findById(mrlId);
+		if (mrl == null || mrl.getIsCanceled())
+			return new ResponseEntity<>("Phiếu đăng kí này không tồn tại hoặc đã được hủy !",
+					HttpStatus.NOT_FOUND);
+		MedicalExamination me = mrl.getMedicalExamination();
+
+		if (me == null)
+			return new ResponseEntity<>("Phiếu đăng kí này chưa có phiếu khám bệnh !",
+					HttpStatus.NOT_FOUND);
+
+		List<PrescriptionItems> pis = prescriptionItemsService
+				.findByMedicalExamination(me);
+
+		PaymentPhase2OutputDto pp2 = new PaymentPhase2OutputDto();
+		pp2.setMe(me);
+		pp2.setPis(pis);
+
+		return new ResponseEntity<>(pp2, HttpStatus.OK);
 	}
 
 }

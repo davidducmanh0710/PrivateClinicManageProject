@@ -530,7 +530,7 @@ export default function ExaminationForm() {
                       }`}
                     >
                       <input
-                        min={7}
+                        min={0}
                         max={30}
                         style={{ width: 40 + "%" }}
                         type="number"

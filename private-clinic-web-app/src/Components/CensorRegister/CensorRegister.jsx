@@ -64,7 +64,9 @@ export default function CencorRegister() {
         return "info";
       case "FOLLOWUP":
         return "primary";
-      case "PAYMENTPHASE1" : 
+      case "PAYMENTPHASE1":
+        return "success";
+      case "PAYMENTPHASE2":
         return "success";
       default:
         return "";

@@ -119,6 +119,24 @@ public class MailSenderServiceImpl implements MailSenderService {
 					"<img src='" + mrl.getQrUrl() + "'/>";
 
 			footer = "<h4>Xin chân thành cảm ơn quý khách đã đăng kí phòng khám của chúng tôi !</h4>";
+		} else if (statusIsApproved.getStatus().equals("FINISHED")) {
+
+			header += "<p class='text-success'><strong>Quý khách đã thanh toán đơn thuốc thành công !</strong><p/>";
+			body += "<p> Mã phiếu khám : <strong>" + "#MSPK" + mrl.getMedicalExamination().getId()
+					+ "</strong></p>" +
+					"<p> <strong>Vui lòng đến quầy thuốc để lấy thuốc !</strong></p>";
+
+			footer = "<h4>Xin chân thành cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi !</h4>";
+		} else if (statusIsApproved.getStatus().equals("FOLLOWUP")) {
+
+			header += "<p class='text-success'><strong>Quý khách đã thanh toán đơn thuốc thành công !</strong><p/>";
+			body += "<p> Mã phiếu khám : <strong>" + "#MSPK" + mrl.getMedicalExamination().getId()
+					+ "</strong></p>" +
+					"<p> Ngày hẹn khám : <strong>" + mrl.getMedicalExamination().getFollowUpDate()
+					+ "</strong></p>" +
+					"<p> <strong>Vui lòng đến quầy thuốc để lấy thuốc !</strong></p>";
+
+			footer = "<h4>Xin chân thành cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi !</h4>";
 		}
 
 		mrl.setStatusIsApproved(statusIsApproved);

@@ -5,15 +5,15 @@ import {
   useRef,
   useState,
 } from "react";
-import "./PaymentPhase1Form.css";
+import "./PaymentForm.css";
 import dayjs from "dayjs";
 import { authAPI, endpoints } from "../config/Api";
 import { CustomerSnackbar } from "../Common/Common";
 import { CircularProgress } from "@mui/material";
 import VoucherForm from "../VoucherForm/VoucherForm";
 
-const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
-  { onCancel, paymentPhase1UrlForm },
+const PaymentForm = forwardRef(function PaymentForm(
+  { onCancel, urs, me, pis },
   ref
 ) {
   const dialog2 = useRef();
@@ -26,6 +26,7 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
   const [code, setCode] = useState("");
 
   const [finalPrice, setFinalPrice] = useState(100000);
+  const [totalPisPrice, setTotalPisPrice] = useState(0);
 
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
@@ -63,23 +64,18 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
     };
   });
 
-  const handleMOMOPaymentPhase1 = async (amount, mrlId) => {
+  const handleMOMOPayment = async (amount, mrlId) => {
     setLoading(true);
     let response;
     try {
       response = await authAPI().post(
-        endpoints["benhnhanMOMOPaymentPhase1"],
-        voucher !== null
-          ? {
-              amount: amount,
-              mrlId: mrlId,
-              voucherId: voucher.id,
-            }
-          : {
-              amount: amount,
-              mrlId: mrlId,
-              voucherId: null,
-            },
+        endpoints["benhnhanMOMOPayment"],
+        {
+          amount,
+          mrlId,
+          voucherId: voucher ? voucher.id : null,
+          meId : me ? me.id : null,
+        },
         {
           validateStatus: function (status) {
             return status < 500; // Chỉ ném lỗi nếu status code >= 500
@@ -104,23 +100,18 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
     }
   };
 
-  const handleVNPAYPaymentPhase1 = async (amount, mrlId) => {
+  const handleVNPAYPayment = async (amount, mrlId) => {
     setLoading(true);
     let response;
     try {
       response = await authAPI().post(
-        endpoints["benhnhanVNPAYPaymentPhase1"],
-        voucher !== null
-          ? {
-              amount: amount,
-              mrlId: mrlId,
-              voucherId: voucher.id,
-            }
-          : {
-              amount: amount,
-              mrlId: mrlId,
-              voucherId: null,
-            },
+        endpoints["benhnhanVNPAYPayment"],
+        {
+          amount,
+          mrlId,
+          voucherId: voucher ? voucher.id : null,
+          meId : me ? me.id : null,
+        },
         {
           validateStatus: function (status) {
             return status < 500; // Chỉ ném lỗi nếu status code >= 500
@@ -186,13 +177,31 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
 
   useEffect(() => {
     if (voucher !== null) {
-      setFinalPrice(
-        100000 - (100000 * voucher.voucherCondition.percentSale) / 100
-      ); // set giá ở đây nè
+      if (me === null && urs !== null && pis === null) {
+        setFinalPrice(
+          100000 - (100000 * voucher.voucherCondition.percentSale) / 100
+        );
+      } else if (me !== null && pis !== null) {
+        let sum = handleTotalPisPrice(pis);
+        setTotalPisPrice(sum);
+        setFinalPrice(sum - (sum * voucher.voucherCondition.percentSale) / 100);
+      }
     } else {
-      setFinalPrice(100000);
+      if (me === null && urs !== null && pis === null) {
+        setFinalPrice(100000);
+      } else if (me !== null && pis !== null) {
+        let sum = handleTotalPisPrice(pis);
+        setTotalPisPrice(sum);
+        setFinalPrice(sum);
+      }
     }
-  }, [voucher, finalPrice]);
+  }, [voucher, finalPrice, me, pis]);
+
+  function handleTotalPisPrice(pis) {
+    return pis.reduce((total, p) => {
+      return total + p.medicine.price * p.prognosis;
+    }, 0);
+  }
 
   return (
     <>
@@ -247,7 +256,9 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
               <div className="row">
                 <div className="text-center">
                   <h1 style={{ color: "green", marginTop: "10px" }}>
-                    HÓA ĐƠN ĐĂNG KÍ KHÁM BỆNH
+                    {me === null
+                      ? "HÓA ĐƠN ĐĂNG KÍ KHÁM BỆNH"
+                      : "HÓA ĐƠN THANH TOÁN ĐƠN THUỐC"}
                   </h1>
                 </div>
 
@@ -256,42 +267,38 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
                     <div className="card-body">
                       <h4 className="card-title">Thông tin bệnh nhân : </h4>
 
-                      {paymentPhase1UrlForm !== null && (
+                      {me === null && urs !== null && (
                         <>
                           <div className="row d-flex">
                             <div className="col-xs-6 col-sm-6 col-md-6">
                               <p>
                                 <span>Mã phiếu đăng ký : </span>
                                 <strong className="d-inline">
-                                  #MSPDKLK{paymentPhase1UrlForm.id}
+                                  #MSPDKLK{urs.id}
                                 </strong>
                               </p>
                               <p>
                                 <span>Tên người đăng ký : </span>
-                                <strong>{paymentPhase1UrlForm.name}</strong>
+                                <strong>{urs.name}</strong>
                               </p>
                               <p>
                                 <span>Số điện thoại : </span>
-                                <strong>
-                                  {paymentPhase1UrlForm.user.phone}
-                                </strong>
+                                <strong>{urs.user.phone}</strong>
                               </p>
                             </div>
                             <div className="col-xs-6 col-sm-6 col-md-6 text-end">
                               <p>
                                 <span>Ngày đăng ký khám : </span>
                                 <strong>
-                                  {dayjs(
-                                    paymentPhase1UrlForm.createdDate
-                                  ).format("DD/MM/YYYY")}
+                                  {dayjs(urs.createdDate).format("DD/MM/YYYY")}
                                 </strong>
                               </p>
                               <p>
                                 <span>Ngày hẹn khám : </span>
                                 <strong>
-                                  {dayjs(
-                                    paymentPhase1UrlForm.schedule.date
-                                  ).format("DD/MM/YYYY")}
+                                  {dayjs(urs.schedule.date).format(
+                                    "DD/MM/YYYY"
+                                  )}
                                 </strong>
                               </p>
                             </div>
@@ -302,7 +309,82 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
                                 <span>
                                   Nhu cầu khám :{" "}
                                   <strong className="d-inline">
-                                    {paymentPhase1UrlForm.favor}
+                                    {urs.favor}
+                                  </strong>
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {me !== null && urs !== null && (
+                        <>
+                          <div className="row d-flex">
+                            <div className="col-xs-6 col-sm-6 col-md-6">
+                              <p>
+                                <span>Mã phiếu khám : </span>
+                                <strong className="d-inline">
+                                  #MSPK{me.id}
+                                </strong>
+                              </p>
+                              <p>
+                                <span>Tên bệnh nhân : </span>
+                                <strong>{urs.name}</strong>
+                              </p>
+                              <p>
+                                <span>Số điện thoại : </span>
+                                <strong>{urs.user.phone}</strong>
+                              </p>
+                            </div>
+                            <div className="col-xs-6 col-sm-6 col-md-6 text-end">
+                              <p>
+                                <span>Ngày lập phiếu khám : </span>
+                                <strong>
+                                  {dayjs(me.createdDate).format("DD/MM/YYYY")}
+                                </strong>
+                              </p>
+
+                              <p>
+                                <span>Bác sĩ : </span>
+                                <strong>
+                                  {me.userCreated.name} ({me.userCreated.phone})
+                                </strong>
+                              </p>
+                              <p>
+                                <span>Ngày tái khám : </span>
+                                <strong>
+                                  {me.followUpDate === null
+                                    ? "Không có"
+                                    : dayjs(me.followUpDate).format(
+                                        "DD/MM/YYYY"
+                                      )}
+                                </strong>
+                              </p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-xs-12">
+                              <p>
+                                <span>
+                                  Số ngày cấp thuốc :{" "}
+                                  <strong className="d-inline">
+                                    {me.durationDay}
+                                  </strong>
+                                </span>
+                              </p>
+                              <p>
+                                <span>
+                                  Chuẩn đoán :{" "}
+                                  <strong className="d-inline">
+                                    {me.predict}
+                                  </strong>
+                                </span>
+                              </p>
+                              <p>
+                                <span>
+                                  Lời khuyên :{" "}
+                                  <strong className="d-inline">
+                                    {me.advance}
                                   </strong>
                                 </span>
                               </p>
@@ -314,56 +396,107 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
                   </div>
                 </div>
                 <div className="container">
-                  {/* <table className="table table-hover">
-                    <thead>
-                      <tr>
-                        <th>Danh sách thuốc :</th>
-                        <th className="text-center">Giá tiền</th>
-                        <th className="text-center">Số lượng cấp</th>
-                        <th className="text-center">Đơn vị thuốc</th>
-                        <th className="text-center">Tổng tiền</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table> */}
+                  {me !== null && urs !== null && (
+                    <table className="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Danh sách thuốc :</th>
+                          <th className="text-center">Giá tiền</th>
+                          <th className="text-center">Số lượng cấp</th>
+                          <th className="text-center">Đơn vị thuốc</th>
+                          <th className="text-center">Tổng tiền</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pis !== null &&
+                          pis.length > 0 &&
+                          pis.map((p) => {
+                            return (
+                              <tr>
+                                <td class="col-md-9">
+                                  <h4>
+                                    <em>{p.medicine.name}</em>
+                                  </h4>
+                                  {p.usage}
+                                </td>
+                                <td class="col-md-1 text-center">
+                                  {p.medicine.price.toLocaleString("vi-VN")}
+                                </td>
+                                <td class="col-md-1 text-center">
+                                  {p.prognosis}
+                                </td>
+                                <td class="col-md-1 text-center">
+                                  {p.medicine.unitType.unitName}
+                                </td>
+                                <td class="col-md-1 text-center">
+                                  {(
+                                    p.medicine.price * p.prognosis
+                                  ).toLocaleString("vi-VN")}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  )}
+                  {me === null && urs !== null && (
+                    <table className="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Tiền khám </th>
+                          <th className="text-center"></th>
+                          <th className="text-center"></th>
+                          <th className="text-center"></th>
+                          <th className="text-center">Tổng tiền</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="col-md-9">
+                            <h5>
+                              <em>Tiền khám cơ bản </em>
+                            </h5>
+                          </td>
+                          <td></td>
+                          <td></td>
+                          <td> </td>
+                          <td className="text-center">100.000</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  )}
                   <table className="table table-hover">
-                    <thead>
-                      <tr>
-                        <th>Tiền khám </th>
-                        <th className="text-center"></th>
-                        <th className="text-center"></th>
-                        <th className="text-center"></th>
-                        <th className="text-center">Tổng tiền</th>
-                      </tr>
-                    </thead>
                     <tbody>
-                      <tr>
-                        <td className="col-md-9">
-                          <h5>
-                            <em>Tiền khám cơ bản </em>
-                          </h5>
-                        </td>
-                        <td></td>
-                        <td></td>
-                        <td> </td>
-                        <td className="text-center">100.000</td>
-                      </tr>
                       <tr>
                         <td className="col-md-9">
                           {voucher !== null && (
                             <h5>
-                              <em>Áp dụng mã giảm giá </em>
+                              <em className="text text-success">
+                                Áp dụng mã giảm giá{" "}
+                              </em>
                             </h5>
                           )}
                         </td>
                         <td></td>
                         <td></td>
                         <td> </td>
-                        {voucher !== null && (
+                        {voucher !== null && me === null && pis === null && (
                           <td className="text-center">
                             -
                             {(
                               (100000 * voucher.voucherCondition.percentSale) /
+                              100
+                            ).toLocaleString("vi-VN")}
+                            ({voucher.voucherCondition.percentSale}%)
+                          </td>
+                        )}
+
+                        {voucher !== null && me !== null && pis !== null && (
+                          <td className="text-center">
+                            -
+                            {(
+                              (totalPisPrice *
+                                voucher.voucherCondition.percentSale) /
                               100
                             ).toLocaleString("vi-VN")}
                             ({voucher.voucherCondition.percentSale}%)
@@ -421,7 +554,7 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
                   </table>
                 </div>
 
-                {paymentPhase1UrlForm !== null &&
+                {urs !== null &&
                   (loading ? (
                     <div className="d-flex justify-content-center align-item-center">
                       <CircularProgress className="mt-3" />
@@ -433,10 +566,7 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
                           <button
                             className="button-vnpay-payment"
                             onClick={() =>
-                              handleVNPAYPaymentPhase1(
-                                finalPrice,
-                                paymentPhase1UrlForm.id
-                              )
+                              handleVNPAYPayment(finalPrice, urs.id)
                             }
                           >
                             <div className="icon-vnpay-div">
@@ -453,10 +583,7 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
                           <button
                             className="button-momo-payment"
                             onClick={() =>
-                              handleMOMOPaymentPhase1(
-                                finalPrice,
-                                paymentPhase1UrlForm.id
-                              )
+                              handleMOMOPayment(finalPrice, urs.id)
                             }
                           >
                             <div className="icon-momo-div">
@@ -480,4 +607,4 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
   );
 });
 
-export default PaymentPhase1Form;
+export default PaymentForm;

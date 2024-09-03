@@ -24,7 +24,7 @@ public class PaymentMOMODetailServiceImpl implements PaymentMOMODetailService {
 	private RestTemplate restTemplate;
 
 	@Override
-	public Map<String, Object> generateUrlPayment(Long amount, MedicalRegistryList mrl,
+	public Map<String, Object> generateMOMOUrlPayment(Long amount, MedicalRegistryList mrl,
 			Voucher voucher) {
 
 		String apiUrl = PaymentMomoConfig.momo_ApiUrl;
@@ -48,6 +48,9 @@ public class PaymentMOMODetailServiceImpl implements PaymentMOMODetailService {
 		extraDataBody.put("mrl", mrl);
 		if (voucher != null)
 			extraDataBody.put("voucher", voucher);
+
+		if (mrl.getMedicalExamination() != null)
+			extraDataBody.put("me", mrl.getMedicalExamination());
 
 		extraData = PaymentMomoConfig.Base64Encode(extraDataBody);
 

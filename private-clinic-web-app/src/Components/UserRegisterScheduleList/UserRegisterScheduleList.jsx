@@ -7,12 +7,15 @@ import dayjs from "dayjs";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DeleteConfirmationForm from "../DeleteConfirmationForm/DeleteConfirmationForm";
 import { UserContext } from "../config/Context";
-import PaymentPhase1Form from "../PaymentPhase1Form/PaymentPhase1Form";
+import PaymentPhase1Form from "../PaymentPhase1Form/PaymentForm";
+import PaymentForm from "../PaymentPhase1Form/PaymentForm";
 
 export default function UserRegisterScheduleList() {
   const [userRegisterScheduleList, setUserRegisterScheduleList] = useState([]);
   const [registerScheduleId, setRegisterScheduleId] = useState(null);
-  const [paymentPhase1UrlForm , setPaymentPhase1UrlForm] = useState(null)
+  const [urs, setUrs] = useState(null);
+  const [me, setMe] = useState(null);
+  const [pis, setPis] = useState(null);
 
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
@@ -40,7 +43,7 @@ export default function UserRegisterScheduleList() {
   };
 
   const deleteFormRef = useRef();
-  const paymentPhase1FormRef = useRef();
+  const paymentFormRef = useRef();
 
   const loadUserRegisterScheduleList = useCallback(async () => {
     let response;
@@ -56,7 +59,13 @@ export default function UserRegisterScheduleList() {
         if (response.status === 200) {
           setUserRegisterScheduleList(response.data);
           setTotalPage(response.data.totalPages);
-        } else showSnackbar(response.data, "error");
+          setMe(null);
+          setPis(null);
+        } else {
+          showSnackbar(response.data, "error");
+          setMe(null);
+          setPis(null);
+        }
       } catch {
         showSnackbar("Lỗi", "error");
       }
@@ -67,6 +76,8 @@ export default function UserRegisterScheduleList() {
     if (currentUser !== null) {
       loadUserRegisterScheduleList();
       setIsCanceled(false);
+      setMe(null);
+      setPis(null);
     }
   }, [page, currentUser, isCanceled]);
 
@@ -90,6 +101,23 @@ export default function UserRegisterScheduleList() {
     }
   };
 
+  const getMEByMrlId = async (mrlId) => {
+    let response;
+    try {
+      response = await authAPI().get(endpoints["benhnhanGetMEByMrlId"](mrlId), {
+        validateStatus: function (status) {
+          return status < 500;
+        },
+      });
+      if (response.status === 200) {
+        setMe(response.data.me);
+        setPis(response.data.pis);
+      } else showSnackbar(response.data, "error");
+    } catch {
+      showSnackbar("Lỗi", "error");
+    }
+  };
+
   function handleOpenDeleteConfirmForm(registerScheduleId) {
     deleteFormRef.current.open();
     setRegisterScheduleId(registerScheduleId);
@@ -100,13 +128,23 @@ export default function UserRegisterScheduleList() {
     deleteFormRef.current.close();
   }
 
-  function handleOpenPaymentPhase1Form(paymentPhase1UrlForm) {
-    setPaymentPhase1UrlForm(() => paymentPhase1UrlForm)
-    paymentPhase1FormRef.current.open();
+  function handleOpenPaymentPhase1Form(urs) {
+    setMe(null);
+    setPis(null);
+    setUrs(() => urs);
+    paymentFormRef.current.open();
   }
 
-  function handleClosePaymentPhase1Form() {
-    paymentPhase1FormRef.current.close();
+  function handleOpenPaymentPhase2Form(urs) {
+    setUrs(() => urs);
+    getMEByMrlId(urs.id);
+    paymentFormRef.current.open();
+  }
+
+  function handleClosePaymentForm() {
+    paymentFormRef.current.close();
+    setMe(null)
+    setPis(null)
   }
 
   return (
@@ -121,11 +159,12 @@ export default function UserRegisterScheduleList() {
         message={data.message}
         severity={data.severity}
       />
-      <PaymentPhase1Form
-        ref={paymentPhase1FormRef}
-        onCancel={handleClosePaymentPhase1Form}
-        paymentPhase1UrlForm={paymentPhase1UrlForm}
-        
+      <PaymentForm
+        ref={paymentFormRef}
+        onCancel={handleClosePaymentForm}
+        urs={urs}
+        me={me}
+        pis={pis}
       />
       {userRegisterScheduleList.empty !== true && (
         <Pagination
@@ -173,7 +212,8 @@ export default function UserRegisterScheduleList() {
                       <div className="col col-5" data-label="Note">
                         {urs.statusIsApproved.note}
                       </div>
-                      {urs.statusIsApproved.status !== "PAYMENTPHASE1" ? (
+                      {urs.statusIsApproved.status !== "PAYMENTPHASE1" &&
+                      urs.statusIsApproved.status !== "PAYMENTPHASE2" ? (
                         <button
                           onClick={() => handleOpenDeleteConfirmForm(urs.id)}
                           className={`col col-6 btn ${
@@ -187,12 +227,22 @@ export default function UserRegisterScheduleList() {
                         </button>
                       ) : (
                         <>
-                          <button
-                            className="col col-6 btn btn-success"
-                            onClick={() => handleOpenPaymentPhase1Form(urs)}
-                          >
-                            Thanh toán lấy mã QR
-                          </button>
+                          {urs.statusIsApproved.status === "PAYMENTPHASE1" && (
+                            <button
+                              className="col col-6 btn btn-success"
+                              onClick={() => handleOpenPaymentPhase1Form(urs)}
+                            >
+                              Thanh toán lấy mã QR
+                            </button>
+                          )}
+                          {urs.statusIsApproved.status === "PAYMENTPHASE2" && (
+                            <button
+                              className="col col-6 btn btn-success"
+                              onClick={() => handleOpenPaymentPhase2Form(urs)}
+                            >
+                              Thanh toán lấy thuốc
+                            </button>
+                          )}
                         </>
                       )}
                     </li>

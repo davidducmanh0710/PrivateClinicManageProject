@@ -183,13 +183,10 @@ public class ApiBacsiRestController {
 			return new ResponseEntity<>("Không tồn tại đơn hẹn khám cho đơn thuốc này",
 					HttpStatus.NOT_FOUND);
 
-		StatusIsApproved statusIsApproved;
+		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("PAYMENTPHASE2");
 		MedicalExamination medicalExamination = new MedicalExamination();
 
-		if (medicalExamDto.getFollowUpDate() == null) {
-			statusIsApproved = statusIsApprovedService.findByStatus("FINISHED");
-		} else {
-			statusIsApproved = statusIsApprovedService.findByStatus("FOLLOWUP");
+		if (medicalExamDto.getFollowUpDate() != null) {
 			medicalExamination.setFollowUpDate(medicalExamDto.getFollowUpDate());
 		}
 

@@ -9,8 +9,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaymentIniPhase1Dto {
+public class PaymentInitDto {
 	private Long amount;
 	private Integer mrlId;
 	private Integer voucherId;
+	private Integer meId;
 }

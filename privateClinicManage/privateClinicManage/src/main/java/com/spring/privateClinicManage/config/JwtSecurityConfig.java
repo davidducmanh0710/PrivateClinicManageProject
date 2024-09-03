@@ -60,8 +60,8 @@ public class JwtSecurityConfig {
 				.requestMatchers(HttpMethod.GET,
 						"/api/users/getAllStatusIsApproved/",
 						"/api/qr/barcodes/zxing/qrcode/",
-						"/api/payment/momo/phase1-return/",
-						"/api/payment/vnpay/phase1-return/")
+						"/api/payment/momo/return/",
+						"/api/payment/vnpay/return/")
 				.permitAll()
 
 				.requestMatchers(HttpMethod.POST,
@@ -71,6 +71,10 @@ public class JwtSecurityConfig {
 						"/api/pdf/generate/",
 						"/api/users/take-order-from-qrCode/")
 				.permitAll()
+
+				.requestMatchers(HttpMethod.GET,
+						"/api/benhnhan/get-medical-exam-by-mrlId/{mrlId}/")
+				.hasRole("BENHNHAN")
 
 				.requestMatchers(HttpMethod.POST,
 						"/api/benhnhan/register-schedule/",
