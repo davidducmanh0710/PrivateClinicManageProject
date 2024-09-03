@@ -69,11 +69,17 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
     try {
       response = await authAPI().post(
         endpoints["benhnhanMOMOPaymentPhase1"],
-        {
-          amount: amount,
-          mrlId: mrlId,
-          voucherId : voucher.id
-        },
+        voucher !== null
+          ? {
+              amount: amount,
+              mrlId: mrlId,
+              voucherId: voucher.id,
+            }
+          : {
+              amount: amount,
+              mrlId: mrlId,
+              voucherId: null,
+            },
         {
           validateStatus: function (status) {
             return status < 500; // Chỉ ném lỗi nếu status code >= 500
@@ -104,10 +110,17 @@ const PaymentPhase1Form = forwardRef(function PaymentPhase1Form(
     try {
       response = await authAPI().post(
         endpoints["benhnhanVNPAYPaymentPhase1"],
-        {
-          amount: amount,
-          mrlId: mrlId,
-        },
+        voucher !== null
+          ? {
+              amount: amount,
+              mrlId: mrlId,
+              voucherId: voucher.id,
+            }
+          : {
+              amount: amount,
+              mrlId: mrlId,
+              voucherId: null,
+            },
         {
           validateStatus: function (status) {
             return status < 500; // Chỉ ném lỗi nếu status code >= 500

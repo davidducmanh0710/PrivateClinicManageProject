@@ -20,12 +20,16 @@ import com.spring.privateClinicManage.entity.MedicalRegistryList;
 import com.spring.privateClinicManage.entity.PaymentDetailPhase1;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
 import com.spring.privateClinicManage.entity.User;
+import com.spring.privateClinicManage.entity.UserVoucher;
+import com.spring.privateClinicManage.entity.Voucher;
 import com.spring.privateClinicManage.service.MailSenderService;
 import com.spring.privateClinicManage.service.MedicalRegistryListService;
 import com.spring.privateClinicManage.service.PaymentDetailPhase1Service;
 import com.spring.privateClinicManage.service.PaymentVNPAYDetailService;
 import com.spring.privateClinicManage.service.StatusIsApprovedService;
 import com.spring.privateClinicManage.service.UserService;
+import com.spring.privateClinicManage.service.UserVoucherService;
+import com.spring.privateClinicManage.service.VoucherService;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +52,10 @@ public class ApiVNPAYPaymentController {
 	private StatusIsApprovedService statusIsApprovedService;
 	@Autowired
 	private MailSenderService mailSenderService;
+	@Autowired
+	private VoucherService voucherService;
+	@Autowired
+	private UserVoucherService userVoucherService;
 
 	@PostMapping(path = "/phase1/")
 	@CrossOrigin
@@ -76,8 +84,18 @@ public class ApiVNPAYPaymentController {
 			return new ResponseEntity<>("Không thể thanh toán vì đã hủy lịch hẹn !",
 					HttpStatus.UNAUTHORIZED);
 
+		Integer voucherId = paymentIniPhase1Dto.getVoucherId();
+		Voucher voucher = null;
+
+		if (voucherId != null) {
+			voucher = voucherService.findVoucherById(voucherId);
+			if (voucher == null)
+				return new ResponseEntity<>("Mã giảm giá này không tồn tại !",
+						HttpStatus.NOT_FOUND);
+		}
+
 		String paymentPhase1Url = paymentVNPAYDetailService
-				.generateUrlPayment(paymentIniPhase1Dto.getAmount(), mrl);
+				.generateUrlPayment(paymentIniPhase1Dto.getAmount(), mrl, voucher);
 
 		return new ResponseEntity<>(paymentPhase1Url, HttpStatus.OK);
 	}
@@ -90,7 +108,8 @@ public class ApiVNPAYPaymentController {
 		String vnpResponseCode = params.get("vnp_ResponseCode");
 
 		if (vnpResponseCode.equals("00")) {
-			Integer mrlId = Integer.parseInt(params.get("vnp_OrderInfo"));
+			String[] items = String.valueOf(params.get("vnp_OrderInfo")).split("_");
+			Integer mrlId = Integer.parseInt(items[0]);
 
 			MedicalRegistryList mrl = medicalRegistryListService.findById(mrlId);
 
@@ -113,6 +132,25 @@ public class ApiVNPAYPaymentController {
 			mrl.setPaymentPhase1(pdp1);
 
 			paymentDetailPhase1Service.savePdp1(pdp1);
+
+			if (!items[1].equals("0")) {
+
+				Voucher voucher = voucherService.findVoucherById(Integer.parseInt(items[1]));
+				UserVoucher userVoucher = userVoucherService.findByUserAndVoucher(mrl.getUser(),
+						voucher);
+
+				if (userVoucher != null) {
+					userVoucher.setIsUsed(true);
+				} else {
+					userVoucher = new UserVoucher();
+					userVoucher.setIsOwned(false);
+					userVoucher.setIsUsed(true);
+					userVoucher.setUser(mrl.getUser());
+					userVoucher.setVoucher(voucher);
+				}
+
+				userVoucherService.saveUserVoucher(userVoucher);
+			}
 
 			StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("SUCCESS");
 			try {

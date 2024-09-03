@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.spring.privateClinicManage.config.PaymentVnPayConfig;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
+import com.spring.privateClinicManage.entity.Voucher;
 import com.spring.privateClinicManage.service.PaymentVNPAYDetailService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +33,7 @@ public class PaymentVNPAYDetailServiceImpl implements PaymentVNPAYDetailService 
 	private HttpServletResponse resp;
 
 	@Override
-	public String generateUrlPayment(Long amount, MedicalRegistryList mrl)
+	public String generateUrlPayment(Long amount, MedicalRegistryList mrl, Voucher voucher)
 			throws UnsupportedEncodingException {
 
 		String vnp_Version = "2.1.0"; // phiên bản
@@ -57,7 +58,12 @@ public class PaymentVNPAYDetailServiceImpl implements PaymentVNPAYDetailService 
 			vnp_Params.put("vnp_BankCode", bankCode); // nếu bankcode rỗng thì chọn ngân hàng
 		}
 		vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-		vnp_Params.put("vnp_OrderInfo", "" + mrl.getId());
+
+		if (voucher == null)
+			vnp_Params.put("vnp_OrderInfo", "" + mrl.getId() + "_" + "0");
+		else
+			vnp_Params.put("vnp_OrderInfo", "" + mrl.getId() + "_" + voucher.getId());
+
 		vnp_Params.put("vnp_OrderType", orderType);
 
 		String locate = req.getParameter("language");

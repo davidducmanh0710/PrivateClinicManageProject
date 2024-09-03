@@ -141,22 +141,24 @@ public class ApiMOMOPaymentController {
 
 			paymentDetailPhase1Service.savePdp1(pdp1);
 
-			Voucher tempVoucher = (Voucher) extraDataBody.get("voucher");
-			Voucher voucher = voucherService.findVoucherById(tempVoucher.getId());
+			Voucher tempVoucher = (Voucher) extraDataBody.getOrDefault("voucher", null);
+			if (tempVoucher != null) {
+				Voucher voucher = voucherService.findVoucherById(tempVoucher.getId());
 
-			UserVoucher userVoucher = userVoucherService.findByUserAndVoucher(mrl.getUser(),
-					voucher);
-			if (userVoucher != null) {
-				userVoucher.setIsUsed(true);
-			} else {
-				userVoucher = new UserVoucher();
-				userVoucher.setIsOwned(false);
-				userVoucher.setIsUsed(true);
-				userVoucher.setUser(mrl.getUser());
-				userVoucher.setVoucher(voucher);
+				UserVoucher userVoucher = userVoucherService.findByUserAndVoucher(mrl.getUser(),
+						voucher);
+				if (userVoucher != null) {
+					userVoucher.setIsUsed(true);
+				} else {
+					userVoucher = new UserVoucher();
+					userVoucher.setIsOwned(false);
+					userVoucher.setIsUsed(true);
+					userVoucher.setUser(mrl.getUser());
+					userVoucher.setVoucher(voucher);
+				}
+
+				userVoucherService.saveUserVoucher(userVoucher);
 			}
-
-			userVoucherService.saveUserVoucher(userVoucher);
 
 			StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("SUCCESS");
 			try {
