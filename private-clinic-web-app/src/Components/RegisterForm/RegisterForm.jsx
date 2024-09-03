@@ -31,8 +31,9 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
   });
   const [otpButtonDisabled, setOtpButtonDisabled] = useState(false);
   const [otpCountdown, setOtpCountdown] = useState(30);
-
   const dialog = useRef();
+
+  const countdownIntervalRef = useRef(null);
 
   useImperativeHandle(ref, () => {
     return {
@@ -47,6 +48,19 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
       },
     };
   });
+
+  const showSnackbar = (message, severity) => {
+    setData({
+      message: message,
+      severity: severity,
+    });
+
+    setOpen(true);
+
+    setTimeout(() => {
+      setOpen(false);
+    }, 2500);
+  };
 
   function handleFormRegisterState(e) {
     const { name, value } = e.target;
@@ -92,13 +106,18 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
           name: "",
           email: "",
           phone: "",
-          gender: "",
+          gender: "male",
           birthday: "",
           address: "",
           password: "",
           otp: "",
         });
         dialog.current.close();
+        if (countdownIntervalRef.current) {
+          clearInterval(countdownIntervalRef.current);
+          setOtpButtonDisabled(false);
+          setOtpCountdown(30);
+        }
       } else if (response.status !== 201) {
         showSnackbar(response.data, "error");
       }
@@ -129,10 +148,11 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
       if (response.status === 200) {
         showSnackbar("Đã gửi OTP cho email !", "success");
         setOtpButtonDisabled(true);
-        const countdownInterval = setInterval(() => {
+
+        countdownIntervalRef.current = setInterval(() => {
           setOtpCountdown((prevCountdown) => {
             if (prevCountdown === 1) {
-              clearInterval(countdownInterval);
+              clearInterval(countdownIntervalRef.current);
               setOtpButtonDisabled(false);
               setOtpCountdown(30);
             }
@@ -145,19 +165,6 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
     } catch {
       showSnackbar("Lỗi", "error");
     }
-  };
-
-  const showSnackbar = (message, severity) => {
-    setData({
-      message: message,
-      severity: severity,
-    });
-
-    setOpen(true);
-
-    setTimeout(() => {
-      setOpen(false);
-    }, 2500);
   };
 
   return (
@@ -203,6 +210,7 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
                         type="radio"
                         name="gender"
                         id="male"
+                        defaultValue={formRegisterState.gender = "male"}
                         value={(formRegisterState.gender = "male")}
                         onChange={handleFormRegisterState}
                       />
@@ -324,7 +332,9 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
                 <button
                   type="submit"
                   className={`btn bt-register w-100 ${
-                    activeRegister ? "" : "disabled"
+                    activeRegister && formRegisterState.otp !== ""
+                      ? ""
+                      : "disabled"
                   }`}
                 >
                   ĐĂNG KÝ
