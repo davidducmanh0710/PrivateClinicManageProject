@@ -93,5 +93,9 @@ public class User implements Serializable {
 	@JsonIgnore
 	private List<UserVoucher> userVoucher;
 
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Blog> blogs;
+
 
 }

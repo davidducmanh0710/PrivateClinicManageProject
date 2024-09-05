@@ -102,31 +102,11 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
     }, 2400);
   };
 
-  // const connectWsInit = () => {
-  //   let stompClient = null;
-  //   let socket = new SockJS(`${BASE_URL}/ws`);
-  //   stompClient = over(socket);
-  //   stompClient.connect(
-  //     {},
-  //     () => {
-  //       stompClient.subscribe("/notify/registerContainer/", (payload) => {
-  //         console.log(payload)
-  //       });
-  //     },
-  //     onError
-  //   );
-  // };
-
-  // function onConnected() {
-  //     stompClient.subscribe('/notify/registerContainer/', onNotifyReceived); // subscribe là hàm callback
-  // }
   function onError() {
     showSnackbar("Lỗi", "error");
   }
 
-  // function onNotifyReceived(payload) {
-  //   console.log(payload)
-  // }
+
 
   return (
     <>

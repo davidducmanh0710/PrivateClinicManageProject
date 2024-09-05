@@ -85,7 +85,7 @@ export default function Header() {
                     <i className="fab fa-instagram"></i>
                   </a>
                 </div>
-                { currentUser && <NotificationContainer />}
+                {currentUser && <NotificationContainer />}
 
                 {currentUser ? (
                   <>
@@ -176,7 +176,9 @@ export default function Header() {
                 <a className="nav-item nav-link active">Trang chủ</a>
                 <a className="nav-item nav-link">Giới thiệu</a>
                 <a className="nav-item nav-link">Đội ngũ</a>
-                <a className="nav-item nav-link">Tư vấn</a>
+                <Link className="nav-item nav-link" to="/advise-section">
+                  Tư vấn
+                </Link>
                 <div className="nav-item dropdown">
                   <a className="nav-link" data-bs-toggle="dropdown">
                     <span className="dropdown-toggle">Dịch vụ</span>
@@ -223,11 +225,7 @@ export default function Header() {
                 </div>
                 <a className="nav-item nav-link">Contact</a>
                 <div className="nav-btn px-3">
-                  <button
-                    className="btn-search btn btn-success btn-md-square rounded-circle flex-shrink-0"
-                    data-bs-toggle="modal"
-                    data-bs-target="#searchModal"
-                  >
+                  <button className="btn-search btn btn-success btn-md-square rounded-circle flex-shrink-0">
                     <i className="fas fa-search"></i>
                   </button>
                 </div>

@@ -112,6 +112,11 @@ public class JwtSecurityConfig {
 						"/api/bacsi/get-history-user-register/")
 				.hasRole("BACSI")
 
+				.requestMatchers("/api/anyrole/blogs/",
+						"/api/anyrole/blogs/{blogId}/get-comment-blog/")
+				.permitAll()
+				.requestMatchers("/api/anyrole/**").hasAnyRole("BENHNHAN", "BACSI", "YTA")
+
 				.anyRequest().authenticated())
 				.httpBasic(httpbc -> httpbc
 						.authenticationEntryPoint(restServicesEntryPoint()))
