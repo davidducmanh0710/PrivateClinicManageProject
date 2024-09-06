@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,13 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.spring.privateClinicManage.dto.BlogDto;
 import com.spring.privateClinicManage.dto.CommentDto;
+import com.spring.privateClinicManage.dto.CountDto;
 import com.spring.privateClinicManage.entity.Blog;
 import com.spring.privateClinicManage.entity.Comment;
 import com.spring.privateClinicManage.entity.CommentBlog;
+import com.spring.privateClinicManage.entity.LikeBlog;
 import com.spring.privateClinicManage.entity.User;
 import com.spring.privateClinicManage.service.BlogService;
 import com.spring.privateClinicManage.service.CommentBlogService;
 import com.spring.privateClinicManage.service.CommentService;
+import com.spring.privateClinicManage.service.LikeBlogService;
 import com.spring.privateClinicManage.service.UserService;
 
 @RestController
@@ -43,11 +47,15 @@ public class ApiAnyRoleRestController {
 	private CommentBlogService commentBlogService;
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
+	@Autowired
+	private LikeBlogService likeBlogService;
 
 
 	@GetMapping(path = "/blogs/")
 	@CrossOrigin
 	public ResponseEntity<Object> getAllBlogs(@RequestParam Map<String, String> params) {
+
+		User currentUser = userService.getCurrentLoginUser();
 
 		Integer page = Integer.parseInt(params.getOrDefault("page", "1"));
 		Integer size = Integer.parseInt(params.getOrDefault("size", "5"));
@@ -67,6 +75,15 @@ public class ApiAnyRoleRestController {
 			List<CommentBlog> cb = commentBlogService.findByBlog(b);
 			Boolean isCommented = cb == null || cb.size() < 1 ? false : true;
 			b.setIsCommented(isCommented);
+
+			if (currentUser != null) {
+				LikeBlog likeBlog = likeBlogService.findLikeBlogByUserAndBlog(currentUser, b);
+				Boolean hasLiked = likeBlog == null ? false : likeBlog.getHasLiked();
+				b.setHasLiked(hasLiked);
+			} else {
+				b.setHasLiked(false);
+			}
+
 		});
 
 		Page<Blog> allBlogsPaginated = blogService
@@ -144,6 +161,54 @@ public class ApiAnyRoleRestController {
 				commentBlog);
 
 		return new ResponseEntity<>(commentBlog, HttpStatus.CREATED);
+	}
+
+	@GetMapping(path = "/blogs/{blogId}/count-likes/")
+	@CrossOrigin
+	public ResponseEntity<Object> countLikeBlog(@PathVariable("blogId") Integer blogId) {
+
+		Blog blog = blogService.findById(blogId);
+		if (blog == null)
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+		Integer countLikesBlog = likeBlogService.countLikeBlogByBlog(blog);
+
+		return new ResponseEntity<>(new CountDto(countLikesBlog), HttpStatus.OK);
+	}
+
+	@PostMapping(path = "/blogs/{blogId}/likes/")
+	@CrossOrigin
+	@Async
+	public ResponseEntity<Object> toggleLikeBlog(@PathVariable("blogId") Integer blogId) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		Blog blog = blogService.findById(blogId);
+
+		if (blog == null || currentUser == null)
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+		LikeBlog likeBlog = likeBlogService.findLikeBlogByUserAndBlog(currentUser, blog);
+		if (likeBlog != null) {
+
+			Boolean hasLiked = likeBlog.getHasLiked();
+
+			likeBlog.setHasLiked(!hasLiked);
+			blog.setHasLiked(!hasLiked);
+			likeBlog.setBlog(blog);
+
+			likeBlogService.saveLikeBlog(likeBlog);
+
+			return new ResponseEntity<>(likeBlog, HttpStatus.OK);
+		}
+
+		likeBlog = new LikeBlog();
+		likeBlog.setBlog(blog);
+		likeBlog.setUser(currentUser);
+		likeBlog.setHasLiked(true);
+		blog.setHasLiked(true);
+		likeBlogService.saveLikeBlog(likeBlog);
+
+		return new ResponseEntity<>(likeBlog, HttpStatus.OK);
 	}
 
 

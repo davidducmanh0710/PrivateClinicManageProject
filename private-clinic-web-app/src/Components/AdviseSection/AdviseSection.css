@@ -92,8 +92,26 @@
     flex-direction: column;
   }
 
+  .header-card-container {
+    display: flex;
+    justify-content: space-between;
+
+  }
+
   .base-infor{
     display: flex;
+  }
+  
+
+  .like-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fa-regular .fa-heart .fa-sm {
+    color: red;
   }
 
   .avatar{

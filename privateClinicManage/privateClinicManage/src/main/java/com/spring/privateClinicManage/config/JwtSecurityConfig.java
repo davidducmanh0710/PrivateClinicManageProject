@@ -113,7 +113,8 @@ public class JwtSecurityConfig {
 				.hasRole("BACSI")
 
 				.requestMatchers("/api/anyrole/blogs/",
-						"/api/anyrole/blogs/{blogId}/get-comment-blog/")
+						"/api/anyrole/blogs/{blogId}/get-comment-blog/",
+						"/api/anyrole/blogs/{blogId}/count-likes/")
 				.permitAll()
 				.requestMatchers("/api/anyrole/**").hasAnyRole("BENHNHAN", "BACSI", "YTA")
 

@@ -40,6 +40,8 @@ export let endpoints = {
   getCommentBlogByBlogId: (blogId) =>
     `/api/anyrole/blogs/${blogId}/get-comment-blog/`,
   createNewCommentBlog: "/api/anyrole/blogs/create-comment-blog/",
+  toggleLikeBlog: (blogId) => `/api/anyrole/blogs/${blogId}/likes/`,
+  countLikeBlog : (blogId) => `/api/anyrole/blogs/${blogId}/count-likes/`
 };
 
 export const authAPI = () => {

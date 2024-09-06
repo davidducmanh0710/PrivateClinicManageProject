@@ -6,6 +6,7 @@ import { CustomerSnackbar, isBENHNHAN } from "../Common/Common";
 import { UserContext } from "../config/Context";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
+import CountLikeBlog from "../CountLikeBlog/CountLikeBlog";
 
 export default function AdviseSection() {
   const [blogs, setBlogs] = useState([]);
@@ -14,6 +15,8 @@ export default function AdviseSection() {
   const [totalPage, setTotalPage] = useState(1);
 
   const [blogId, setBlogId] = useState(0);
+
+  const [likeChange, setLikeChange] = useState(false);
 
   const [createBlogForm, setCreateBlogForm] = useState({
     title: "",
@@ -62,7 +65,9 @@ export default function AdviseSection() {
       let key = params.get("key");
       if (key) url += `&key=${key}`;
 
-      response = await Api.get(url, {
+      const typeFeitch = currentUser ? authAPI() : Api;
+
+      response = await typeFeitch.get(url, {
         validateStatus: function (status) {
           return status < 500;
         },
@@ -75,11 +80,11 @@ export default function AdviseSection() {
     } catch {
       console.log(response.data);
     }
-  }, [page, params]);
+  }, [page, params, currentUser, likeChange]);
 
   useEffect(() => {
     getAllBlogs();
-  }, [page, blogId, createBlogForm, params, comment]);
+  }, [page, blogId, createBlogForm, params, comment, currentUser, likeChange]);
 
   function handleToggleShowAnswer(blogId, blogIdState) {
     if (comment === null || blogId !== blogIdState) {
@@ -211,12 +216,41 @@ export default function AdviseSection() {
     }
   };
 
-  function sliceHalfLengthString(str) {
-    const length = str.length;
-    const halfLength = Math.ceil((1 / 2) * length);
-    const start = length - halfLength;
-    return str.slice(start);
+  function handleLike(blogId) {
+    if (currentUser !== null) {
+      const likeIcon = document.getElementById(`likeBlog${blogId}`);
+      const likeCount = document.getElementById(`countLikeBlog${blogId}`);
+
+      if (likeIcon && likeCount) {
+        if (likeIcon.classList.contains("fa-solid")) {
+          likeIcon.classList.remove("fa-solid");
+          likeCount.textContent = parseInt(likeCount.textContent) - 1;
+        } else {
+          likeIcon.classList.add("fa-solid");
+          likeCount.textContent = parseInt(likeCount.textContent) + 1;
+        }
+      }
+      handleToggleLikeApi(blogId);
+      setLikeChange((prev) => !prev);
+    } else {
+      showSnackbar("Bạn cần đăng nhập để thích bài viết !", "error");
+    }
   }
+
+  const handleToggleLikeApi = async (blogId) => {
+    let response;
+    try {
+      response = await authAPI().post(endpoints["toggleLikeBlog"](blogId), {
+        validateStatus: function (status) {
+          return status < 500;
+        },
+      });
+      if (response.status === 200) {
+      } else showSnackbar(response, "error");
+    } catch {
+      showSnackbar(response, "error");
+    }
+  };
 
   return (
     <>
@@ -274,16 +308,30 @@ export default function AdviseSection() {
                       >
                         <div className="card p-3 shadow-sm question-card">
                           <div className="card-body">
-                            <div className="base-infor mb-4">
-                              <img className="avatar" src={b.user.avatar} />
-                              <div className="mb-3">
-                                <i className="bi bi-chat-dots"></i>
-                                <span className="answer-name fw-bold">
-                                  {b.user.name}
-                                </span>
-                                <p className="ml-3">
-                                  {dayjs(b.createdDate).format("DD/MM/YYYY")}
-                                </p>
+                            <div className="header-card-container mb-4">
+                              <div className="base-infor">
+                                <img className="avatar" src={b.user.avatar} />
+                                <div className="mb-3">
+                                  <i className="bi bi-chat-dots"></i>
+                                  <span className="answer-name fw-bold">
+                                    {b.user.name}
+                                  </span>
+                                  <p className="ml-3">
+                                    {dayjs(b.createdDate).format("DD/MM/YYYY")}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="like-container">
+                                <i
+                                  id={`likeBlog${b.id}`}
+                                  type="button"
+                                  className={`fa-regular fa-heart fa-2xl ${
+                                    b.hasLiked === true ? "fa-solid" : ""
+                                  }`}
+                                  style={{ color: "#ff0019" }}
+                                  onClick={() => handleLike(b.id)}
+                                ></i>
+                                <CountLikeBlog b={b} />
                               </div>
                             </div>
 
