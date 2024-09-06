@@ -47,6 +47,12 @@ export default function NotificationContainer() {
     }, 4000);
   };
 
+  function sliceString(str) {
+    const length = str.length;
+    const sliceLength = Math.ceil((1 / 2) * length);
+    return str.slice(0, sliceLength);
+  }
+
   function formatDuration(seconds) {
     seconds = seconds / 1000;
     if (seconds < 60) {
@@ -93,12 +99,12 @@ export default function NotificationContainer() {
       },
       onError
     );
-    // return () => {
-    //   if (stompYTAClientRef.current) {
-    //     stompYTAClientRef.current.disconnect();
-    //     stompYTAClientRef.current = null;
-    //   }
-    // };
+    return () => {
+      if (stompYTAClientRef.current) {
+        stompYTAClientRef.current.disconnect();
+        stompYTAClientRef.current = null;
+      }
+    };
   };
 
   const benhnhanConnectNotificationWsInit = () => {
@@ -116,6 +122,22 @@ export default function NotificationContainer() {
             const p = JSON.parse(payload.body);
             p.timeSent = Date.now();
             p.isRead = false;
+            p.type = "DICRECT_REGISTER";
+            setBENHNHANNotifications((prevBNNotifications) => [
+              p,
+              ...prevBNNotifications,
+            ]);
+            showSnackbar("Bạn có thông báo mới", "success");
+            forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
+          }
+        );
+        stompBENHNHANClient.subscribe(
+          "/notify/recievedNewComment/" + currentUser.id,
+          (payload) => {
+            const p = JSON.parse(payload.body);
+            p.timeSent = Date.now();
+            p.isRead = false;
+            p.type = "RECIEVED_NEW_COMMENT";
             setBENHNHANNotifications((prevBNNotifications) => [
               p,
               ...prevBNNotifications,
@@ -127,12 +149,12 @@ export default function NotificationContainer() {
       },
       onError
     );
-    // return () => {
-    //   if (stompBENHNHANClientRef.current) {
-    //     stompBENHNHANClientRef.current.disconnect();
-    //     stompBENHNHANClientRef.current = null;
-    //   }
-    // };
+    return () => {
+      if (stompBENHNHANClientRef.current) {
+        stompBENHNHANClientRef.current.disconnect();
+        stompBENHNHANClientRef.current = null;
+      }
+    };
   };
 
   useEffect(() => {
@@ -156,22 +178,6 @@ export default function NotificationContainer() {
     console.log("Lỗi");
     console.log("stompYTAClientRef", stompYTAClientRef);
     console.log("stompBENHNHANClientRef", stompBENHNHANClientRef);
-
-    // setTimeout(() => {
-    //   if (
-    //     currentUser !== null &&
-    //     stompYTAClientRef.current === null &&
-    //     isYTA(currentUser)
-    //   )
-    //     ytaConnectNotificationWsInit();
-    //   else if (
-    //     currentUser !== null &&
-    //     stompBENHNHANClientRef.current === null &&
-    //     isBENHNHAN(currentUser)
-    //   )
-    //     benhnhanConnectNotificationWsInit();
-    // }, 5000);
-
   }
 
   function handleCountIsReadFalse(YTAnotifications) {
@@ -353,59 +359,127 @@ export default function NotificationContainer() {
 
               {isBENHNHAN(currentUser) &&
                 BENHNHANnotifications.length > 0 &&
-                BENHNHANnotifications.map((notification) => (
-                  <Dropdown.Item
-                    onClick={() => {
-                      notification.isRead = true;
-                      navigate("/user-register-schedule-list");
-                      handleCountIsReadFalseBN(BENHNHANnotifications);
-                    }}
-                    key={notification.id}
-                    className={`d-flex align-items-start border ${
-                      notification.isRead ? "" : "bg-warning"
-                    }`}
-                    style={{
-                      fontSize: "12px",
-                      color: "#000",
-                      backgroundColor: "#fff",
-                    }}
-                  >
-                    <img
-                      src={notification.user.avatar}
-                      alt="Avatar"
-                      className="rounded-circle"
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        marginRight: "10px",
-                      }}
-                    />
-                    <div>
-                      <strong>Đặt lịch khám trực tiếp thành công !</strong>
-                      <p
-                        className="mb-0"
-                        style={{ fontSize: "12px", color: "#fff" }}
+                BENHNHANnotifications.map((notification) => {
+                  if (notification.type === "DICRECT_REGISTER") {
+                    return (
+                      <Dropdown.Item
+                        onClick={() => {
+                          notification.isRead = true;
+                          navigate("/user-register-schedule-list");
+                          handleCountIsReadFalseBN(BENHNHANnotifications);
+                        }}
+                        key={notification.id}
+                        className={`d-flex align-items-start border ${
+                          notification.isRead ? "" : "bg-warning"
+                        }`}
+                        style={{
+                          fontSize: "12px",
+                          color: "#000",
+                          backgroundColor: "#fff",
+                        }}
                       >
-                        <small style={{ fontSize: "12px", color: "#000" }}>
-                          Đặt lịch khám vào ngày{" "}
-                          {dayjs(notification.schedule.date).format(
-                            "DD/MM/YYYY"
-                          )}
-                        </small>
-                        <small
+                        <img
+                          src={notification.user.avatar}
+                          alt="Avatar"
+                          className="rounded-circle"
                           style={{
-                            display: "block",
+                            width: "40px",
+                            height: "40px",
+                            marginRight: "10px",
+                          }}
+                        />
+                        <div>
+                          <strong>Đặt lịch khám trực tiếp thành công !</strong>
+                          <p
+                            className="mb-0"
+                            style={{ fontSize: "12px", color: "#fff" }}
+                          >
+                            <small style={{ fontSize: "12px", color: "#000" }}>
+                              Đặt lịch khám vào ngày{" "}
+                              {dayjs(notification.schedule.date).format(
+                                "DD/MM/YYYY"
+                              )}
+                            </small>
+                            <small
+                              style={{
+                                display: "block",
+                                fontSize: "12px",
+                                color: "red",
+                              }}
+                            >
+                              {formatDuration(
+                                Date.now() - notification.timeSent
+                              )}{" "}
+                              trước
+                            </small>
+                          </p>
+                        </div>
+                      </Dropdown.Item>
+                    );
+                  }
+                  if (notification.type === "RECIEVED_NEW_COMMENT") {
+                    return (
+                      <>
+                        <Dropdown.Item
+                          onClick={() => {
+                            notification.isRead = true;
+                            navigate("/advise-section");
+                            handleCountIsReadFalseBN(BENHNHANnotifications);
+                          }}
+                          key={notification.id}
+                          className={`d-flex align-items-start border ${
+                            notification.isRead ? "" : "bg-warning"
+                          }`}
+                          style={{
                             fontSize: "12px",
-                            color: "red",
+                            color: "#000",
+                            backgroundColor: "#fff",
                           }}
                         >
-                          {formatDuration(Date.now() - notification.timeSent)}{" "}
-                          trước
-                        </small>
-                      </p>
-                    </div>
-                  </Dropdown.Item>
-                ))}
+                          <img
+                            src={notification.comment.user.avatar}
+                            alt="Avatar"
+                            className="rounded-circle"
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                              marginRight: "10px",
+                            }}
+                          />
+                          <div>
+                            <strong>
+                              {notification.comment.user.name} đã trả lời câu
+                              hỏi của bạn.
+                            </strong>
+                            <p
+                              className="mb-0"
+                              style={{ fontSize: "12px", color: "#fff" }}
+                            >
+                              <small
+                                style={{ fontSize: "12px", color: "#000" }}
+                              >
+                                Câu hỏi về :{" "}
+                                {sliceString(notification.blog.title)}...
+                              </small>
+                              <small
+                                style={{
+                                  display: "block",
+                                  fontSize: "12px",
+                                  color: "red",
+                                }}
+                              >
+                                {formatDuration(
+                                  Date.now() - notification.timeSent
+                                )}{" "}
+                                trước
+                              </small>
+                            </p>
+                          </div>
+                        </Dropdown.Item>
+                      </>
+                    );
+                  }
+                })}
 
               <Dropdown.Divider />
               {BENHNHANnotifications.length > 0 ? (

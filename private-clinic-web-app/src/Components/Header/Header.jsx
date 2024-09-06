@@ -85,7 +85,7 @@ export default function Header() {
                     <i className="fab fa-instagram"></i>
                   </a>
                 </div>
-                {currentUser && <NotificationContainer />}
+                {currentUser !== null && <NotificationContainer />}
 
                 {currentUser ? (
                   <>

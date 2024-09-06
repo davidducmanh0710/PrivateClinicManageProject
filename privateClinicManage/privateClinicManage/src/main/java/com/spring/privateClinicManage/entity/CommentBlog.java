@@ -43,7 +43,6 @@ public class CommentBlog implements Serializable {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})
 	@JoinColumn(name = "blog_id", referencedColumnName = "id")
-	@JsonIgnore
 	private Blog blog;
 
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,6 +41,9 @@ public class ApiAnyRoleRestController {
 	private CommentService commentService;
 	@Autowired
 	private CommentBlogService commentBlogService;
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
+
 
 	@GetMapping(path = "/blogs/")
 	@CrossOrigin
@@ -136,7 +140,11 @@ public class ApiAnyRoleRestController {
 
 		blog.setIsCommented(true);
 
+		messagingTemplate.convertAndSend("/notify/recievedNewComment/" + blog.getUser().getId(),
+				commentBlog);
+
 		return new ResponseEntity<>(commentBlog, HttpStatus.CREATED);
 	}
+
 
 }
