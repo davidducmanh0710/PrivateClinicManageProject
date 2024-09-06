@@ -29,6 +29,8 @@ export default function AdviseSection() {
 
   const [comment, setComment] = useState(null);
 
+  const [answerBlogContent, setAnswerBlogContent] = useState("");
+
   const { currentUser } = useContext(UserContext);
 
   const [loading, setLoading] = useState();
@@ -77,11 +79,13 @@ export default function AdviseSection() {
 
   useEffect(() => {
     getAllBlogs();
-  }, [page, blogId, createBlogForm, params]);
+  }, [page, blogId, createBlogForm, params, comment]);
 
-  function handleToggleShowAnswer(blogId) {
-    setBlogId(blogId);
-    handleGetCommentBlogByBlogId(blogId);
+  function handleToggleShowAnswer(blogId, blogIdState) {
+    if (comment === null || blogId !== blogIdState) {
+      setBlogId(blogId);
+      handleGetCommentBlogByBlogId(blogId);
+    }
   }
 
   function handleCreateCommentBlog(blogId) {
@@ -146,6 +150,42 @@ export default function AdviseSection() {
     } else {
       showSnackbar("Bạn cần đăng nhập để đặt câu hỏi !", "error");
       setLoading(false);
+    }
+    setLoading(false);
+  };
+
+  const handleCreateNewCommentBlog = async (event, blogId) => {
+    event.preventDefault();
+    setLoading(true);
+    if (currentUser !== null) {
+      let response;
+      try {
+        response = await authAPI().post(
+          endpoints["createNewCommentBlog"],
+          {
+            content: answerBlogContent,
+            blogId: blogId,
+          },
+          {
+            validateStatus: function (status) {
+              return status < 500;
+            },
+          }
+        );
+        if (response.status === 201) {
+          showSnackbar("Trả lời câu hỏi thành công !", "success");
+          setAnswerBlogContent("");
+          handleGetCommentBlogByBlogId(blogId);
+        } else {
+          showSnackbar(response.data, "error");
+        }
+      } catch {
+        showSnackbar(response, "error");
+        console.log(response);
+        setLoading(false);
+      }
+    } else {
+      showSnackbar("Bạn cần đăng nhập để trả lời câu hỏi !", "error");
     }
     setLoading(false);
   };
@@ -253,7 +293,9 @@ export default function AdviseSection() {
                               {b.isCommented === true ? (
                                 <button
                                   className="btn btn-primary"
-                                  onClick={() => handleToggleShowAnswer(b.id)}
+                                  onClick={() =>
+                                    handleToggleShowAnswer(b.id, blogId)
+                                  }
                                 >
                                   Xem câu trả lời
                                 </button>
@@ -285,7 +327,7 @@ export default function AdviseSection() {
                         className="advise-container-item container mb-4 position-relative"
                       >
                         {blogId === b.id &&
-                          (b.isCommented ? (
+                          (b.isCommented === true && b.isCommented !== null ? (
                             <div className="card p-3 shadow-sm d-flex flex-row answer-card">
                               {comment !== null && comment.id > 0 ? (
                                 <>
@@ -308,56 +350,79 @@ export default function AdviseSection() {
                                     <p className="text-muted mb-2">
                                       Bệnh viện Đa khoa HealthCare TP.HCM
                                     </p>
-                                    <p>
-                                      {(comment.content)}
-                                      ...
-                                    </p>
-                                    <label className="text-decoration-none">
+                                    <p>{comment.content}</p>
+                                    {/* <label className="text-decoration-none">
                                       Xem thêm
-                                    </label>
+                                    </label> */}
                                   </div>
                                 </>
                               ) : (
-                                <>
-                                  <Alert
-                                    variant="filled"
-                                    severity="warning"
-                                    className="w-50 mx-auto"
-                                  >
-                                    Chưa có câu trả lời nào !
-                                  </Alert>
-                                </>
+                                b.isCommented === false &&
+                                b.isCommented !== null && (
+                                  <>
+                                    <Alert
+                                      variant="filled"
+                                      severity="warning"
+                                      className="w-50 mx-auto"
+                                    >
+                                      Chưa có câu trả lời nào !
+                                    </Alert>
+                                  </>
+                                )
                               )}
                             </div>
                           ) : (
                             <>
-                              <div className="create-advice-container container mt-2">
-                                <div className="comment-box">
-                                  <img
-                                    className="avatar"
-                                    src={currentUser?.avatar}
-                                  />
-                                  <textarea
-                                    type="text"
-                                    className="comment-input"
-                                    placeholder="Viết bình luận..."
-                                  />
-                                  <div className="comment-icons mt-2">
-                                    <button className="btn btn-link p-0 text-light">
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="24"
-                                        height="24"
-                                        fill="currentColor"
-                                        className="bi bi-send"
-                                        viewBox="0 0 16 16"
-                                      >
-                                        <path d="M15.854.146a.5.5 0 0 1 .11.53l-5 14a.5.5 0 0 1-.927.06L8.155 10.18l-6.792 2.264a.5.5 0 0 1-.65-.65l2.263-6.793L.262 1.036A.5.5 0 0 1 .32.109l14-5a.5.5 0 0 1 .534.037zm-13.5 7.982 5.149 1.721L14.561 1.44 2.354 8.128zm4.265 5.69 1.721 5.149L14.56 1.439 2.353 8.127z" />
-                                      </svg>
-                                    </button>
+                              {loading ? (
+                                <>
+                                  <div className="d-flex justify-content-center align-item-center">
+                                    <CircularProgress className="mt-3" />
                                   </div>
-                                </div>
-                              </div>
+                                </>
+                              ) : (
+                                <form
+                                  onSubmit={(e) =>
+                                    handleCreateNewCommentBlog(e, blogId)
+                                  }
+                                >
+                                  <div className="create-advice-container container mt-2">
+                                    <div className="comment-box">
+                                      <img
+                                        className="avatar"
+                                        src={currentUser?.avatar}
+                                      />
+
+                                      <textarea
+                                        type="text"
+                                        className="comment-input"
+                                        placeholder="Viết bình luận..."
+                                        onChange={(e) =>
+                                          setAnswerBlogContent(e.target.value)
+                                        }
+                                        defaultValue={answerBlogContent}
+                                        required
+                                      />
+                                      <div className="comment-icons mt-2">
+                                        <button
+                                          type="submit"
+                                          className="btn btn-link p-0 text-light"
+                                        >
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="24"
+                                            height="24"
+                                            fill="currentColor"
+                                            className="bi bi-send"
+                                            viewBox="0 0 16 16"
+                                          >
+                                            <path d="M15.854.146a.5.5 0 0 1 .11.53l-5 14a.5.5 0 0 1-.927.06L8.155 10.18l-6.792 2.264a.5.5 0 0 1-.65-.65l2.263-6.793L.262 1.036A.5.5 0 0 1 .32.109l14-5a.5.5 0 0 1 .534.037zm-13.5 7.982 5.149 1.721L14.561 1.44 2.354 8.128zm4.265 5.69 1.721 5.149L14.56 1.439 2.353 8.127z" />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </form>
+                              )}
                             </>
                           ))}
                       </div>

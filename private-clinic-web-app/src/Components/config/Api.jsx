@@ -39,6 +39,7 @@ export let endpoints = {
   createNewBlog: "/api/anyrole/blogs/create/",
   getCommentBlogByBlogId: (blogId) =>
     `/api/anyrole/blogs/${blogId}/get-comment-blog/`,
+  createNewCommentBlog : '/api/anyrole/blogs/create-comment-blog/'
 };
 
 export const authAPI = () => {

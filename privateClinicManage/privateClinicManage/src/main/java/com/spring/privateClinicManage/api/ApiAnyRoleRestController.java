@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spring.privateClinicManage.dto.BlogDto;
+import com.spring.privateClinicManage.dto.CommentDto;
 import com.spring.privateClinicManage.entity.Blog;
 import com.spring.privateClinicManage.entity.Comment;
 import com.spring.privateClinicManage.entity.CommentBlog;
@@ -103,11 +104,11 @@ public class ApiAnyRoleRestController {
 		return new ResponseEntity<>(cb.get(0).getComment(), HttpStatus.OK);
 	}
 
-	@PostMapping(path = "/blogs/{blogId}/create-comment-blog/")
+	@PostMapping(path = "/blogs/create-comment-blog/")
 	@CrossOrigin
-	public ResponseEntity<Object> createCommentBlog(@PathVariable("blogId") Integer blogId) {
+	public ResponseEntity<Object> createCommentBlog(@RequestBody CommentDto commentDto) {
 
-		Blog blog = blogService.findById(blogId);
+		Blog blog = blogService.findById(commentDto.getBlogId());
 		if (blog == null)
 			return new ResponseEntity<>("Bài viết này không tồn tại !", HttpStatus.NOT_FOUND);
 
@@ -123,6 +124,19 @@ public class ApiAnyRoleRestController {
 
 		Comment comment = new Comment();
 		comment.setCreatedDate(new Date());
+		comment.setUser(currentUser);
+		comment.setContent(commentDto.getContent());
+
+		commentService.saveComment(comment);
+
+		CommentBlog commentBlog = new CommentBlog();
+		commentBlog.setBlog(blog);
+		commentBlog.setComment(comment);
+		commentBlogService.saveCommentBlog(commentBlog);
+
+		blog.setIsCommented(true);
+
+		return new ResponseEntity<>(commentBlog, HttpStatus.CREATED);
 	}
 
 }
