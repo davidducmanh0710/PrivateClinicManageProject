@@ -56,6 +56,9 @@ public class Blog implements Serializable {
 	@Transient
 	private Boolean hasLiked = false;
 
+	@Transient
+	private Integer totalLikes;
+
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
 	private User user;

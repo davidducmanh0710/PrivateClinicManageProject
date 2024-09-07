@@ -15,6 +15,7 @@ export default function NotificationContainer() {
 
   const [YTAnotifications, setYTANotifications] = useState([]);
   const [BENHNHANnotifications, setBENHNHANNotifications] = useState([]);
+  const [tempNotifications, setTempNotification] = useState([]); // received all input data from Websocket before seperated
 
   const stompYTAClientRef = useRef(null);
   const stompBENHNHANClientRef = useRef(null);
@@ -111,7 +112,7 @@ export default function NotificationContainer() {
     let stompBENHNHANClient = null;
     let socket = new SockJS(`${BASE_URL}/ws`);
     stompBENHNHANClient = over(socket);
-    stompBENHNHANClient.debug = () => {}; // tắt log của stomp in ra console
+    //stompBENHNHANClient.debug = () => {}; // tắt log của stomp in ra console
     stompBENHNHANClientRef.current = stompBENHNHANClient;
     stompBENHNHANClient.connect(
       {},
@@ -146,6 +147,21 @@ export default function NotificationContainer() {
             forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
           }
         );
+        stompBENHNHANClient.subscribe(
+          "/notify/recievedLikeBlog/" + currentUser.id,
+          (payload) => {
+            let p = JSON.parse(payload.body);
+
+            p.timeSent = Date.now();
+            p.isRead = false;
+            p.type = "RECIEVED_LIKED_BLOG";
+            p.blogId = p.blog.id;
+            setTempNotification((prevTempNotifications) => [
+              p,
+              ...prevTempNotifications,
+            ]);
+          }
+        );
       },
       onError
     );
@@ -173,6 +189,42 @@ export default function NotificationContainer() {
     handleCountIsReadFalse(YTAnotifications);
     handleCountIsReadFalseBN(BENHNHANnotifications);
   }, [YTAnotifications, BENHNHANnotifications]);
+
+  useEffect(() => {
+    if (
+      tempNotifications.length > 0 &&
+      tempNotifications[0].type === "RECIEVED_LIKED_BLOG"
+    ) {
+      let updatedItems = [...BENHNHANnotifications];
+
+      let tempNotify = tempNotifications[0];
+
+      let existingLikeBlogNotifyIndex = updatedItems.findIndex((notifyItem) => {
+        return (
+          notifyItem.type === "RECIEVED_LIKED_BLOG" &&
+          notifyItem.blogId === tempNotify.blogId
+        );
+      });
+
+      let existingLikeBlogNotify = updatedItems[existingLikeBlogNotifyIndex];
+      if (existingLikeBlogNotify) {
+        existingLikeBlogNotify.isRead = false;
+        existingLikeBlogNotify.timeSent = Date.now();
+        existingLikeBlogNotify.blog = tempNotify.blog;
+        existingLikeBlogNotify.user = tempNotify.user;
+
+        const [element] = updatedItems.splice(existingLikeBlogNotifyIndex, 1);
+        updatedItems.unshift(element);
+
+        setBENHNHANNotifications(updatedItems);
+      } else {
+        setBENHNHANNotifications((prev) => [tempNotify, ...prev]);
+      }
+
+      showSnackbar("Bạn có thông báo mới", "success");
+      forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
+    }
+  }, [tempNotifications]);
 
   function onError() {
     console.log("Lỗi");
@@ -360,6 +412,7 @@ export default function NotificationContainer() {
               {isBENHNHAN(currentUser) &&
                 BENHNHANnotifications.length > 0 &&
                 BENHNHANnotifications.map((notification) => {
+                  console.log(notification);
                   if (notification.type === "DICRECT_REGISTER") {
                     return (
                       <Dropdown.Item
@@ -450,6 +503,71 @@ export default function NotificationContainer() {
                             <strong>
                               {notification.comment.user.name} đã trả lời câu
                               hỏi của bạn.
+                            </strong>
+                            <p
+                              className="mb-0"
+                              style={{ fontSize: "12px", color: "#fff" }}
+                            >
+                              <small
+                                style={{ fontSize: "12px", color: "#000" }}
+                              >
+                                Câu hỏi về :{" "}
+                                {sliceString(notification.blog.title)}...
+                              </small>
+                              <small
+                                style={{
+                                  display: "block",
+                                  fontSize: "12px",
+                                  color: "red",
+                                }}
+                              >
+                                {formatDuration(
+                                  Date.now() - notification.timeSent
+                                )}{" "}
+                                trước
+                              </small>
+                            </p>
+                          </div>
+                        </Dropdown.Item>
+                      </>
+                    );
+                  }
+                  if (notification.type === "RECIEVED_LIKED_BLOG") {
+                    return (
+                      <>
+                        <Dropdown.Item
+                          onClick={() => {
+                            notification.isRead = true;
+                            navigate("/advise-section");
+                            handleCountIsReadFalseBN(BENHNHANnotifications);
+                          }}
+                          key={notification.id}
+                          className={`d-flex align-items-start border ${
+                            notification.isRead ? "" : "bg-warning"
+                          }`}
+                          style={{
+                            fontSize: "12px",
+                            color: "#000",
+                            backgroundColor: "#fff",
+                          }}
+                        >
+                          <img
+                            src={notification.user.avatar}
+                            alt="Avatar"
+                            className="rounded-circle"
+                            style={{
+                              width: "40px",
+                              height: "40px",
+                              marginRight: "10px",
+                            }}
+                          />
+                          <div>
+                            <strong className="text-wrap">
+                              Gần đây đã có{" "}
+                              <strong className="text text-danger d-inline">
+                                {notification.blog.totalLikes}
+                              </strong>{" "}
+                              người thích câu hỏi của bạn
                             </strong>
                             <p
                               className="mb-0"

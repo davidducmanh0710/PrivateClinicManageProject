@@ -202,11 +202,19 @@ public class ApiAnyRoleRestController {
 		}
 
 		likeBlog = new LikeBlog();
-		likeBlog.setBlog(blog);
+
 		likeBlog.setUser(currentUser);
 		likeBlog.setHasLiked(true);
 		blog.setHasLiked(true);
+		likeBlog.setBlog(blog);
 		likeBlogService.saveLikeBlog(likeBlog);
+
+		Integer countLikesBlog = likeBlogService.countLikeBlogByBlog(blog);
+		blog.setTotalLikes(countLikesBlog);
+
+
+		messagingTemplate.convertAndSend("/notify/recievedLikeBlog/" + blog.getUser().getId(),
+				likeBlog);
 
 		return new ResponseEntity<>(likeBlog, HttpStatus.OK);
 	}
