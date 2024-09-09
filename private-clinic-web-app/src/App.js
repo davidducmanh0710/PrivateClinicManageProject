@@ -76,6 +76,7 @@ function App() {
     currentUser: currentUser,
     setCurrentUser: setCurrentUser,
     token: token,
+    fetchUser : fetchUser,
   };
 
   return (
@@ -115,8 +116,19 @@ function App() {
                         }
                       />
                     );
-                  } else {
-                    <></>;
+                  }
+                  if (route.role === "ROLE_ANY") {
+                    return (
+                      <Route
+                        key={index}
+                        path={route.path}
+                        element={
+                          <Layout>
+                            <Page />
+                          </Layout>
+                        }
+                      />
+                    );
                   }
                 } else if (
                   (currentUser === null && route.role === "ROLE_ALL") ||
@@ -133,6 +145,8 @@ function App() {
                       }
                     />
                   );
+                } else {
+                  <></>;
                 }
               })}
             </Routes>

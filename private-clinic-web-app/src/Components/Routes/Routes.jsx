@@ -6,6 +6,7 @@ import ExaminationForm from "../ExaminationForm/ExaminationForm";
 import Home from "../Home/Home";
 import QRScanner from "../QRScan/QRScanner";
 import UserProcessingList from "../UserProcessingList/UserProcessingList";
+import UserProfile from "../UserProfile/UserProfile";
 import UserRegisterScheduleList from "../UserRegisterScheduleList/UserRegisterScheduleList";
 
 const publicRoutes = [
@@ -34,6 +35,7 @@ const publicRoutes = [
   },
   { path: "/examination-form", component: ExaminationForm, role: "ROLE_BACSI" },
   { path: "/advise-section", component: AdviseSection, role: "ROLE_ALL" },
+  { path: "/user-profile", component: UserProfile, role: "ROLE_ANY" },
 ];
 
 const privateRoutes = [];

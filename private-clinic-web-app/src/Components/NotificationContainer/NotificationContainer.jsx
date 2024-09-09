@@ -15,7 +15,7 @@ export default function NotificationContainer() {
 
   const [YTAnotifications, setYTANotifications] = useState([]);
   const [BENHNHANnotifications, setBENHNHANNotifications] = useState([]);
-  const [tempNotifications, setTempNotification] = useState([]); // received all input data from Websocket before seperated
+  const [tempNotifications, setTempNotification] = useState([]); // received all output data from Websocket before seperated
 
   const stompYTAClientRef = useRef(null);
   const stompBENHNHANClientRef = useRef(null);
@@ -112,7 +112,7 @@ export default function NotificationContainer() {
     let stompBENHNHANClient = null;
     let socket = new SockJS(`${BASE_URL}/ws`);
     stompBENHNHANClient = over(socket);
-    //stompBENHNHANClient.debug = () => {}; // tắt log của stomp in ra console
+    stompBENHNHANClient.debug = () => {}; // tắt log của stomp in ra console
     stompBENHNHANClientRef.current = stompBENHNHANClient;
     stompBENHNHANClient.connect(
       {},

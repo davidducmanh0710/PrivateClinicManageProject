@@ -100,11 +100,13 @@ export default function Header() {
                         />
                       </Dropdown.Toggle>
                       <Dropdown.Menu className="r-0 header-dropdown-menu">
-                        <Dropdown.Item>
-                          <Link className="dropdown-item" to="/user-detail">
-                            Thông tin cá nhân
-                          </Link>
-                        </Dropdown.Item>
+                        {currentUser !== null && (
+                          <Dropdown.Item>
+                            <Link className="dropdown-item" to="/user-profile">
+                              Thông tin cá nhân
+                            </Link>
+                          </Dropdown.Item>
+                        )}
                         {currentUser !== null && isBENHNHAN(currentUser) && (
                           <Dropdown.Item>
                             <Link
@@ -179,9 +181,23 @@ export default function Header() {
                 <Link className="nav-item nav-link" to="/advise-section">
                   Tư vấn
                 </Link>
-                <div className="nav-item dropdown">
+                <div
+                  className={
+                    currentUser !== null && !isBENHNHAN(currentUser)
+                      ? "nav-item dropdown"
+                      : "nav-item"
+                  }
+                >
                   <a className="nav-link" data-bs-toggle="dropdown">
-                    <span className="dropdown-toggle">Dịch vụ</span>
+                    <span
+                      className={
+                        currentUser !== null && !isBENHNHAN(currentUser)
+                          ? "dropdown-toggle"
+                          : ""
+                      }
+                    >
+                      Dịch vụ
+                    </span>
                   </a>
                   <div className="dropdown-menu">
                     {currentUser !== null && isYTA(currentUser) && (

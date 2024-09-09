@@ -86,6 +86,7 @@ public class UserServiceImpl implements UserService {
 		return user != null && this.encoder.matches(password, user.getPassword());
 	}
 
+
 	@Override
 	public boolean isActived(String email) {
 		User user = userRepository.findByEmail(email);

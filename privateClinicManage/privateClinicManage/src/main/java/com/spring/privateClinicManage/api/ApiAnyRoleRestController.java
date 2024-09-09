@@ -7,21 +7,28 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.privateClinicManage.dto.BlogDto;
+import com.spring.privateClinicManage.dto.ChangePasswordDto;
 import com.spring.privateClinicManage.dto.CommentDto;
 import com.spring.privateClinicManage.dto.CountDto;
+import com.spring.privateClinicManage.dto.UpdateProfileDto;
 import com.spring.privateClinicManage.entity.Blog;
 import com.spring.privateClinicManage.entity.Comment;
 import com.spring.privateClinicManage.entity.CommentBlog;
@@ -36,7 +43,7 @@ import com.spring.privateClinicManage.service.UserService;
 @RestController
 @RequestMapping("/api/anyrole")
 public class ApiAnyRoleRestController {
-	
+
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -49,7 +56,72 @@ public class ApiAnyRoleRestController {
 	private SimpMessagingTemplate messagingTemplate;
 	@Autowired
 	private LikeBlogService likeBlogService;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
+	@PatchMapping(path = "/update-profile/")
+	@CrossOrigin
+	public ResponseEntity<Object> updateProfile(@RequestBody UpdateProfileDto updateProfileDto) {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		if (!updateProfileDto.getName().isBlank()
+				&& !currentUser.getName().equals(updateProfileDto.getName())) {
+			currentUser.setName(updateProfileDto.getName());
+		}
+		if (!updateProfileDto.getAddress().isBlank()
+				&& !currentUser.getAddress().equals(updateProfileDto.getAddress())) {
+			currentUser.setAddress(updateProfileDto.getAddress());
+		}
+		if (updateProfileDto.getBirthday() != null)
+			currentUser.setBirthday(updateProfileDto.getBirthday());
+
+		userService.saveUser(currentUser);
+
+		return new ResponseEntity<Object>(HttpStatus.OK);
+
+	}
+
+	@PatchMapping(path = "/change-avatar/", consumes = {
+			MediaType.MULTIPART_FORM_DATA_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@CrossOrigin
+	public ResponseEntity<Object> changeAvatar(
+			@RequestPart("avatar") MultipartFile files) {
+		User user = userService.getCurrentLoginUser();
+
+		if (files == null || files.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+
+		if (user != null) {
+			user.setFile(files);
+			userService.setCloudinaryField(user);
+
+			return new ResponseEntity<>("Cập nhật ảnh đại diện thành công !", HttpStatus.OK);
+		}
+
+		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+	}
+
+	@PatchMapping(path = "/change-password/")
+	@CrossOrigin
+	public ResponseEntity<Object> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		Boolean isPasswordMatched = userService.authUser(currentUser.getEmail(),
+				changePasswordDto.getOldPassword());
+		if (isPasswordMatched == false)
+			return new ResponseEntity<>("Sai mật khẩu cũ !", HttpStatus.UNAUTHORIZED);
+
+		currentUser.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+		userService.saveUser(currentUser);
+		
+		return new ResponseEntity<>("Thay đổi mật khẩu thành công !", HttpStatus.OK);
+	}
 
 	@GetMapping(path = "/blogs/")
 	@CrossOrigin
@@ -67,8 +139,7 @@ public class ApiAnyRoleRestController {
 		if (!key.isBlank()) {
 
 			blogs = blogService.findByAnyKey(key);
-		}
-		else
+		} else
 			blogs = blogService.findAllBlogs();
 
 		blogs.stream().forEach(b -> {
@@ -212,12 +283,10 @@ public class ApiAnyRoleRestController {
 		Integer countLikesBlog = likeBlogService.countLikeBlogByBlog(blog);
 		blog.setTotalLikes(countLikesBlog);
 
-
 		messagingTemplate.convertAndSend("/notify/recievedLikeBlog/" + blog.getUser().getId(),
 				likeBlog);
 
 		return new ResponseEntity<>(likeBlog, HttpStatus.OK);
 	}
-
 
 }

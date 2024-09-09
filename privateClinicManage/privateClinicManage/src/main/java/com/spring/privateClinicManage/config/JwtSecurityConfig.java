@@ -59,7 +59,7 @@ public class JwtSecurityConfig {
 
 				.requestMatchers(HttpMethod.GET,
 						"/api/users/getAllStatusIsApproved/",
-						"/api/qr/barcodes/zxing/qrcode/",
+//						"/api/qr/barcodes/zxing/qrcode/",
 						"/api/payment/momo/return/",
 						"/api/payment/vnpay/return/")
 				.permitAll()
@@ -116,7 +116,9 @@ public class JwtSecurityConfig {
 						"/api/anyrole/blogs/{blogId}/get-comment-blog/",
 						"/api/anyrole/blogs/{blogId}/count-likes/")
 				.permitAll()
-				.requestMatchers("/api/anyrole/**").hasAnyRole("BENHNHAN", "BACSI", "YTA")
+				.requestMatchers("/api/anyrole/**",
+						"/api/users/current-user/")
+				.hasAnyRole("BENHNHAN", "BACSI", "YTA")
 
 				.anyRequest().authenticated())
 				.httpBasic(httpbc -> httpbc
