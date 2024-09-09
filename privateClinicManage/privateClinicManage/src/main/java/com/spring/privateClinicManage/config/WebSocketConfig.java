@@ -13,7 +13,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.setApplicationDestinationPrefixes("/app");
-		registry.enableSimpleBroker("/notify");
+		registry.enableSimpleBroker("/notify", "/chat");
 	}
 
 	@Override
@@ -23,4 +23,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 				.setAllowedOriginPatterns("*")
 				.withSockJS();
 	}
+
+
 }

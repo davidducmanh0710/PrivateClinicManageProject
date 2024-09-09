@@ -97,6 +97,13 @@ export default function NotificationContainer() {
           showSnackbar("Bạn có thông báo mới", "success");
           forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
         });
+        stompYTAClient.send(
+          "/app/online.addOnlineUser",
+          {},
+          JSON.stringify({
+            userId: currentUser.id,
+          })
+        );
       },
       onError
     );
@@ -117,6 +124,13 @@ export default function NotificationContainer() {
     stompBENHNHANClient.connect(
       {},
       () => {
+        stompBENHNHANClient.send(
+          "/app/online.addOnlineUser",
+          {},
+          JSON.stringify({
+            userId: currentUser.id,
+          })
+        );
         stompBENHNHANClient.subscribe(
           "/notify/directRegister/" + currentUser.id,
           (payload) => {
@@ -189,6 +203,18 @@ export default function NotificationContainer() {
     handleCountIsReadFalse(YTAnotifications);
     handleCountIsReadFalseBN(BENHNHANnotifications);
   }, [YTAnotifications, BENHNHANnotifications]);
+
+  useEffect(() => {
+    if (currentUser === null) {
+      if (stompBENHNHANClientRef.current) {
+        stompBENHNHANClientRef.current.disconnect();
+        stompBENHNHANClientRef.current = null;
+      } else if (stompYTAClientRef.current) {
+        stompYTAClientRef.current.disconnect();
+        stompYTAClientRef.current = null;
+      }
+    }
+  }, [currentUser]); // this useEffect not sure , can make error
 
   useEffect(() => {
     if (
@@ -412,7 +438,6 @@ export default function NotificationContainer() {
               {isBENHNHAN(currentUser) &&
                 BENHNHANnotifications.length > 0 &&
                 BENHNHANnotifications.map((notification) => {
-                  console.log(notification);
                   if (notification.type === "DICRECT_REGISTER") {
                     return (
                       <Dropdown.Item

@@ -11,7 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.spring.privateClinicManage.component.OnlinerUsers;
 import com.spring.privateClinicManage.dto.BlogDto;
 import com.spring.privateClinicManage.dto.ChangePasswordDto;
 import com.spring.privateClinicManage.dto.CommentDto;
@@ -39,6 +42,9 @@ import com.spring.privateClinicManage.service.CommentBlogService;
 import com.spring.privateClinicManage.service.CommentService;
 import com.spring.privateClinicManage.service.LikeBlogService;
 import com.spring.privateClinicManage.service.UserService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/anyrole")
@@ -58,6 +64,32 @@ public class ApiAnyRoleRestController {
 	private LikeBlogService likeBlogService;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private OnlinerUsers onlineUsers;
+
+	@PostMapping("/logout/")
+	@CrossOrigin
+	public ResponseEntity<Object> logout(HttpServletRequest request, HttpServletResponse response) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		onlineUsers.findAndRemoveSessionIdByKey(currentUser.getRole().getName(), "",
+				currentUser.getId());
+
+		SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+		logoutHandler.logout(request, response,
+				SecurityContextHolder.getContext().getAuthentication());
+
+		return new ResponseEntity<Object>("Đăng xuất thành công !", HttpStatus.OK);
+	}
+
+	@GetMapping(path = "/get-all-online-users/")
+	@CrossOrigin
+	public ResponseEntity<Object> getAllOnlineUsers() {
+		return new ResponseEntity<Object>(onlineUsers.getOnlineUsers(), HttpStatus.OK);
+	}
 
 	@PatchMapping(path = "/update-profile/")
 	@CrossOrigin

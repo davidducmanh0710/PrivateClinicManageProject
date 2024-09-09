@@ -1,6 +1,7 @@
 import AdviseSection from "../AdviseSection/AdviseSection";
 import AppointmentForm from "../AppointmentForm/AppointmentForm";
 import CencorRegister from "../CensorRegister/CensorRegister";
+import Chatting from "../Chatting/Chatting";
 import DirectRegister from "../DirectRegister/DirectRegister";
 import ExaminationForm from "../ExaminationForm/ExaminationForm";
 import Home from "../Home/Home";
@@ -36,6 +37,7 @@ const publicRoutes = [
   { path: "/examination-form", component: ExaminationForm, role: "ROLE_BACSI" },
   { path: "/advise-section", component: AdviseSection, role: "ROLE_ALL" },
   { path: "/user-profile", component: UserProfile, role: "ROLE_ANY" },
+  { path: "/chatting", component: Chatting, role: "ROLE_ANY" },
 ];
 
 const privateRoutes = [];

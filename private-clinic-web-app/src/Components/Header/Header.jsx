@@ -7,6 +7,7 @@ import { Button, Dropdown, Image, NavDropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { isBACSI, isBENHNHAN, isYTA } from "../Common/Common";
 import NotificationContainer from "../NotificationContainer/NotificationContainer";
+import { authAPI, endpoints } from "../config/Api";
 
 export default function Header() {
   const formLoginRef = useRef();
@@ -30,12 +31,24 @@ export default function Header() {
     formRegisterRef.current.close();
   }
 
-  function logout() {
-    localStorage.setItem("token", "");
-    localStorage.setItem("HTML5_QRCODE_DATA", "");
-    setCurrentUser(null);
-    navigate("/");
-  }
+  const handleLogoutOnlineUser = async () => {
+    let respone;
+    try {
+      respone = await authAPI().post(endpoints["logoutOnlineUser"], {
+        validateStatus: function (status) {
+          return status < 500;
+        },
+      });
+
+      if (respone.status === 200) {
+        localStorage.setItem("token", "");
+        localStorage.setItem("HTML5_QRCODE_DATA", "");
+        setCurrentUser(null);
+        navigate("/");
+      }
+    } catch {}
+  };
+
 
   useEffect(() => {}, [currentUser]);
 
@@ -117,10 +130,22 @@ export default function Header() {
                             </Link>
                           </Dropdown.Item>
                         )}
+
+                        {currentUser !== null && (
+                          <Dropdown.Item>
+                            <Link className="dropdown-item" to="/chatting">
+                              Nhắn tin tư vấn
+                            </Link>
+                          </Dropdown.Item>
+                        )}
+
                         <NavDropdown.Divider />
 
                         <NavDropdown.Item>
-                          <Button className="dropdown-item" onClick={logout}>
+                          <Button
+                            className="dropdown-item"
+                            onClick={handleLogoutOnlineUser}
+                          >
                             Đăng xuất
                           </Button>
                         </NavDropdown.Item>

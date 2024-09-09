@@ -9,7 +9,6 @@ import {
   Row,
   Stack,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
 import { CustomerSnackbar } from "../Common/Common";
 import { UserContext } from "../config/Context";
 import { authAPI, endpoints } from "../config/Api";

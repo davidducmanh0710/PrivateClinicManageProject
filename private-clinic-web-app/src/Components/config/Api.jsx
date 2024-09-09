@@ -44,7 +44,8 @@ export let endpoints = {
   countLikeBlog: (blogId) => `/api/anyrole/blogs/${blogId}/count-likes/`,
   updateProfile: "/api/anyrole/update-profile/",
   changeAvatar: "/api/anyrole/change-avatar/",
-  changePassword : "/api/anyrole/change-password/"
+  changePassword : "/api/anyrole/change-password/",
+  logoutOnlineUser : '/api/anyrole/logout/'
 };
 
 export const authAPI = () => {
