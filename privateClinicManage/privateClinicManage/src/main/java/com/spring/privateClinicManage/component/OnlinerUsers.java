@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.spring.privateClinicManage.dto.OnlineUsersOutputDto;
+import com.spring.privateClinicManage.entity.User;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -29,10 +30,19 @@ public class OnlinerUsers {
 				if (userOutput.getSessionId().equals(sessionId)
 						|| userOutput.getUser().getId().equals(userId)) {
 					usersList.remove(i);
+//					System.out.println(i);
 					this.getOnlineUsers().put(key, usersList);
 				}
 			}
 		}
+	}
+
+	public User findFirstROLE_TUVAN() {
+		List<OnlineUsersOutputDto> usersList = onlineUsers.get("ROLE_TUVAN");
+		if (usersList == null || usersList.size() < 1)
+			return null;
+
+		return usersList.get(0).getUser();
 	}
 
 }

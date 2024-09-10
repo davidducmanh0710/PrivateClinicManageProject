@@ -6,7 +6,7 @@ import { over } from "stompjs";
 import { BASE_URL } from "../config/Api";
 import { UserContext } from "../config/Context";
 import dayjs from "dayjs";
-import { CustomerSnackbar, isBENHNHAN, isYTA } from "../Common/Common";
+import { CustomerSnackbar, isBENHNHAN, isTUVAN, isYTA } from "../Common/Common";
 import { useNavigate } from "react-router-dom";
 
 export default function NotificationContainer() {
@@ -15,10 +15,12 @@ export default function NotificationContainer() {
 
   const [YTAnotifications, setYTANotifications] = useState([]);
   const [BENHNHANnotifications, setBENHNHANNotifications] = useState([]);
+  const [TUVANnotifications, setTUVANNotifications] = useState([]);
   const [tempNotifications, setTempNotification] = useState([]); // received all output data from Websocket before seperated
 
   const stompYTAClientRef = useRef(null);
   const stompBENHNHANClientRef = useRef(null);
+  const stompTUVANClientRef = useRef(null);
 
   const { currentUser } = useContext(UserContext);
 
@@ -97,13 +99,6 @@ export default function NotificationContainer() {
           showSnackbar("Bạn có thông báo mới", "success");
           forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
         });
-        stompYTAClient.send(
-          "/app/online.addOnlineUser",
-          {},
-          JSON.stringify({
-            userId: currentUser.id,
-          })
-        );
       },
       onError
     );
@@ -124,13 +119,6 @@ export default function NotificationContainer() {
     stompBENHNHANClient.connect(
       {},
       () => {
-        stompBENHNHANClient.send(
-          "/app/online.addOnlineUser",
-          {},
-          JSON.stringify({
-            userId: currentUser.id,
-          })
-        );
         stompBENHNHANClient.subscribe(
           "/notify/directRegister/" + currentUser.id,
           (payload) => {
@@ -162,7 +150,7 @@ export default function NotificationContainer() {
           }
         );
         stompBENHNHANClient.subscribe(
-          "/notify/recievedLikeBlog/" + currentUser.id,
+          "/notify/recievedLikeBlog/" + currentUser?.id,
           (payload) => {
             let p = JSON.parse(payload.body);
 
@@ -187,6 +175,15 @@ export default function NotificationContainer() {
     };
   };
 
+  const tuvanConnectNotificationWsInit = () => {
+    let stompTUVANClient = null;
+    let socket = new SockJS(`${BASE_URL}/ws`);
+    stompTUVANClient = over(socket);
+    //stompTUVANClient.debug = () => {}; // tắt log của stomp in ra console
+    stompTUVANClientRef.current = stompTUVANClient;
+    stompTUVANClient.connect({}, () => {});
+  };
+
   useEffect(() => {
     if (
       currentUser !== null &&
@@ -200,6 +197,12 @@ export default function NotificationContainer() {
       isBENHNHAN(currentUser)
     )
       benhnhanConnectNotificationWsInit();
+    else if (
+      currentUser !== null &&
+      !stompTUVANClientRef.current &&
+      isTUVAN(currentUser)
+    )
+      tuvanConnectNotificationWsInit();
     handleCountIsReadFalse(YTAnotifications);
     handleCountIsReadFalseBN(BENHNHANnotifications);
   }, [YTAnotifications, BENHNHANnotifications]);
@@ -212,6 +215,9 @@ export default function NotificationContainer() {
       } else if (stompYTAClientRef.current) {
         stompYTAClientRef.current.disconnect();
         stompYTAClientRef.current = null;
+      } else if (stompTUVANClientRef.current) {
+        stompTUVANClientRef.current.disconnect();
+        stompTUVANClientRef.current = null;
       }
     }
   }, [currentUser]); // this useEffect not sure , can make error

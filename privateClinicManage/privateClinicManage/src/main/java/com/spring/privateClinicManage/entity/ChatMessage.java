@@ -2,10 +2,6 @@ package com.spring.privateClinicManage.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -16,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,12 +19,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "comment")
+@Table(name = "chatmessage")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Comment implements Serializable {
+public class ChatMessage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -38,26 +33,24 @@ public class Comment implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@Column(name = "content", nullable = false, length = 65535)
+	@Column(name = "chat_room_id")
+	private String chatRoomId;
+
+	@ManyToOne(fetch = FetchType.EAGER, cascade = {
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH
+	}) // không thê để persist
+	@JoinColumn(name = "sender_id", referencedColumnName = "id")
+	private User sender;
+
+	@ManyToOne(fetch = FetchType.EAGER, cascade = {
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH
+	}) // không thê để persist
+	@JoinColumn(name = "recipient_id", referencedColumnName = "id")
+	private User recipient;
+
+	@Column(name = "content")
 	private String content;
 
-	@Column(name = "created_date")
+	@Column(name = "createdDate")
 	private Date createdDate;
-	
-	@Column(name = "updated_date")
-	private Date updatedDate;
-
-	
-	@ManyToOne(fetch = FetchType.EAGER, cascade = {
-			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
-	})
-	@JoinColumn(name = "user_id", referencedColumnName = "id")
-	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-	private User user;
-
-	@OneToMany(mappedBy = "comment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<CommentBlog> commentBlogs;
-
-
 }

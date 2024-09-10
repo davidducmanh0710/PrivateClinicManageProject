@@ -118,7 +118,7 @@ public class JwtSecurityConfig {
 				.permitAll()
 				.requestMatchers("/api/anyrole/**",
 						"/api/users/current-user/")
-				.hasAnyRole("BENHNHAN", "BACSI", "YTA")
+				.hasAnyRole("BENHNHAN", "BACSI", "YTA", "TUVAN")
 
 				.anyRequest().authenticated())
 				.httpBasic(httpbc -> httpbc

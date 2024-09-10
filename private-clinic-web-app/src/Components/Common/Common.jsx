@@ -7,7 +7,7 @@ export const CustomerSnackbar = ({ open, message, severity }) => {
       open={open}
       key={"top center"}
     >
-      <Alert severity={severity} variant="filled" sx={{ width: "100%"}}>
+      <Alert severity={severity} variant="filled" sx={{ width: "100%" }}>
         {message}
       </Alert>
     </Snackbar>
@@ -26,5 +26,10 @@ export const isYTA = (currentUser) => {
 
 export const isBACSI = (currentUser) => {
   if (currentUser.role.name === "ROLE_BACSI") return true;
+  return false;
+};
+
+export const isTUVAN = (currentUser) => {
+  if (currentUser.role.name === "ROLE_TUVAN") return true;
   return false;
 };

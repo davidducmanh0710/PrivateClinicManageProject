@@ -31,13 +31,18 @@ import com.spring.privateClinicManage.dto.BlogDto;
 import com.spring.privateClinicManage.dto.ChangePasswordDto;
 import com.spring.privateClinicManage.dto.CommentDto;
 import com.spring.privateClinicManage.dto.CountDto;
+import com.spring.privateClinicManage.dto.GetChatMessageDto;
 import com.spring.privateClinicManage.dto.UpdateProfileDto;
 import com.spring.privateClinicManage.entity.Blog;
+import com.spring.privateClinicManage.entity.ChatMessage;
+import com.spring.privateClinicManage.entity.ChatRoom;
 import com.spring.privateClinicManage.entity.Comment;
 import com.spring.privateClinicManage.entity.CommentBlog;
 import com.spring.privateClinicManage.entity.LikeBlog;
 import com.spring.privateClinicManage.entity.User;
 import com.spring.privateClinicManage.service.BlogService;
+import com.spring.privateClinicManage.service.ChatMessageService;
+import com.spring.privateClinicManage.service.ChatRoomService;
 import com.spring.privateClinicManage.service.CommentBlogService;
 import com.spring.privateClinicManage.service.CommentService;
 import com.spring.privateClinicManage.service.LikeBlogService;
@@ -66,6 +71,10 @@ public class ApiAnyRoleRestController {
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private OnlinerUsers onlineUsers;
+	@Autowired
+	private ChatRoomService chatRoomService;
+	@Autowired
+	private ChatMessageService chatMessageService;
 
 	@PostMapping("/logout/")
 	@CrossOrigin
@@ -319,6 +328,53 @@ public class ApiAnyRoleRestController {
 				likeBlog);
 
 		return new ResponseEntity<>(likeBlog, HttpStatus.OK);
+	}
+
+	@GetMapping("/connect-to-consultant/")
+	@CrossOrigin
+	public ResponseEntity<Object> connectToConsultant() {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		User tempConsultant = onlineUsers.findFirstROLE_TUVAN();
+
+		if (tempConsultant == null)
+			return new ResponseEntity<Object>("Hiện tại không có tư vấn viên nào đang hoạt động",
+					HttpStatus.NO_CONTENT);
+		User consultant = userService.findUserById(tempConsultant.getId());
+
+		chatRoomService.getChatRoomId(currentUser, consultant, true);
+
+		return new ResponseEntity<>(consultant, HttpStatus.OK);
+	}
+
+	@GetMapping("/get-all-recipient-by-sender/")
+	@CrossOrigin
+	public ResponseEntity<Object> getAllRecipientBySender() {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		List<ChatRoom> chatRooms = chatRoomService.findBySender(currentUser);
+
+		return new ResponseEntity<>(chatRooms, HttpStatus.OK);
+	}
+	
+	@PostMapping("/get-all-chatMessage-by-sender-and-recipient/")
+	@CrossOrigin
+	public ResponseEntity<Object> getAllChatMessageBySenderAndRecipient(
+			@RequestBody GetChatMessageDto getChatMessageDto) {
+		
+		User sender = userService.findUserById(getChatMessageDto.getSenderId());
+		User recipient = userService.findUserById(getChatMessageDto.getRecipientId());
+		
+		List<ChatMessage> chatMessages = chatMessageService.findBySenderAndRecipient(sender,
+				recipient);
+		
+		return new ResponseEntity<>(chatMessages, HttpStatus.OK);
 	}
 
 }

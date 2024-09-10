@@ -34,6 +34,9 @@
     border-radius: 50%;
     padding: 8px;
   }
+  .active {
+    background-color: #e7e7e7;
+  }
 }
 
 .chatting-content {
@@ -121,5 +124,62 @@
       filter: invert(80%);
       cursor: pointer;
     }
+  }
+}
+
+.recipient-items {
+  border-radius: 20px;
+  .profile {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .profile img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .profile-info {
+    margin-left: 20px;
+  }
+  .profile-info h6 {
+    margin: 0;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  .profile-info small {
+    color: #65676b;
+  }
+}
+
+.recipient-items:hover {
+  opacity: 0.7;
+  cursor: pointer;
+  background-color: #ccc;
+}
+
+.chatting-content .chatting-content-main {
+  max-height: 100px;
+  min-height: 600px;
+  overflow-y: scroll;
+
+  .message {
+    max-width: 40%;
+    font-size: 15px;
+  }
+
+  .bg-primary {
+    background-color: #0084ff !important;
+  }
+
+  .bg-light {
+    background-color: #f1f0f0 !important;
+  }
+
+  .rounded-circle {
+    width: 40px;
+    height: 40px;
   }
 }

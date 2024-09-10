@@ -45,7 +45,10 @@ export let endpoints = {
   updateProfile: "/api/anyrole/update-profile/",
   changeAvatar: "/api/anyrole/change-avatar/",
   changePassword : "/api/anyrole/change-password/",
-  logoutOnlineUser : '/api/anyrole/logout/'
+  logoutOnlineUser : '/api/anyrole/logout/',
+  connentToConsultant : '/api/anyrole/connect-to-consultant/',
+  getAllRecipientBySender : '/api/anyrole/get-all-recipient-by-sender/',
+  getAllChatMessageBySenderAndRecipient : '/api/anyrole/get-all-chatMessage-by-sender-and-recipient/'
 };
 
 export const authAPI = () => {

@@ -97,5 +97,20 @@ public class User implements Serializable {
 	@JsonIgnore
 	private List<Blog> blogs;
 
+	@OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<ChatRoom> chatRoomSenders;
+
+	@OneToMany(mappedBy = "recipient", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<ChatRoom> chatRoomsRecipients;
+
+	@OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<ChatMessage> chatMessageSenders;
+
+	@OneToMany(mappedBy = "recipient", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<ChatMessage> chatMessageRecipients;
 
 }
