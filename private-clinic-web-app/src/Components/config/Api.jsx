@@ -48,7 +48,9 @@ export let endpoints = {
   logoutOnlineUser : '/api/anyrole/logout/',
   connentToConsultant : '/api/anyrole/connect-to-consultant/',
   getAllRecipientBySender : '/api/anyrole/get-all-recipient-by-sender/',
-  getAllChatMessageBySenderAndRecipient : '/api/anyrole/get-all-chatMessage-by-sender-and-recipient/'
+  getAllChatMessageBySenderAndRecipient : '/api/anyrole/get-all-chatMessage-by-sender-and-recipient/',
+  isUserOnline : '/api/anyrole/is-user-online/',
+  getLastChatMessage : '/api/anyrole/get-last-chat-message/'
 };
 
 export const authAPI = () => {

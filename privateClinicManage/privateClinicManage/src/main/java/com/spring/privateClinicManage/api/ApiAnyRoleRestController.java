@@ -32,6 +32,8 @@ import com.spring.privateClinicManage.dto.ChangePasswordDto;
 import com.spring.privateClinicManage.dto.CommentDto;
 import com.spring.privateClinicManage.dto.CountDto;
 import com.spring.privateClinicManage.dto.GetChatMessageDto;
+import com.spring.privateClinicManage.dto.OnlineUserDto;
+import com.spring.privateClinicManage.dto.RecipientDto;
 import com.spring.privateClinicManage.dto.UpdateProfileDto;
 import com.spring.privateClinicManage.entity.Blog;
 import com.spring.privateClinicManage.entity.ChatMessage;
@@ -375,6 +377,46 @@ public class ApiAnyRoleRestController {
 				recipient);
 		
 		return new ResponseEntity<>(chatMessages, HttpStatus.OK);
+	}
+
+	@PostMapping("/is-user-online/")
+	@CrossOrigin
+	public ResponseEntity<Object> isUserOnline(@RequestBody OnlineUserDto onlineUserDto) {
+		
+		User user = userService.findUserById(onlineUserDto.getUserId());
+		
+		if (user == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		Boolean isOnline = onlineUsers.isUserOnline(user);
+		
+		return new ResponseEntity<>(isOnline, HttpStatus.OK);
+	}
+
+	@PostMapping("/get-last-chat-message/")
+	@CrossOrigin
+	public ResponseEntity<Object> getLastChatMessage(@RequestBody RecipientDto recipientDto){
+		
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+		User recipient = userService.findUserById(recipientDto.getRecipientId());
+		
+		if (recipient == null)
+			return new ResponseEntity<>("Người nhận không tồn tại", HttpStatus.NOT_FOUND);
+		
+		List<ChatMessage> lastChatMessages = chatMessageService
+				.findTopByOrderByCreatedDateDesc(currentUser, recipient);
+		ChatMessage lastChatMessage = null;
+
+		if (lastChatMessages.size() > 0)
+			lastChatMessage = lastChatMessages.get(0);
+
+		if (lastChatMessage == null)
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+		return new ResponseEntity<>(lastChatMessage, HttpStatus.OK);
+		
 	}
 
 }

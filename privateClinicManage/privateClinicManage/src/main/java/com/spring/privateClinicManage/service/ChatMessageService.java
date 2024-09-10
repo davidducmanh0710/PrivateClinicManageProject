@@ -12,4 +12,6 @@ public interface ChatMessageService {
 	ChatMessage saveChatMessage(ChatMessage chatMessage);
 
 	List<ChatMessage> findBySenderAndRecipient(User sender, User recipient);
+
+	List<ChatMessage> findTopByOrderByCreatedDateDesc(User sender, User recipient);
 }

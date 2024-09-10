@@ -31,8 +31,6 @@ public class WebSocketEventListener {
 		if (currentUser != null)
 			onlineUsers.findAndRemoveSessionIdByKey(currentUser.getRole().getName(), sessionId,
 					currentUser.getId());
-
-		System.out.println("Session ID " + sessionId + " đã ngắt kết nối.");
 	}
 
 	public boolean isUserActive(String userId) {

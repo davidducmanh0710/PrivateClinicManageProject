@@ -43,7 +43,19 @@ public class ChatController {
 		if (user != null) {
 			List<OnlineUsersOutputDto> ouoDtos = onlineUsers
 					.getOnlineUsers().getOrDefault(user.getRole().getName(), new ArrayList<>());
-			ouoDtos.add(new OnlineUsersOutputDto(user, sessionId));
+
+			Boolean flag = false;
+
+			for (int i = 0; i < ouoDtos.size(); i++) {
+				OnlineUsersOutputDto userOutput = ouoDtos.get(i);
+				if (userOutput.getUser().getId().equals(user.getId())) {
+					ouoDtos.get(i).setSessionId(sessionId);
+					flag = true;
+				}
+			}
+
+			if (flag == false)
+				ouoDtos.add(new OnlineUsersOutputDto(user, sessionId));
 
 			onlineUsers.getOnlineUsers().put(user.getRole().getName(), ouoDtos);
 

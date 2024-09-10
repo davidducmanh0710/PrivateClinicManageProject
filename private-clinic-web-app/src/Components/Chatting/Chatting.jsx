@@ -6,6 +6,8 @@ import { authAPI, BASE_URL, endpoints } from "../config/Api";
 import { CustomerSnackbar, isBENHNHAN } from "../Common/Common";
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
+import OnlineIcon from "../OnlineIcon/OnlineIcon";
+import LastChatMessage from "../LastChatMessage/LastChatMessage";
 
 export default function Chatting() {
   const { currentUser } = useContext(UserContext);
@@ -46,12 +48,15 @@ export default function Chatting() {
     element.scrollIntoView();
 
     getAllRecipientBySender();
-  }, [recipient]);
+  }, [recipient,messagesContainer]);
 
   useEffect(() => {
-    if (messagesContainer.length > 0)
-      document.getElementById("chatting-content-main").scrollTop =
-        document.getElementById("chatting-content-main").scrollHeight;
+    if (document !== null) {
+      let element = document.getElementById("chatting-content-main");
+      if (element !== null)
+        document.getElementById("chatting-content-main").scrollTop =
+          document.getElementById("chatting-content-main").scrollHeight;
+    }
   }, [messagesContainer, messageContent]);
 
   const getAllRecipientBySender = useCallback(async () => {
@@ -146,9 +151,7 @@ export default function Chatting() {
             userId: currentUser?.id,
           })
         );
-        stompUSERClient.subscribe('/online-users', (payload) => {
-          
-        });
+        stompUSERClient.subscribe("/online-users", (payload) => {});
       },
       onError
     );
@@ -219,7 +222,7 @@ export default function Chatting() {
       } else {
         return (
           <div
-            className="d-flex mb-3 flex-row-reverse align-items-center mr-2"
+            className="d-flex mb-3 mr-3 flex-row-reverse align-items-center"
             key={m.id}
           >
             <div className="message bg-primary text-white p-3 rounded">
@@ -279,10 +282,15 @@ export default function Chatting() {
                       onClick={() => hanldeClickRecipientItem(c.recipient)}
                     >
                       <div class="profile p-3">
-                        <img src={c.recipient.avatar} alt="Avatar" />
+                        <img
+                          className="avatar"
+                          src={c.recipient.avatar}
+                          alt="Avatar"
+                        />
+                        <OnlineIcon u={c.recipient} />
                         <div class="profile-info">
                           <h6>{c.recipient.name}</h6>
-                          <small>{messagesContainer?.at(-1)?.content}</small>
+                          <LastChatMessage r={c.recipient}/>
                         </div>
                       </div>
                     </div>
@@ -295,9 +303,11 @@ export default function Chatting() {
           {recipient !== null && (
             <div class="profile p-3 shadow-sm">
               <img src={recipient.avatar} alt="Avatar" />
+              <OnlineIcon u={recipient} />
+
               <div class="profile-info">
                 <h6>{recipient.name}</h6>
-                <small>Hoạt động 14 phút trước</small>
+                <small></small>
               </div>
             </div>
           )}

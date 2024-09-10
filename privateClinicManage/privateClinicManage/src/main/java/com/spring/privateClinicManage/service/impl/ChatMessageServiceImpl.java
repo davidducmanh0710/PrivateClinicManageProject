@@ -46,4 +46,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 		chatMessageRepository.save(chatMessage);
 	}
 
+	@Override
+	public List<ChatMessage> findTopByOrderByCreatedDateDesc(User sender, User recipient) {
+		String chatRoomId = chatRoomService.getChatRoomId(sender, recipient, false);
+		return chatMessageRepository.findTopByOrderByCreatedDateDesc(chatRoomId);
+	}
+
 }

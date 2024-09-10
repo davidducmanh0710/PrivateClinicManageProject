@@ -24,13 +24,12 @@ public class OnlinerUsers {
 
 	public void findAndRemoveSessionIdByKey(String key, String sessionId, Integer userId) {
 		List<OnlineUsersOutputDto> usersList = onlineUsers.get(key);
-		if (usersList != null) {
+		if (usersList != null && usersList.size() > 0) {
 			for (int i = 0; i < usersList.size(); i++) {
 				OnlineUsersOutputDto userOutput = usersList.get(i);
 				if (userOutput.getSessionId().equals(sessionId)
 						|| userOutput.getUser().getId().equals(userId)) {
 					usersList.remove(i);
-//					System.out.println(i);
 					this.getOnlineUsers().put(key, usersList);
 				}
 			}
@@ -43,6 +42,20 @@ public class OnlinerUsers {
 			return null;
 
 		return usersList.get(0).getUser();
+	}
+
+	public Boolean isUserOnline(User user) {
+
+		List<OnlineUsersOutputDto> usersList = onlineUsers.get(user.getRole().getName());
+
+		if (usersList != null && usersList.size() > 0) {
+			for (int i = 0; i < usersList.size(); i++) {
+				OnlineUsersOutputDto userOutput = usersList.get(i);
+				if (userOutput.getUser().getId().equals(user.getId()))
+					return true;
+			}
+		}
+		return false;
 	}
 
 }
