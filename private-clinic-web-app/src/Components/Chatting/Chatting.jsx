@@ -6,10 +6,14 @@ import { authAPI, BASE_URL, endpoints } from "../config/Api";
 import { CustomerSnackbar, isBENHNHAN } from "../Common/Common";
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
-import OnlineIcon from "../OnlineIcon/OnlineIcon";
 import LastChatMessage from "../LastChatMessage/LastChatMessage";
+import OnlineSide from "../OnlineSide/OnlineSide";
+import Select from "react-select";
 
 export default function Chatting() {
+  const [userList, setUserList] = useState([]);
+  let userSelectRef = useRef(undefined);
+
   const { currentUser } = useContext(UserContext);
   const [chatRooms, setChatRooms] = useState(null);
   const [recipient, setRecipient] = useState(null);
@@ -43,13 +47,14 @@ export default function Chatting() {
   useEffect(() => {
     if (currentUser !== null && !stompUSERClientRef.current)
       userConnectChattingWsInit();
+    if (userList.length < 1) getAllUsers();
   }, []);
 
   useEffect(() => {
     const element = document.getElementById("chatting-container");
     element.scrollIntoView();
 
-    if (chatRooms === null) getAllRecipientBySender();
+    getAllRecipientBySender();
   }, [recipient, messagesContainer, onlineUsers]);
 
   useEffect(() => {
@@ -84,7 +89,7 @@ export default function Chatting() {
         setChatRooms(response.data);
       }
     } catch {}
-  }, []);
+  }, [chatRooms]);
 
   const getAllChatMessageBySenderAndRecipient = async (recipient) => {
     let response;
@@ -264,6 +269,78 @@ export default function Chatting() {
     }
   }
 
+  const getAllUsers = useCallback(async () => {
+    let response;
+    try {
+      response = await authAPI().get(endpoints["getAllUsers"], {
+        validateStatus: function (status) {
+          return status < 500; // Chỉ ném lỗi nếu status code >= 500
+        },
+      });
+
+      if (response.status === 200) {
+        if (response.data.length > 0)
+          setUserList(
+            response.data.map((u) => {
+              return {
+                value: u.id,
+                label: `${u.email}`,
+              };
+            })
+          );
+      } else {
+        setUserList([]);
+        showSnackbar(response.data, "error");
+      }
+    } catch {
+      showSnackbar("Lỗi", "error");
+    }
+  }, []);
+
+  const isOptionSelected = (_, selectValue) => {
+    return selectValue.length > 0;
+  }; // set nếu đã chọn 2 value vào thẻ select r thì false , ko cho chọn nữa
+
+  const connentToNewRecipient = async () => {
+    if (userSelectRef !== undefined) {
+      let recipients = [];
+
+      userSelectRef.current.props.value?.forEach((u) =>
+        recipients.push(u?.value)
+      );
+
+      if (recipients[0] > 0) {
+        let response;
+        try {
+          response = await authAPI().post(
+            endpoints["connentToNewRecipient"],
+            {
+              recipientId: recipients[0],
+            },
+            {
+              validateStatus: function (status) {
+                return status < 500;
+              },
+            }
+          );
+          if (response.status === 200) {
+            showSnackbar("Kết nối thành công !", "success");
+            setRecipient(response.data);
+            userSelectRef = undefined;
+          } else {
+            showSnackbar(response.data, "error");
+            userSelectRef = undefined;
+          }
+        } catch {
+          showSnackbar(response, "error");
+          userSelectRef = undefined;
+        }
+      }
+    }
+    userSelectRef = undefined;
+  };
+
+
   return (
     <>
       <CustomerSnackbar
@@ -295,58 +372,71 @@ export default function Chatting() {
               )}
             </div>
             <div className="mt-3">
-              <div className="search-bar">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  className="bi bi-search"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85a1.007 1.007 0 0 0-.115-.098zm-5.344.856a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z" />
-                </svg>
-                <input type="text" placeholder="Tìm kiếm người để nhắn tin" />
+              <div className="search-bar" onBlur={connentToNewRecipient}>
+                <div className="search-icon">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    className="bi bi-search"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85a1.007 1.007 0 0 0-.115-.098zm-5.344.856a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z" />
+                  </svg>
+                </div>
+                <Select
+                  isMulti
+                  options={userList}
+                  className="basic-multi-select fs-6"
+                  classNamePrefix="select"
+                  isSearchable={true}
+                  ref={userSelectRef}
+                  isOptionSelected={isOptionSelected}
+                  placeholder="Tìm tài khoản muốn nhắn tin :"
+                />
               </div>
             </div>
-            {chatRooms !== null &&
-              chatRooms?.length > 0 &&
-              chatRooms.map((c) => {
-                return (
-                  <>
-                    <div
-                      className={`recipient-items ${
-                        recipient?.id === c.recipient.id ? "active" : ""
-                      }`}
-                      onClick={() => hanldeClickRecipientItem(c.recipient)}
-                    >
-                      <div class="profile p-3">
-                        <img
-                          className="avatar"
-                          src={c.recipient.avatar}
-                          alt="Avatar"
-                        />
-                        <OnlineIcon u={c.recipient} type="ICON"/>
-                        <div class="profile-info">
-                          <h6>{c.recipient.name}</h6>
-                          <LastChatMessage r={c.recipient} />
+            <div className="recipient-list">
+              {chatRooms !== null &&
+                chatRooms?.length > 0 &&
+                chatRooms.map((c) => {
+                  return (
+                    <>
+                      <div
+                        className={`recipient-items ${
+                          recipient?.id === c.recipient.id ? "active" : ""
+                        }`}
+                        onClick={() => hanldeClickRecipientItem(c.recipient)}
+                      >
+                        <div class="profile p-3">
+                          <img
+                            className="avatar"
+                            src={c.recipient.avatar}
+                            alt="Avatar"
+                          />
+                          <OnlineSide u={c.recipient} type="ICON" />
+                          <div class="profile-info">
+                            <h6>{c.recipient.name}</h6>
+                            <LastChatMessage r={c.recipient} />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </>
-                );
-              })}
+                    </>
+                  );
+                })}
+            </div>
           </div>
         </div>
         <div className="chatting-content shadow container mt-3 p-3">
           {recipient !== null && (
             <div class="profile p-3 shadow-sm">
               <img src={recipient.avatar} alt="Avatar" />
-              <OnlineIcon u={recipient} type="ICON" />
+              <OnlineSide u={recipient} type="ICON" />
 
               <div class="profile-info">
                 <h6>{recipient.name}</h6>
-                <OnlineIcon u={recipient} type="TEXT"/>
+                <OnlineSide u={recipient} type="TEXT" />
               </div>
             </div>
           )}

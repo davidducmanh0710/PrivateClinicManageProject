@@ -6,7 +6,6 @@ import { authAPI, endpoints } from "../config/Api";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 
-
 export default function DirectRegister() {
   const [directRegisterState, setDirectRegisterState] = useState({
     name: "",
@@ -17,7 +16,6 @@ export default function DirectRegister() {
 
   const navigate = useNavigate();
 
-
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
     message: "Đặt lịch thành công",
@@ -26,8 +24,6 @@ export default function DirectRegister() {
 
   const [userList, setUserList] = useState([]);
   let userSelectRef = useRef(undefined);
-
-
 
   const showSnackbar = (message, severity) => {
     setData({
@@ -42,8 +38,8 @@ export default function DirectRegister() {
     }, 2400);
   };
 
-    const isOptionSelected = (_, selectValue) => {
-  	return selectValue.length > 0;
+  const isOptionSelected = (_, selectValue) => {
+    return selectValue.length > 0;
   }; // set nếu đã chọn 2 value vào thẻ select r thì false , ko cho chọn nữa
 
   function hanldeRegisterScheduleState(e) {
@@ -57,14 +53,11 @@ export default function DirectRegister() {
   const getAllUsers = useCallback(async () => {
     let response;
     try {
-      response = await authAPI().get(
-        endpoints["getAllUsers"],
-        {
-          validateStatus: function (status) {
-            return status < 500; // Chỉ ném lỗi nếu status code >= 500
-          },
-        }
-      );
+      response = await authAPI().get(endpoints["getAllUsers"], {
+        validateStatus: function (status) {
+          return status < 500; // Chỉ ném lỗi nếu status code >= 500
+        },
+      });
 
       if (response.status === 200) {
         if (response.data.length > 0)
@@ -86,8 +79,8 @@ export default function DirectRegister() {
   }, []);
 
   useEffect(() => {
-    if (userList.length < 1) getAllUsers()
-  },[])
+    if (userList.length < 1) getAllUsers();
+  }, []);
 
   const directScheduleAct = async (event) => {
     event.preventDefault();
@@ -95,16 +88,15 @@ export default function DirectRegister() {
     setLoading(true);
 
     try {
-
-        let emails = [];
-        if (userSelectRef.current !== undefined)
-          userSelectRef.current.props.value.forEach((u) => emails.push(u.value));
+      let emails = [];
+      if (userSelectRef.current !== undefined)
+        userSelectRef.current.props.value.forEach((u) => emails.push(u.value));
 
       const response = await authAPI().post(
         endpoints["directRegister"],
         {
           ...directRegisterState,
-          email : emails[0]
+          email: emails[0],
         },
         {
           validateStatus: function (status) {

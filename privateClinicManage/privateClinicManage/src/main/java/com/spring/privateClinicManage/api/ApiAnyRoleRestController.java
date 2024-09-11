@@ -162,7 +162,7 @@ public class ApiAnyRoleRestController {
 
 		currentUser.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
 		userService.saveUser(currentUser);
-		
+
 		return new ResponseEntity<>("Thay đổi mật khẩu thành công !", HttpStatus.OK);
 	}
 
@@ -364,47 +364,58 @@ public class ApiAnyRoleRestController {
 
 		return new ResponseEntity<>(chatRooms, HttpStatus.OK);
 	}
-	
+
 	@PostMapping("/get-all-chatMessage-by-sender-and-recipient/")
 	@CrossOrigin
 	public ResponseEntity<Object> getAllChatMessageBySenderAndRecipient(
 			@RequestBody GetChatMessageDto getChatMessageDto) {
-		
+
+		if (getChatMessageDto.getSenderId() == null)
+			return new ResponseEntity<>("Người gửi không tồn tại", HttpStatus.NOT_FOUND);
+		if (getChatMessageDto.getRecipientId() == null)
+			return new ResponseEntity<>("Người nhận không tồn tại", HttpStatus.NOT_FOUND);
+
 		User sender = userService.findUserById(getChatMessageDto.getSenderId());
 		User recipient = userService.findUserById(getChatMessageDto.getRecipientId());
-		
+
 		List<ChatMessage> chatMessages = chatMessageService.findBySenderAndRecipient(sender,
 				recipient);
-		
+
 		return new ResponseEntity<>(chatMessages, HttpStatus.OK);
 	}
 
 	@PostMapping("/is-user-online/")
 	@CrossOrigin
 	public ResponseEntity<Object> isUserOnline(@RequestBody OnlineUserDto onlineUserDto) {
-		
+
+		if (onlineUserDto.getUserId() == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
 		User user = userService.findUserById(onlineUserDto.getUserId());
-		
+
 		if (user == null)
 			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
 
 		Boolean isOnline = onlineUsers.isUserOnline(user);
-		
+
 		return new ResponseEntity<>(isOnline, HttpStatus.OK);
 	}
 
 	@PostMapping("/get-last-chat-message/")
 	@CrossOrigin
-	public ResponseEntity<Object> getLastChatMessage(@RequestBody RecipientDto recipientDto){
-		
+	public ResponseEntity<Object> getLastChatMessage(@RequestBody RecipientDto recipientDto) {
+
+		if (recipientDto.getRecipientId() == null)
+			return new ResponseEntity<>("Người nhận không tồn tại", HttpStatus.NOT_FOUND);
+
 		User currentUser = userService.getCurrentLoginUser();
 		if (currentUser == null)
 			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
 		User recipient = userService.findUserById(recipientDto.getRecipientId());
-		
+
 		if (recipient == null)
 			return new ResponseEntity<>("Người nhận không tồn tại", HttpStatus.NOT_FOUND);
-		
+
 		List<ChatMessage> lastChatMessages = chatMessageService
 				.findTopByOrderByCreatedDateDesc(currentUser, recipient);
 		ChatMessage lastChatMessage = null;
@@ -416,7 +427,32 @@ public class ApiAnyRoleRestController {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
 		return new ResponseEntity<>(lastChatMessage, HttpStatus.OK);
-		
+
+	}
+
+	@PostMapping("/connect-to-new-recipient/")
+	@CrossOrigin
+	public ResponseEntity<Object> connectToNewRecipient(@RequestBody RecipientDto recipientDto) {
+
+		if (recipientDto.getRecipientId() == null)
+			return new ResponseEntity<>("Người nhận không tồn tại", HttpStatus.NOT_FOUND);
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		User recipient = userService.findUserById(recipientDto.getRecipientId());
+		if (recipient == null)
+			return new ResponseEntity<>("Người nhận không tồn tại", HttpStatus.NOT_FOUND);
+
+		String chatRoomId = chatRoomService.getChatRoomId(currentUser, recipient, false);
+
+		if (chatRoomId != null)
+			return new ResponseEntity<>(recipient, HttpStatus.OK);
+
+		chatRoomService.getChatRoomId(currentUser, recipient, true);
+
+		return new ResponseEntity<>(recipient, HttpStatus.OK);
 	}
 
 }

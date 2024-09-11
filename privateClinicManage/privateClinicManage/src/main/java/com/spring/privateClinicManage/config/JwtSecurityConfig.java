@@ -88,8 +88,7 @@ public class JwtSecurityConfig {
 				.hasRole("BENHNHAN")
 
 				.requestMatchers(HttpMethod.GET,
-						"/api/yta/all-register-schedule/",
-						"/api/yta/get-all-users/")
+						"/api/yta/all-register-schedule/")
 				.hasRole("YTA")
 
 				.requestMatchers(HttpMethod.POST,
@@ -117,7 +116,7 @@ public class JwtSecurityConfig {
 						"/api/anyrole/blogs/{blogId}/count-likes/")
 				.permitAll()
 				.requestMatchers("/api/anyrole/**",
-						"/api/users/current-user/")
+						"/api/users/current-user/", "/api/yta/get-all-users/")
 				.hasAnyRole("BENHNHAN", "BACSI", "YTA", "TUVAN")
 
 				.anyRequest().authenticated())

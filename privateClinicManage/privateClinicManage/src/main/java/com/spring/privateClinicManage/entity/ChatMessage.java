@@ -48,7 +48,7 @@ public class ChatMessage implements Serializable {
 	@JoinColumn(name = "recipient_id", referencedColumnName = "id")
 	private User recipient;
 
-	@Column(name = "content")
+	@Column(name = "content", nullable = false, length = 65535)
 	private String content;
 
 	@Column(name = "createdDate")

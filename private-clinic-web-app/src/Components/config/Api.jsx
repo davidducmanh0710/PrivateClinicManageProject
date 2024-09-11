@@ -50,7 +50,8 @@ export let endpoints = {
   getAllRecipientBySender : '/api/anyrole/get-all-recipient-by-sender/',
   getAllChatMessageBySenderAndRecipient : '/api/anyrole/get-all-chatMessage-by-sender-and-recipient/',
   isUserOnline : '/api/anyrole/is-user-online/',
-  getLastChatMessage : '/api/anyrole/get-last-chat-message/'
+  getLastChatMessage : '/api/anyrole/get-last-chat-message/',
+  connentToNewRecipient : '/api/anyrole/connect-to-new-recipient/',
 };
 
 export const authAPI = () => {

@@ -45,9 +45,17 @@ export default function LastChatMessage({ r }) {
     }
   };
 
+  function truncateString(str) {
+    if (str.length > 8) {
+      return str.substring(0, 30) + '...';
+    } else {
+      return str;
+    }
+  }
+
   return (
     <>
-      <small>{content}</small>
+      <small>{truncateString(content)}</small>
     </>
   );
 }

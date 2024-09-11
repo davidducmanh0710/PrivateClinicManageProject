@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { authAPI, endpoints } from "../config/Api";
 
-export default function OnlineIcon({ u, type }) {
+export default function OnlineSide({ u, type }) {
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {

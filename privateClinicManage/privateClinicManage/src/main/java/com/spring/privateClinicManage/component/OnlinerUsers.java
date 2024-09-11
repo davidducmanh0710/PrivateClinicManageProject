@@ -29,7 +29,6 @@ public class OnlinerUsers {
 				OnlineUsersOutputDto userOutput = usersList.get(i);
 				if (userOutput.getSessionId().equals(sessionId)
 						|| userOutput.getUser().getId().equals(userId)) {
-					if (usersList.size() > 0)
 						usersList.remove(i);
 					this.getOnlineUsers().put(key, usersList);
 				}
