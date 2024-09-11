@@ -44,6 +44,7 @@ import jakarta.mail.MessagingException;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin
 public class ApiUserRestController {
 
 	private JwtService jwtService;

@@ -1,6 +1,8 @@
 import axios from "axios";
 
-export const BASE_URL = "http://localhost:8888";
+// export const BASE_URL = "http://localhost:8888";
+
+export const BASE_URL = "https://8c5e-113-185-79-230.ngrok-free.app";
 
 export let endpoints = {
   login: "/api/users/login/",
@@ -44,14 +46,15 @@ export let endpoints = {
   countLikeBlog: (blogId) => `/api/anyrole/blogs/${blogId}/count-likes/`,
   updateProfile: "/api/anyrole/update-profile/",
   changeAvatar: "/api/anyrole/change-avatar/",
-  changePassword : "/api/anyrole/change-password/",
-  logoutOnlineUser : '/api/anyrole/logout/',
-  connentToConsultant : '/api/anyrole/connect-to-consultant/',
-  getAllRecipientBySender : '/api/anyrole/get-all-recipient-by-sender/',
-  getAllChatMessageBySenderAndRecipient : '/api/anyrole/get-all-chatMessage-by-sender-and-recipient/',
-  isUserOnline : '/api/anyrole/is-user-online/',
-  getLastChatMessage : '/api/anyrole/get-last-chat-message/',
-  connentToNewRecipient : '/api/anyrole/connect-to-new-recipient/',
+  changePassword: "/api/anyrole/change-password/",
+  logoutOnlineUser: "/api/anyrole/logout/",
+  connentToConsultant: "/api/anyrole/connect-to-consultant/",
+  getAllRecipientBySender: "/api/anyrole/get-all-recipient-by-sender/",
+  getAllChatMessageBySenderAndRecipient:
+    "/api/anyrole/get-all-chatMessage-by-sender-and-recipient/",
+  isUserOnline: "/api/anyrole/is-user-online/",
+  getLastChatMessage: "/api/anyrole/get-last-chat-message/",
+  connentToNewRecipient: "/api/anyrole/connect-to-new-recipient/",
 };
 
 export const authAPI = () => {
@@ -59,10 +62,16 @@ export const authAPI = () => {
     baseURL: `${BASE_URL}`,
     headers: {
       Authorization: localStorage.getItem("token"),
+      "ngrok-skip-browser-warning": "69420",
+      "bypass-tunnel-reminder" : '69420',      
     },
   });
 };
 
 export default axios.create({
   baseURL: `${BASE_URL}`,
+  headers: {
+    "ngrok-skip-browser-warning": "69420",
+    "bypass-tunnel-reminder" : '69420'
+  },
 });

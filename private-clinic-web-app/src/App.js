@@ -100,11 +100,12 @@ function App() {
                 } else if (route.layout === null) {
                   Layout = Fragment;
                 }
-
+                
                 if (currentUser === null && route.role !== "ROLE_ALL")
                   return <></>;
                 else if (currentUser !== null && route.role !== "ROLE_ALL") {
-                  if (currentUser.role.name === route.role) {
+                  if (currentUser?.role?.name === route.role) {
+                    
                     return (
                       <Route
                         key={index}

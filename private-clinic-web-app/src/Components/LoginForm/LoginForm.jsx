@@ -11,8 +11,6 @@ import {
 import { CircularProgress } from "@mui/material";
 import { CustomerSnackbar } from "../Common/Common";
 import { UserContext } from "../config/Context";
-import SockJS from "sockjs-client";
-import { over } from "stompjs";
 
 const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
   const [email, setEmail] = useState();
@@ -58,9 +56,9 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
     event.preventDefault();
 
     setLoading(true);
-
+    let response
     try {
-      const response = await Api.post(
+       response = await Api.post(
         endpoints["login"],
         {
           email: email,
@@ -78,7 +76,7 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
         setTimeout(async () => {
           const userResponse = await authAPI().get(endpoints["currentUser"], {
             validateStatus: function (status) {
-              return status < 500; // Chỉ ném lỗi nếu status code >= 500
+              return status < 500;
             },
           });
           if (userResponse.status === 200) {
@@ -95,18 +93,13 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
         console.log(response.data);
       }
     } catch (error) {
-      showSnackbar("Lỗi", "error");
+      showSnackbar(response, "error");
+      console.log(response)
     }
     setTimeout(() => {
       setLoading(false);
     }, 2400);
   };
-
-  function onError() {
-    showSnackbar("Lỗi", "error");
-  }
-
-
 
   return (
     <>
