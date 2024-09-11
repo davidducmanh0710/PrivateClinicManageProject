@@ -8,6 +8,19 @@ export default function LastChatMessage({ r }) {
     getLastChatMessage();
   });
 
+  const [autoLoadComponent, setAutoLoadComponent] = useState(null);
+
+  const updateData = () => {
+    setAutoLoadComponent(new Date().toLocaleTimeString());
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateData();
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
+
   const getLastChatMessage = async () => {
     let response;
     try {

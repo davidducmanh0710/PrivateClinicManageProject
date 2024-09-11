@@ -1,12 +1,25 @@
 import { useEffect, useState } from "react";
 import { authAPI, endpoints } from "../config/Api";
 
-export default function OnlineIcon({ u }) {
+export default function OnlineIcon({ u, type }) {
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
     isUserOnline();
   });
+
+  const [autoLoadComponent, setAutoLoadComponent] = useState(null);
+
+  const updateData = () => {
+    setAutoLoadComponent(new Date().toLocaleTimeString());
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateData();
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   const isUserOnline = async () => {
     let response;
@@ -30,5 +43,19 @@ export default function OnlineIcon({ u }) {
     }
   };
 
-  return <>{isOnline === true && <div class="status-indicator"></div>}</>;
+  return (
+    <>
+      {isOnline === true ? (
+        <>
+          {type === "ICON" ? (
+            <div class="status-indicator"></div>
+          ) : (
+            type === "TEXT" && <small>Online</small>
+          )}
+        </>
+      ) : (
+        <>{type === "TEXT" && <small>Offline</small>}</>
+      )}
+    </>
+  );
 }

@@ -19,6 +19,8 @@ export default function Chatting() {
   let [messageContent, setMessageContent] = useState("");
   const [messagesContainer, setMessagesContainer] = useState([]);
 
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
     message: "Đăng kí thành công",
@@ -47,17 +49,27 @@ export default function Chatting() {
     const element = document.getElementById("chatting-container");
     element.scrollIntoView();
 
-    getAllRecipientBySender();
-  }, [recipient,messagesContainer]);
+    if (chatRooms === null) getAllRecipientBySender();
+  }, [recipient, messagesContainer, onlineUsers]);
 
   useEffect(() => {
     if (document !== null) {
       let element = document.getElementById("chatting-content-main");
-      if (element !== null)
+      if (element !== null) {
         document.getElementById("chatting-content-main").scrollTop =
           document.getElementById("chatting-content-main").scrollHeight;
+      }
     }
   }, [messagesContainer, messageContent]);
+
+  useEffect(() => {
+    if (document !== null) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "auto";
+      };
+    }
+  }, [document]);
 
   const getAllRecipientBySender = useCallback(async () => {
     let response;
@@ -151,7 +163,11 @@ export default function Chatting() {
             userId: currentUser?.id,
           })
         );
-        stompUSERClient.subscribe("/online-users", (payload) => {});
+
+        stompUSERClient.subscribe("/online-users", (payload) => {
+          let p = JSON.parse(payload.body);
+          setOnlineUsers((prev) => [...prev, p]);
+        });
       },
       onError
     );
@@ -214,7 +230,7 @@ export default function Chatting() {
               className="rounded-circle me-2"
               alt="User Avatar"
             />
-            <div className="message bg-light p-3 rounded">
+            <div className="message bg-light">
               <p className="mb-0 text-break">{m.content}</p>
             </div>
           </div>
@@ -225,7 +241,7 @@ export default function Chatting() {
             className="d-flex mb-3 mr-3 flex-row-reverse align-items-center"
             key={m.id}
           >
-            <div className="message bg-primary text-white p-3 rounded">
+            <div className="message bg-primary text-white">
               <p className="mb-0 text-break">{m.content}</p>
             </div>
           </div>
@@ -233,6 +249,20 @@ export default function Chatting() {
       }
     });
   };
+
+  function toggleLockChatScreen() {
+    const lockIcon = document.getElementById("lock-icon");
+
+    if (lockIcon.classList.contains("fa-lock-open")) {
+      lockIcon.classList.remove("fa-lock-open");
+      lockIcon.style.color = "#f50505";
+      document.body.style.overflow = "hidden";
+    } else {
+      lockIcon.classList.add("fa-lock-open");
+      lockIcon.style.color = "#63E6BE";
+      document.body.style.overflow = "auto";
+    }
+  }
 
   return (
     <>
@@ -242,6 +272,15 @@ export default function Chatting() {
         severity={data.severity}
       />
       <div id="chatting-container" className="chatting-container">
+        <div className="lock-icon">
+          <button className="icon-lock-btn" onClick={toggleLockChatScreen}>
+            <i
+              id="lock-icon"
+              class="fa-solid fa-lock"
+              style={{ color: "#f50505" }}
+            ></i>
+          </button>
+        </div>
         <div className="chatting-list shadow p-3">
           <div className="container mt-4 h-100">
             <div className="d-flex justify-content-between align-items-center">
@@ -287,10 +326,10 @@ export default function Chatting() {
                           src={c.recipient.avatar}
                           alt="Avatar"
                         />
-                        <OnlineIcon u={c.recipient} />
+                        <OnlineIcon u={c.recipient} type="ICON"/>
                         <div class="profile-info">
                           <h6>{c.recipient.name}</h6>
-                          <LastChatMessage r={c.recipient}/>
+                          <LastChatMessage r={c.recipient} />
                         </div>
                       </div>
                     </div>
@@ -303,11 +342,11 @@ export default function Chatting() {
           {recipient !== null && (
             <div class="profile p-3 shadow-sm">
               <img src={recipient.avatar} alt="Avatar" />
-              <OnlineIcon u={recipient} />
+              <OnlineIcon u={recipient} type="ICON" />
 
               <div class="profile-info">
                 <h6>{recipient.name}</h6>
-                <small></small>
+                <OnlineIcon u={recipient} type="TEXT"/>
               </div>
             </div>
           )}
