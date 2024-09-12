@@ -62,4 +62,16 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 		return chatRoomRepository.findBySender(sender);
 	}
 
+	@Override
+	public ChatRoom findChatRoomByChatRoomIdAndSenderOrRecipient(String chatRoomId, User sender,
+			User recipient) {
+		return chatRoomRepository.findByChatRoomIdAndSenderOrRecipient(chatRoomId, sender,
+				recipient);
+	}
+	
+	@Override
+	public ChatRoom findChatRoomByChatRoomIdAndSender(String chatRoomId, User sender) {
+		return chatRoomRepository.findByChatRoomIdAndSender(chatRoomId, sender);
+	}
+
 }

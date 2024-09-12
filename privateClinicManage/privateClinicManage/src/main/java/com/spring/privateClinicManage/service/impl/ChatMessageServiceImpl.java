@@ -52,4 +52,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 		return chatMessageRepository.findTopByOrderByCreatedDateDesc(chatRoomId);
 	}
 
+	@Override
+	public List<ChatMessage> findLatestMessagesBySenderAndSortChatRoomByLatestMessage(User sender) {
+		return chatMessageRepository
+				.findLatestMessagesBySenderAndSortChatRoomByLatestMessage(sender);
+	}
+
 }

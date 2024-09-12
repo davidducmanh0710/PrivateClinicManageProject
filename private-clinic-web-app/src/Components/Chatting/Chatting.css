@@ -176,6 +176,11 @@
   max-height: 100px;
   min-height: 600px;
   overflow-y: scroll;
+
+  .active {
+    background-color: #d5d5d5;
+  }
+
 }
 
 .recipient-items {
@@ -219,6 +224,9 @@
   }
   .profile-info small {
     color: #65676b;
+  }
+  .active {
+    background-color: #a9a9a9;
   }
 }
 

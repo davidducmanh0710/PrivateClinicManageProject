@@ -82,12 +82,11 @@ export default function NotificationContainer() {
   const ytaConnectNotificationWsInit = () => {
     let stompYTAClient = null;
     let socket = new SockJS(`${BASE_URL}/ws`);
-    // let socket = new SockJS(`https://8c5e-113-185-79-230.ngrok-free.app/ws`);
     stompYTAClient = over(socket);
     stompYTAClient.debug = () => {}; // tắt log của stomp in ra console
     stompYTAClientRef.current = stompYTAClient;
     stompYTAClient.connect(
-      {},
+      {"Access-Control-Allow-Origin" : `${BASE_URL}/ws/info`},
       () => {
         stompYTAClient.subscribe("/notify/registerContainer/", (payload) => {
           const p = JSON.parse(payload.body);
@@ -114,10 +113,9 @@ export default function NotificationContainer() {
   const benhnhanConnectNotificationWsInit = () => {
     let stompBENHNHANClient = null;
     let socket = new SockJS(`${BASE_URL}/ws`);
-    // let socket = new SockJS(`https://8c5e-113-185-79-230.ngrok-free.app/ws`);
 
     stompBENHNHANClient = over(socket);
-    //stompBENHNHANClient.debug = () => {}; // tắt log của stomp in ra console
+    stompBENHNHANClient.debug = () => {}; // tắt log của stomp in ra console
     stompBENHNHANClientRef.current = stompBENHNHANClient;
     stompBENHNHANClient.connect(
       {"Access-Control-Allow-Origin" : `${BASE_URL}/ws/info`},
@@ -181,12 +179,11 @@ export default function NotificationContainer() {
   const tuvanConnectNotificationWsInit = () => {
     let stompTUVANClient = null;
     let socket = new SockJS(`${BASE_URL}/ws`);
-    // let socket = new SockJS(`https://8c5e-113-185-79-230.ngrok-free.app/ws`);
 
     stompTUVANClient = over(socket);
-    //stompTUVANClient.debug = () => {}; // tắt log của stomp in ra console
+    stompTUVANClient.debug = () => {}; // tắt log của stomp in ra console
     stompTUVANClientRef.current = stompTUVANClient;
-    stompTUVANClient.connect({}, () => {});
+    stompTUVANClient.connect({"Access-Control-Allow-Origin" : `${BASE_URL}/ws/info`}, () => {});
   };
 
   useEffect(() => {

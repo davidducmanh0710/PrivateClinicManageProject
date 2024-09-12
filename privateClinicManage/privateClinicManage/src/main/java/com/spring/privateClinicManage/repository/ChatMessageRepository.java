@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.spring.privateClinicManage.entity.ChatMessage;
+import com.spring.privateClinicManage.entity.User;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Integer> {
@@ -16,4 +17,13 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Intege
 
 	@Query("SELECT c FROM ChatMessage c WHERE c.chatRoomId = :chatRoomId ORDER BY c.createdDate DESC")
 	List<ChatMessage> findTopByOrderByCreatedDateDesc(@Param("chatRoomId") String chatRoomId);
+
+	@Query("SELECT m FROM ChatMessage m " +
+			"WHERE m.createdDate = (" +
+			"    SELECT MAX(sub.createdDate) " +
+			"    FROM ChatMessage sub " +
+			"    WHERE sub.chatRoomId = m.chatRoomId" +
+			") " + "AND (m.sender = :sender OR m.recipient = :sender) " +
+			"ORDER BY m.createdDate DESC")
+	List<ChatMessage> findLatestMessagesBySenderAndSortChatRoomByLatestMessage(User sender);
 }

@@ -14,4 +14,7 @@ public interface ChatMessageService {
 	List<ChatMessage> findBySenderAndRecipient(User sender, User recipient);
 
 	List<ChatMessage> findTopByOrderByCreatedDateDesc(User sender, User recipient);
+
+	List<ChatMessage> findLatestMessagesBySenderAndSortChatRoomByLatestMessage(User sender);
+
 }

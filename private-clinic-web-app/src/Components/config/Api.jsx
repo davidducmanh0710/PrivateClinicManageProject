@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// export const BASE_URL = "http://localhost:8888";
+export const BASE_URL = "http://localhost:8888";
 
-export const BASE_URL = "https://8c5e-113-185-79-230.ngrok-free.app";
+//export const BASE_URL = "https://8c5e-113-185-79-230.ngrok-free.app";
 
 export let endpoints = {
   login: "/api/users/login/",
@@ -63,7 +63,7 @@ export const authAPI = () => {
     headers: {
       Authorization: localStorage.getItem("token"),
       "ngrok-skip-browser-warning": "69420",
-      "bypass-tunnel-reminder" : '69420',      
+      "bypass-tunnel-reminder": "69420",
     },
   });
 };
@@ -72,6 +72,6 @@ export default axios.create({
   baseURL: `${BASE_URL}`,
   headers: {
     "ngrok-skip-browser-warning": "69420",
-    "bypass-tunnel-reminder" : '69420'
+    "bypass-tunnel-reminder": "69420",
   },
 });

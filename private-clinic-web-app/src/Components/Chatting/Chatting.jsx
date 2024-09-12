@@ -18,6 +18,8 @@ export default function Chatting() {
   const [chatRooms, setChatRooms] = useState(null);
   const [recipient, setRecipient] = useState(null);
 
+  const [tempOutputWsInputSender, setTempOutputWsInputSender] = useState(null);
+
   let stompUSERClientRef = useRef(null);
 
   let [messageContent, setMessageContent] = useState("");
@@ -55,7 +57,7 @@ export default function Chatting() {
     element.scrollIntoView();
 
     getAllRecipientBySender();
-  }, [recipient, messagesContainer, onlineUsers]);
+  }, [messagesContainer, onlineUsers, tempOutputWsInputSender]);
 
   useEffect(() => {
     if (document !== null) {
@@ -76,7 +78,15 @@ export default function Chatting() {
     }
   }, [document]);
 
-  const getAllRecipientBySender = useCallback(async () => {
+  useEffect(() => {
+    if (tempOutputWsInputSender !== null && recipient !== null) {
+      if (tempOutputWsInputSender.sender.id === recipient.id) {
+        setMessagesContainer((prev) => [...prev, tempOutputWsInputSender]);
+      }
+    }
+  }, [tempOutputWsInputSender]);
+
+  const getAllRecipientBySender = async () => {
     let response;
 
     try {
@@ -89,7 +99,7 @@ export default function Chatting() {
         setChatRooms(response.data);
       }
     } catch {}
-  }, [chatRooms]);
+  }; // removed chatRoom
 
   const getAllChatMessageBySenderAndRecipient = async (recipient) => {
     let response;
@@ -143,7 +153,8 @@ export default function Chatting() {
 
   function onMessageReceived(payload) {
     let p = JSON.parse(payload.body);
-    setMessagesContainer((prev) => [...prev, p]);
+
+    setTempOutputWsInputSender(p);
   }
 
   const userConnectChattingWsInit = () => {
@@ -153,7 +164,7 @@ export default function Chatting() {
     stompUSERClient.debug = () => {}; // tắt log của stomp in ra console
     stompUSERClientRef.current = stompUSERClient;
     stompUSERClient.connect(
-      {"Access-Control-Allow-Origin" : `${BASE_URL}/ws/info`},
+      { "Access-Control-Allow-Origin": `${BASE_URL}/ws/info` },
       () => {
         stompUSERClient.subscribe(
           `/user/${currentUser?.id}/queue/messages`,
@@ -227,26 +238,26 @@ export default function Chatting() {
     }
 
     return messagesContainer.map((m) => {
-      if (currentUser?.id === m?.recipient?.id) {
-        return (
-          <div className="d-flex mb-3 align-items-center" key={m.id}>
-            <img
-              src={m?.sender.avatar}
-              className="rounded-circle me-2"
-              alt="User Avatar"
-            />
-            <div className="message bg-light">
-              <p className="mb-0 text-break">{m.content}</p>
-            </div>
-          </div>
-        );
-      } else {
+      if (currentUser?.id === m?.sender?.id) {
         return (
           <div
             className="d-flex mb-3 mr-3 flex-row-reverse align-items-center"
             key={m.id}
           >
             <div className="message bg-primary text-white">
+              <p className="mb-0 text-break">{m.content}</p>
+            </div>
+          </div>
+        );
+      } else {
+        return (
+          <div className="d-flex mb-3 align-items-start" key={m.id}>
+            <img
+              src={m?.sender.avatar}
+              className="rounded-circle me-2"
+              alt="User Avatar"
+            />
+            <div className="message bg-light">
               <p className="mb-0 text-break">{m.content}</p>
             </div>
           </div>
@@ -279,15 +290,19 @@ export default function Chatting() {
       });
 
       if (response.status === 200) {
-        if (response.data.length > 0)
+        if (response.data.length > 0) {
+          const array = response.data.filter((e) => {
+            return e.id !== currentUser.id || e.email !== "admin@gmail.com";
+          });
           setUserList(
-            response.data.map((u) => {
+            array.map((u) => {
               return {
                 value: u.id,
                 label: `${u.email}`,
               };
             })
           );
+        }
       } else {
         setUserList([]);
         showSnackbar(response.data, "error");
@@ -340,6 +355,13 @@ export default function Chatting() {
     userSelectRef = undefined;
   };
 
+  function truncateString(str) {
+    if (str.length > 20) {
+      return str.substring(0, 30) + '...';
+    } else {
+      return str;
+    }
+  }
 
   return (
     <>
@@ -405,20 +427,24 @@ export default function Chatting() {
                     <>
                       <div
                         className={`recipient-items ${
-                          recipient?.id === c.recipient.id ? "active" : ""
+                          recipient?.id === c.chatRoom.recipient.id
+                            ? "active"
+                            : ""
                         }`}
-                        onClick={() => hanldeClickRecipientItem(c.recipient)}
+                        onClick={() =>
+                          hanldeClickRecipientItem(c.chatRoom.recipient)
+                        }
                       >
                         <div class="profile p-3">
                           <img
                             className="avatar"
-                            src={c.recipient.avatar}
+                            src={c.chatRoom.recipient.avatar}
                             alt="Avatar"
                           />
-                          <OnlineSide u={c.recipient} type="ICON" />
+                          <OnlineSide u={c.chatRoom.recipient} type="ICON" />
                           <div class="profile-info">
-                            <h6>{c.recipient.name}</h6>
-                            <LastChatMessage r={c.recipient} />
+                            <h6>{c.chatRoom.recipient.name}</h6>
+                            <small>{truncateString(c.chatMessage.content)}</small>
                           </div>
                         </div>
                       </div>

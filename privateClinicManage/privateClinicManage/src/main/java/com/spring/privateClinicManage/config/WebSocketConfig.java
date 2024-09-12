@@ -2,7 +2,9 @@ package com.spring.privateClinicManage.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
@@ -18,6 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+	@Autowired
+	private Environment environment;
+
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.setApplicationDestinationPrefixes("/app");
@@ -28,9 +33,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws")
-				.setAllowedOrigins("http://localhost:3000", "https://my-app.loca.lt:3000",
-						"https://8c5e-113-185-79-230.ngrok-free.app",
-						"https://8c5e-113-185-79-230.ngrok-free.app/ws/info")
+				.setAllowedOrigins(environment.getProperty("localhost.front-end.url"),
+						environment.getProperty("deploy.front-end.url"),
+						environment.getProperty("deploy.back-end.url"),
+						environment.getProperty("deploy.back-end.url") + "/ws/info")
 				.setAllowedOriginPatterns("*")
 				.withSockJS();
 	}

@@ -17,4 +17,8 @@ public interface ChatRoomService {
 
 	String createChatId(User sender, User recipient);
 
+	ChatRoom findChatRoomByChatRoomIdAndSenderOrRecipient(String chatRoomId, User sender,
+			User recipient);
+
+	ChatRoom findChatRoomByChatRoomIdAndSender(String chatRoomId, User sender);
 }

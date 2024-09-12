@@ -1,5 +1,6 @@
 package com.spring.privateClinicManage.api;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import com.spring.privateClinicManage.dto.CommentDto;
 import com.spring.privateClinicManage.dto.CountDto;
 import com.spring.privateClinicManage.dto.GetChatMessageDto;
 import com.spring.privateClinicManage.dto.OnlineUserDto;
+import com.spring.privateClinicManage.dto.RecipientChatRoomDto;
 import com.spring.privateClinicManage.dto.RecipientDto;
 import com.spring.privateClinicManage.dto.UpdateProfileDto;
 import com.spring.privateClinicManage.entity.Blog;
@@ -360,9 +362,24 @@ public class ApiAnyRoleRestController {
 		if (currentUser == null)
 			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
 
-		List<ChatRoom> chatRooms = chatRoomService.findBySender(currentUser);
+		List<ChatMessage> chatMessages = chatMessageService
+				.findLatestMessagesBySenderAndSortChatRoomByLatestMessage(currentUser);
 
-		return new ResponseEntity<>(chatRooms, HttpStatus.OK);
+		List<RecipientChatRoomDto> rcrDto = new ArrayList<>();
+
+		chatMessages.forEach((cm) -> {
+			ChatRoom chatRoom;
+			chatRoom = chatRoomService.findChatRoomByChatRoomIdAndSender(cm.getChatRoomId(),
+					currentUser);
+
+			rcrDto.add(new RecipientChatRoomDto(chatRoom, cm));
+		});
+
+		return new ResponseEntity<>(rcrDto, HttpStatus.OK);
+
+//		List<ChatRoom> chatRooms = chatRoomService.findBySender(currentUser);
+//
+//		return new ResponseEntity<>(chatRooms, HttpStatus.OK);
 	}
 
 	@PostMapping("/get-all-chatMessage-by-sender-and-recipient/")
