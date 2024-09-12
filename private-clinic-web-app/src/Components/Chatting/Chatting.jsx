@@ -6,7 +6,6 @@ import { authAPI, BASE_URL, endpoints } from "../config/Api";
 import { CustomerSnackbar, isBENHNHAN } from "../Common/Common";
 import { over } from "stompjs";
 import SockJS from "sockjs-client";
-import LastChatMessage from "../LastChatMessage/LastChatMessage";
 import OnlineSide from "../OnlineSide/OnlineSide";
 import Select from "react-select";
 
@@ -341,6 +340,7 @@ export default function Chatting() {
           if (response.status === 200) {
             showSnackbar("Kết nối thành công !", "success");
             setRecipient(response.data);
+            getAllChatMessageBySenderAndRecipient(response.data)
             userSelectRef = undefined;
           } else {
             showSnackbar(response.data, "error");
@@ -357,7 +357,7 @@ export default function Chatting() {
 
   function truncateString(str) {
     if (str.length > 20) {
-      return str.substring(0, 30) + '...';
+      return str.substring(0, 30) + "...";
     } else {
       return str;
     }
@@ -444,7 +444,9 @@ export default function Chatting() {
                           <OnlineSide u={c.chatRoom.recipient} type="ICON" />
                           <div class="profile-info">
                             <h6>{c.chatRoom.recipient.name}</h6>
-                            <small>{truncateString(c.chatMessage.content)}</small>
+                            <small>
+                              {truncateString(c.chatMessage.content)}
+                            </small>
                           </div>
                         </div>
                       </div>
