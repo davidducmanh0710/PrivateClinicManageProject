@@ -47,4 +47,10 @@ public interface UserService extends UserDetailsService {
 
 	boolean isActived(String email);
 
+	User findByPhone(String phone);
+
+	boolean isValidGmail(String email);
+
+	boolean isValidPhoneNumber(String phoneNumber);
+
 }

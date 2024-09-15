@@ -30,4 +30,6 @@ public interface UserRepository
 			"u.email LIKE %:key% OR " +
 			"u.address LIKE %:key% ")
 	List<User> findByAnyText(@Param("key") String key);
+
+	User findByPhone(String phone);
 }

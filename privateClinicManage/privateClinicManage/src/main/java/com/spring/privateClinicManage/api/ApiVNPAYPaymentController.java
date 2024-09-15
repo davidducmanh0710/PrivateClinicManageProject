@@ -2,6 +2,7 @@ package com.spring.privateClinicManage.api;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -180,6 +181,7 @@ public class ApiVNPAYPaymentController {
 				pdp1.setOrderId(params.get("vnp_TxnRef"));
 				pdp1.setPartnerCode("VNPAY");
 				pdp1.setResultCode(vnpResponseCode);
+				pdp1.setCreatedDate(new Date());
 
 				mrl.setPaymentPhase1(pdp1);
 
@@ -213,6 +215,7 @@ public class ApiVNPAYPaymentController {
 				pdp2.setOrderId(params.get("vnp_TxnRef"));
 				pdp2.setPartnerCode("VNPAY");
 				pdp2.setResultCode(vnpResponseCode);
+				pdp2.setCreatedDate(new Date());
 
 				me.setPaymentPhase2(pdp2);
 				paymentDetailPhase2Service.savePdp2(pdp2);

@@ -56,7 +56,6 @@ public class ApiUserRestController {
 	private StatusIsApprovedService statusIsApprovedService;
 	private DownloadPDFService downloadPDFService;
 
-
 	@Autowired
 	public ApiUserRestController(JwtService jwtService, UserService userService,
 			VerifyEmailService verifyEmailService, MailSenderService mailSenderService,
@@ -74,7 +73,6 @@ public class ApiUserRestController {
 		this.downloadPDFService = downloadPDFService;
 	}
 
-
 	@PostMapping(path = "/login/")
 	@CrossOrigin
 	public ResponseEntity<Object> login(@RequestBody UserLoginDto loginDto) {
@@ -90,7 +88,6 @@ public class ApiUserRestController {
 		return new ResponseEntity<>(token, HttpStatus.OK);
 
 	}
-
 
 	@GetMapping(path = "/current-user/", produces = {
 			MediaType.APPLICATION_JSON_VALUE
@@ -110,7 +107,13 @@ public class ApiUserRestController {
 	public ResponseEntity<Object> retrieveOtp(@RequestBody EmailDto emailDto)
 			throws UnsupportedEncodingException, MessagingException {
 
+		if (!userService.isValidGmail(emailDto.getEmail()) || emailDto.getEmail().isEmpty()
+				|| emailDto.getEmail() == "")
+			return new ResponseEntity<>("Email không hợp lệ !",
+					HttpStatus.UNAUTHORIZED);
+
 		User existUser = userService.findByEmail(emailDto.getEmail());
+
 		if (existUser != null)
 			return new ResponseEntity<>("Email này đã được đăng kí !", HttpStatus.UNAUTHORIZED);
 
@@ -126,9 +129,24 @@ public class ApiUserRestController {
 		User existUser = userService.findByEmail(registerDto.getEmail());
 		VerifyEmail verifyEmail = verifyEmailService.findByEmail(registerDto.getEmail());
 
-		if (existUser != null || verifyEmail == null || registerDto.getOtp().isEmpty()
-				|| registerDto.getOtp() == "")
-			return new ResponseEntity<>("Email này đã được đăng kí !",
+		if (!userService.isValidGmail(registerDto.getEmail()) || (registerDto.getEmail().isEmpty()
+				|| registerDto.getEmail() == ""))
+			return new ResponseEntity<>("Email không hợp lệ !",
+					HttpStatus.UNAUTHORIZED);
+
+		if (existUser != null)
+			return new ResponseEntity<>("Email này đã được đăng kí !", HttpStatus.UNAUTHORIZED);
+
+		if (userService.isValidPhoneNumber(registerDto.getPhone()) == false
+				|| registerDto.getPhone().isBlank()
+				|| registerDto.getPhone() == "")
+			return new ResponseEntity<>("Số điện thoại không hợp lệ !",
+					HttpStatus.UNAUTHORIZED);
+
+		existUser = userService.findByPhone(registerDto.getPhone());
+
+		if (existUser != null)
+			return new ResponseEntity<>("Số điện thoại này đã được đăng kí !",
 					HttpStatus.UNAUTHORIZED);
 
 		if (verifyEmailService.isOtpExpiredTime(verifyEmail))
@@ -201,6 +219,5 @@ public class ApiUserRestController {
 
 		return new ResponseEntity<>(orderQrCodeDto, HttpStatus.OK);
 	}
-
 
 }

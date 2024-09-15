@@ -290,8 +290,10 @@ export default function Chatting() {
 
       if (response.status === 200) {
         if (response.data.length > 0) {
-          const array = response.data.filter((e) => {
-            return e.id !== currentUser.id || e.email !== "admin@gmail.com";
+          console.log(currentUser?.id);
+          let array = response.data;
+          array = array.filter((e) => {
+            return e.id !== currentUser.id && e.email !== "admin@gmail.com";
           });
           setUserList(
             array.map((u) => {
@@ -340,7 +342,7 @@ export default function Chatting() {
           if (response.status === 200) {
             showSnackbar("Kết nối thành công !", "success");
             setRecipient(response.data);
-            getAllChatMessageBySenderAndRecipient(response.data)
+            getAllChatMessageBySenderAndRecipient(response.data);
             userSelectRef = undefined;
           } else {
             showSnackbar(response.data, "error");

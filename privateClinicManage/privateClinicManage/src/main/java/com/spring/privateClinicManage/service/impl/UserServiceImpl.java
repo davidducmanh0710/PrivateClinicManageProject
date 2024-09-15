@@ -211,4 +211,20 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	@Override
+	public User findByPhone(String phone) {
+		return userRepository.findByPhone(phone);
+	}
+
+	@Override
+	public boolean isValidGmail(String email) {
+		return email != null && email.contains("@gmail.com");
+	}
+
+	@Override
+	public boolean isValidPhoneNumber(String phoneNumber) {
+		String regex = "\\d{10}";
+		return phoneNumber != null && phoneNumber.matches(regex);
+	}
+
 }

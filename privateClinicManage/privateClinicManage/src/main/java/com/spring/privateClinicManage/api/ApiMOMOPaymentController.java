@@ -2,6 +2,7 @@ package com.spring.privateClinicManage.api;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -194,6 +195,7 @@ public class ApiMOMOPaymentController {
 				pdp1.setOrderId(orderId);
 				pdp1.setPartnerCode(partnerCode);
 				pdp1.setResultCode(momoResultCode);
+				pdp1.setCreatedDate(new Date());
 
 				mrl.setPaymentPhase1(pdp1);
 
@@ -227,6 +229,7 @@ public class ApiMOMOPaymentController {
 				pdp2.setOrderId(orderId);
 				pdp2.setPartnerCode(partnerCode);
 				pdp2.setResultCode(momoResultCode);
+				pdp2.setCreatedDate(new Date());
 
 				me.setPaymentPhase2(pdp2);
 				paymentDetailPhase2Service.savePdp2(pdp2);

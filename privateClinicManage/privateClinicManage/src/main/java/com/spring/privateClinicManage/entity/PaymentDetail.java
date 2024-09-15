@@ -1,5 +1,7 @@
 package com.spring.privateClinicManage.entity;
 
+import java.util.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
@@ -43,5 +45,8 @@ public abstract class PaymentDetail {
 
 	@Column(name = "partnerCode")
 	private String partnerCode;
+
+	@Column(name = "createdDate")
+	private Date createdDate;
 
 }

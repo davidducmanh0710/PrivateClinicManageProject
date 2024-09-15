@@ -1,7 +1,10 @@
 package com.spring.privateClinicManage.controller;
 
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +35,7 @@ import com.spring.privateClinicManage.entity.VoucherCondition;
 import com.spring.privateClinicManage.service.MedicineGroupService;
 import com.spring.privateClinicManage.service.MedicineService;
 import com.spring.privateClinicManage.service.RoleService;
+import com.spring.privateClinicManage.service.StatsService;
 import com.spring.privateClinicManage.service.UnitMedicineTypeService;
 import com.spring.privateClinicManage.service.UserService;
 import com.spring.privateClinicManage.service.VoucherConditionService;
@@ -58,6 +62,8 @@ public class AdminController {
 	private VoucherService voucherService;
 	@Autowired
 	private VoucherConditionService voucherConditionService;
+	@Autowired
+	private StatsService statsService;
 
 	@ModelAttribute
 	public void addAttributes(Model model) {
@@ -531,6 +537,78 @@ public class AdminController {
 
 		return "redirect:/admin/vouchers-list";
 
+	}
+
+	@GetMapping("/admin/statsByPrognosisMedicine")
+	public String statsByPrognosisMedicine(Model model, @RequestParam Map<String, String> params) {
+
+		String yearlyPrognosis = params.getOrDefault("yearlyPrognosis",
+				String.valueOf(LocalDate.now().getYear()));
+
+		yearlyPrognosis = yearlyPrognosis.isEmpty() || yearlyPrognosis.equals("")
+				|| Integer.parseInt(yearlyPrognosis) < 2000
+				|| Integer.parseInt(yearlyPrognosis) > LocalDateTime.now().getYear()
+				? String.valueOf(LocalDateTime.now().getYear())
+				: yearlyPrognosis;
+
+		String monthlyPrognosis = params.getOrDefault("monthlyPrognosis",
+				String.valueOf(LocalDate.now().getMonthValue()));
+
+		monthlyPrognosis = monthlyPrognosis.isEmpty() || monthlyPrognosis.equals("")
+				? String.valueOf(LocalDateTime.now().getMonthValue())
+				: monthlyPrognosis;
+		
+		List<Object[]> stats1 = statsService
+				.statsByPrognosisMedicine(Integer.parseInt(yearlyPrognosis),
+						Integer.parseInt(monthlyPrognosis));
+		
+		List<Map<String, Object>> formattedStats1 = new ArrayList<>();
+
+		for (Object[] s : stats1) {
+			Map<String, Object> resultMap = new HashMap<>();
+			resultMap.put("medicineName", s[0]);
+			resultMap.put("prognosis", s[1]);
+			formattedStats1.add(resultMap);
+
+		}
+
+		model.addAttribute("prognosisMedicineStats", formattedStats1);
+		model.addAttribute("monthlyPrognosis", monthlyPrognosis);
+		model.addAttribute("yearlyPrognosis", yearlyPrognosis);
+
+		return "admin/stats/statsByPrognosis";
+	}
+
+	@GetMapping("/admin/statsByRevenue")
+	public String statsByRevenue(Model model, @RequestParam Map<String, String> params) {
+
+		String yearlyRevenue = params.getOrDefault("yearlyRevenue",
+				String.valueOf(LocalDate.now().getYear()));
+
+		yearlyRevenue = yearlyRevenue.isEmpty() || yearlyRevenue.equals("")
+				|| Integer.parseInt(yearlyRevenue) < 2000
+				|| Integer.parseInt(yearlyRevenue) > LocalDateTime.now().getYear()
+						? String.valueOf(LocalDateTime.now().getYear())
+						: yearlyRevenue;
+
+		List<Object[]> stats2 = statsService
+				.statsByRevenue(Integer.parseInt(yearlyRevenue));
+
+		List<Map<Object, Object>> formattedStats2 = new ArrayList<>();
+
+		for (Object[] s : stats2) {
+			Map<Object, Object> resultMap = new HashMap<>();
+			resultMap.put("month", s[0]);
+			resultMap.put("revenue", s[1]);
+			formattedStats2.add(resultMap);
+
+		}
+
+		model.addAttribute("revenueStats", formattedStats2);
+		model.addAttribute("yearlyRevenue", yearlyRevenue);
+
+		return "admin/stats/statsByRevenue";
+//		return "redirect:/admin";
 	}
 
 }

@@ -86,7 +86,7 @@ export default function NotificationContainer() {
     stompYTAClient.debug = () => {}; // tắt log của stomp in ra console
     stompYTAClientRef.current = stompYTAClient;
     stompYTAClient.connect(
-      {"Access-Control-Allow-Origin" : `${BASE_URL}/ws/info`},
+      { "Access-Control-Allow-Origin": `*` },
       () => {
         stompYTAClient.subscribe("/notify/registerContainer/", (payload) => {
           const p = JSON.parse(payload.body);
@@ -118,7 +118,9 @@ export default function NotificationContainer() {
     stompBENHNHANClient.debug = () => {}; // tắt log của stomp in ra console
     stompBENHNHANClientRef.current = stompBENHNHANClient;
     stompBENHNHANClient.connect(
-      {"Access-Control-Allow-Origin" : `${BASE_URL}/ws/info`},
+      {
+        "Access-Control-Allow-Origin": `*`,
+      },
       () => {
         stompBENHNHANClient.subscribe(
           "/notify/directRegister/" + currentUser.id,
@@ -183,7 +185,12 @@ export default function NotificationContainer() {
     stompTUVANClient = over(socket);
     stompTUVANClient.debug = () => {}; // tắt log của stomp in ra console
     stompTUVANClientRef.current = stompTUVANClient;
-    stompTUVANClient.connect({"Access-Control-Allow-Origin" : `${BASE_URL}/ws/info`}, () => {});
+    stompTUVANClient.connect(
+      {
+        "Access-Control-Allow-Origin": `*`,
+      },
+      () => {}
+    );
   };
 
   useEffect(() => {

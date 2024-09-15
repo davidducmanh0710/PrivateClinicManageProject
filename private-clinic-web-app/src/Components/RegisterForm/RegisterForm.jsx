@@ -9,6 +9,7 @@ import {
 } from "react";
 import { CircularProgress } from "@mui/material";
 import { CustomerSnackbar } from "../Common/Common";
+import dayjs from "dayjs";
 
 const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
   const [loading, setLoading] = useState(false);
@@ -113,11 +114,16 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
           otp: "",
         });
         dialog.current.close();
-        if (countdownIntervalRef.current) {
-          clearInterval(countdownIntervalRef.current);
-          setOtpButtonDisabled(false);
-          setOtpCountdown(30);
-        }
+        countdownIntervalRef.current = setInterval(() => {
+          setOtpCountdown((prevCountdown) => {
+            if (prevCountdown === 1) {
+              clearInterval(countdownIntervalRef.current);
+              setOtpButtonDisabled(false);
+              setOtpCountdown(30);
+            }
+            return prevCountdown - 1;
+          });
+        }, 1000);
       } else if (response.status !== 201) {
         showSnackbar(response.data, "error");
       }
@@ -131,7 +137,7 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
 
   const sendOtp = async (event) => {
     event.preventDefault();
-
+    setLoading(true);
     try {
       const response = await Api.post(
         endpoints["sendOtp"],
@@ -159,12 +165,17 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
             return prevCountdown - 1;
           });
         }, 1000);
+        setLoading(false);
       } else if (response.status !== 200) {
         showSnackbar(response.data, "error");
+        setLoading(false);
       }
     } catch {
       showSnackbar("Lỗi", "error");
+      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   return (
@@ -210,7 +221,7 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
                         type="radio"
                         name="gender"
                         id="male"
-                        defaultValue={formRegisterState.gender = "male"}
+                        defaultValue={(formRegisterState.gender = "male")}
                         value={(formRegisterState.gender = "male")}
                         onChange={handleFormRegisterState}
                       />
@@ -254,9 +265,14 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
                     className="form-control"
                     placeholder="Số điện thoại"
                     name="phone"
-                    minLength="10"
-                    maxLength="10"
-                    onChange={handleFormRegisterState}
+                    minLength={10}
+                    maxLength={10}
+                    min={0}
+                    onChange={(e) => {
+                      let phone = e.target.value;
+                      if (phone.length > 10) phone.slice(0, 10);
+                      else handleFormRegisterState(e);
+                    }}
                     value={formRegisterState.phone}
                     required
                   />
@@ -271,6 +287,7 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
                   onChange={handleFormRegisterState}
                   value={formRegisterState.birthday}
                   required
+                  max={dayjs(new Date()).format("YYYY-MM-DD")}
                 />
               </div>
               <div className="form-group mb-2">
@@ -313,16 +330,22 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
                     value={formRegisterState.otp}
                   />
                 </div>
-                <button
-                  onClick={sendOtp}
-                  type="button"
-                  disabled={otpButtonDisabled}
-                  className={`btn align-self-end ${
-                    activeRegister ? "btn-danger" : "btn-secondary disabled"
-                  }`}
-                >
-                  {otpButtonDisabled ? otpCountdown : "Gửi OTP"}
-                </button>
+                {loading ? (
+                  <div className="d-flex justify-content-center align-item-center">
+                    <CircularProgress className="mt-3" />
+                  </div>
+                ) : (
+                  <button
+                    onClick={sendOtp}
+                    type="button"
+                    disabled={otpButtonDisabled}
+                    className={`btn align-self-end ${
+                      activeRegister ? "btn-danger" : "btn-secondary disabled"
+                    }`}
+                  >
+                    {otpButtonDisabled ? otpCountdown : "Gửi OTP"}
+                  </button>
+                )}
               </div>
               {loading ? (
                 <div className="d-flex justify-content-center align-item-center">
