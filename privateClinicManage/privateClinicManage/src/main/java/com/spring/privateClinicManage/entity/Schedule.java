@@ -44,6 +44,9 @@ public class Schedule implements Serializable {
 	@Column(name = "is_day_off", nullable = false)
 	private Boolean isDayOff;
 	
+	@Column(name = "description", nullable = true)
+	private String description = "normal working day";
+
 	@OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY, cascade = {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})

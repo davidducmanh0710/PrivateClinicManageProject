@@ -81,6 +81,20 @@
 
 					</ul></li>
 
+				<li class="menu-item-has-children dropdown"><a href="#"
+					class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+					aria-expanded="false"> <i
+						class="fa-solid fa-calendar-days mr-4"></i>Quản lý lịch làm việc
+				</a>
+					<ul class="sub-menu children dropdown-menu">
+
+						<li><i class="fa fa-bars"></i><a
+							th:href="@{/admin/schedule-list}">Danh sách lịch làm việc</a></li>
+						<li><i class="fa-solid fa-plus"></i><a
+							th:href="@{/admin/addNewSchedule}">Thêm mới lịch làm việc</a></li>
+
+					</ul></li>
+
 
 				<li class="menu-item-has-children dropdown"><a href="#"
 					class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
@@ -91,8 +105,9 @@
 						<li><i class="menu-icon fa fa-line-chart"></i><a
 							th:href="@{/admin/statsByPrognosisMedicine}">Tần xuất sử dụng
 								thuốc</a></li>
-						<li><i class="fa-solid fa-dollar-sign" style="color: #74C0FC;"></i><a
-							th:href="@{/admin/statsByRevenue}">Doanh thu</a></li>
+						<li><i class="fa-solid fa-dollar-sign"
+							style="color: #74C0FC;"></i><a th:href="@{/admin/statsByRevenue}">Doanh
+								thu</a></li>
 					</ul></li>
 
 				<li class="menu-item-has-children dropdown"><a href="#"

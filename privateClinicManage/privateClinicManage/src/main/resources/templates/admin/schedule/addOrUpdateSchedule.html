@@ -19,67 +19,64 @@
 			<div class="col-lg-12">
 				<div class="card">
 					<div class="card-header">
-						<strong>ADD NEW LESSON</strong>
+						<strong th:if="${schedule.id > 0}">Cập nhật lịch làm việc</strong>
+						<strong th:if="${schedule.id == null}">Thêm mới lịch làm
+							việc</strong>
+
 					</div>
 					<div class="card-body card-block">
-						<form th:action="@{/admin/addOrUpdateLesson}" method="post"
-							enctype="multipart/form-data" th:object="${lesson}"
-							class="form-horizontal">
-							
-							<input type="hidden" th:field="${lesson.id}" th:value="${lesson.id}"/>
-							<input type="hidden" th:field="${lesson.videoUrl}" th:value="${lesson.videoUrl}"/>
+						<form th:action="@{/admin/addOrUpdateSchedule}" method="post"
+							th:object="${schedule}" class="form-horizontal">
+
+							<input type="hidden" th:field="${schedule.id}"
+								th:value="${schedule.id}" />
+
 
 							<div class="row form-group">
 								<div class="col col-md-3">
-									<label for="text-input" class=" form-control-label">Title</label>
+									<label for="text-input" class=" form-control-label">Ngày
+										làm việc</label>
 								</div>
 								<div class="col-12 col-md-9">
-									<input th:field="${lesson.title}" required type="text"
-										id="text-input" name="text-input" placeholder="Title"
-										class="form-control"><small
-										class="form-text text-muted">Title of lesson</small>
+									<input th:field="${schedule.date}" required type="date"
+										id="text-input" name="date" class="form-control"
+										th:min="${#dates.format(new java.util.Date(), 'yyyy-MM-dd')}">
+									<p th:errors="*{date}" class="text-danger"
+										th:if="${#fields.hasErrors('date')}"></p>
 								</div>
+
 							</div>
 
 							<div class="row form-group">
 								<div class="col col-md-3">
-									<label for="text-input" class=" form-control-label">Course</label>
-								</div>
-								<div class="col-12 col-md-9">
-									<select required name="selectCourse" id="selectLg"
-										class="form-control-lg form-control">
-										<option th:each="c : ${lsc}" th:value="${c.id}"
-											th:selected="${lesson.course == c}"
-											th:text="${c.title}"></option>
-									</select>
-								</div>
-							</div>
-
-
-							<div class="row form-group">
-								<div class="col col-md-3">
-									<label class=" form-control-label">Is actived</label>
+									<label class=" form-control-label">Trạng thái ngày nghỉ</label>
 								</div>
 								<div class="col col-md-9">
 									<div class="form-check-inline form-check">
 										<label for="inline-checkbox1" class="form-check-label ">
-											<input th:checked="${lesson.isActived}" type="checkbox" id="inline-checkbox1"
-											name="isActived" value="true" class="form-check-input">
+											<input th:field="${schedule.isDayOff}"
+											th:checked="${schedule.isDayOff}" type="checkbox"
+											id="inline-checkbox1" name="isDayOff" value="true"
+											class="form-check-input">
 										</label>
 									</div>
 								</div>
 							</div>
+
 							<div class="row form-group">
 								<div class="col col-md-3">
-									<label for="file-input" class=" form-control-label">File
-										video</label>
+									<label for="text-input" class=" form-control-label">Chú
+										thích</label>
 								</div>
 								<div class="col-12 col-md-9">
-									<input type="file" id="file-input" name="videoFile"
-									th:attr="required=${lesson.videoUrl == null or lesson.videoUrl.isEmpty() ? 'required' : null}"
-										class="form-control-file" th:text="${lesson.videoUrl}">
+									<input th:field="${schedule.description}" required type="text"
+										id="text-input" name="description" class="form-control">
+
 								</div>
+
 							</div>
+
+
 							<div class="card-footer">
 								<button type="submit" class="btn btn-primary btn-sm">
 									<i class="fa fa-dot-circle-o"></i> Submit

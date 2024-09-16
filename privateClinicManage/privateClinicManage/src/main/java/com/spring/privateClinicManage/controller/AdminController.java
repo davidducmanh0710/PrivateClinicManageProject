@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.spring.privateClinicManage.entity.Medicine;
 import com.spring.privateClinicManage.entity.MedicineGroup;
 import com.spring.privateClinicManage.entity.Role;
+import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.UnitMedicineType;
 import com.spring.privateClinicManage.entity.User;
 import com.spring.privateClinicManage.entity.Voucher;
@@ -35,11 +37,14 @@ import com.spring.privateClinicManage.entity.VoucherCondition;
 import com.spring.privateClinicManage.service.MedicineGroupService;
 import com.spring.privateClinicManage.service.MedicineService;
 import com.spring.privateClinicManage.service.RoleService;
+import com.spring.privateClinicManage.service.ScheduleService;
 import com.spring.privateClinicManage.service.StatsService;
 import com.spring.privateClinicManage.service.UnitMedicineTypeService;
 import com.spring.privateClinicManage.service.UserService;
 import com.spring.privateClinicManage.service.VoucherConditionService;
 import com.spring.privateClinicManage.service.VoucherService;
+import com.spring.privateClinicManage.utilities.CalendarFormat;
+import com.spring.privateClinicManage.utilities.CalendarFormatUtil;
 
 import jakarta.validation.Valid;
 
@@ -64,6 +69,8 @@ public class AdminController {
 	private VoucherConditionService voucherConditionService;
 	@Autowired
 	private StatsService statsService;
+	@Autowired
+	private ScheduleService scheduleService;
 
 	@ModelAttribute
 	public void addAttributes(Model model) {
@@ -524,7 +531,7 @@ public class AdminController {
 		 * bất chấp
 		 */
 		if (voucher.getId() != null) {
-			
+
 			VoucherCondition voucherCondition = existVoucher.getVoucherCondition();
 
 			voucherCondition.setExpiredDate(voucher.getVoucherCondition().getExpiredDate());
@@ -548,8 +555,8 @@ public class AdminController {
 		yearlyPrognosis = yearlyPrognosis.isEmpty() || yearlyPrognosis.equals("")
 				|| Integer.parseInt(yearlyPrognosis) < 2000
 				|| Integer.parseInt(yearlyPrognosis) > LocalDateTime.now().getYear()
-				? String.valueOf(LocalDateTime.now().getYear())
-				: yearlyPrognosis;
+						? String.valueOf(LocalDateTime.now().getYear())
+						: yearlyPrognosis;
 
 		String monthlyPrognosis = params.getOrDefault("monthlyPrognosis",
 				String.valueOf(LocalDate.now().getMonthValue()));
@@ -557,11 +564,11 @@ public class AdminController {
 		monthlyPrognosis = monthlyPrognosis.isEmpty() || monthlyPrognosis.equals("")
 				? String.valueOf(LocalDateTime.now().getMonthValue())
 				: monthlyPrognosis;
-		
+
 		List<Object[]> stats1 = statsService
 				.statsByPrognosisMedicine(Integer.parseInt(yearlyPrognosis),
 						Integer.parseInt(monthlyPrognosis));
-		
+
 		List<Map<String, Object>> formattedStats1 = new ArrayList<>();
 
 		for (Object[] s : stats1) {
@@ -608,7 +615,97 @@ public class AdminController {
 		model.addAttribute("yearlyRevenue", yearlyRevenue);
 
 		return "admin/stats/statsByRevenue";
-//		return "redirect:/admin";
+	}
+
+	@GetMapping("/admin/schedule-list")
+	public String getScheduleList(Model model, @RequestParam Map<String, String> params) {
+
+		String date = params.getOrDefault("date", null);
+
+		Integer page = Integer.parseInt(params.getOrDefault("page", "1"));
+		Integer size = Integer.parseInt(params.getOrDefault("size", "5"));
+
+		List<Schedule> schedules = new ArrayList<>();
+
+		if (date != null && !date.isBlank()) {
+			CalendarFormat cd = CalendarFormatUtil.parseStringToCalendarFormat(date);
+			Schedule exSchedule = scheduleService.findByDayMonthYear(cd.getYear(), cd.getMonth(),
+					cd.getDay());
+			if (exSchedule != null)
+				schedules.add(exSchedule);
+
+		} else {
+			schedules = scheduleService.findAllSchedule();
+		}
+
+		Page<Schedule> schedulesPaginated = scheduleService.schedulePaginated(page, size,
+				schedules);
+
+		page = page > 0 ? page : 1;
+		size = size > 0 ? size : 5;
+
+		Integer totalPages = schedulesPaginated.getTotalPages();
+		if (totalPages > 0) {
+			List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
+					.boxed()
+					.collect(Collectors.toList());
+			model.addAttribute("pageNumbers", pageNumbers);
+		}
+
+		model.addAttribute("schedulesPaginated", schedulesPaginated);
+		model.addAttribute("page", page);
+		model.addAttribute("size", size);
+
+		return "admin/schedule/schedulesList";
+	}
+
+	@GetMapping("/admin/addNewSchedule")
+	public String getFormAddNewSchedule(Model model) {
+		Schedule schedule = new Schedule();
+		model.addAttribute("schedule", schedule);
+
+		return "admin/schedule/addOrUpdateSchedule";
+	}
+
+	@GetMapping("/admin/updateSchedule/{scheduleId}")
+	public String getFormUpdateSchedule(Model model,
+			@PathVariable("scheduleId") Integer scheduleId) {
+
+		Schedule schedule = scheduleService.findById(scheduleId);
+		model.addAttribute("schedule", schedule);
+
+		return "admin/schedule/addOrUpdateSchedule";
+	}
+
+	@PostMapping("/admin/addOrUpdateSchedule")
+	public String addOrUpdateVoucher(Model model,
+			@Valid @ModelAttribute("schedule") Schedule schedule,
+			BindingResult bindingResult,
+			@RequestParam Map<String, Object> params)
+			throws ParseException {
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(schedule.getDate());
+
+//		Integer month = calendar.get(Calendar.MONTH) == 12 ? 1 : calendar.get(Calendar.MONTH) + 1;
+		Integer month = calendar.get(Calendar.MONTH) + 1;
+
+		Schedule existSchedule = scheduleService.findByDayMonthYear(calendar.get(Calendar.YEAR),
+				month,
+				calendar.get(Calendar.DAY_OF_MONTH));
+
+		if (schedule.getId() == null && existSchedule != null)
+			bindingResult.rejectValue("date", null, "Đã tồn tại lịch ngày làm này !");
+
+		if (bindingResult.hasErrors()) {
+			model.addAttribute("schedule", schedule);
+			return "admin/schedule/addOrUpdateSchedule";
+		}
+
+		scheduleService.saveSchedule(schedule);
+
+		return "redirect:/admin/schedule-list";
+
 	}
 
 }

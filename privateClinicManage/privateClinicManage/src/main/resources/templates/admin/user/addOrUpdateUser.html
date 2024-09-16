@@ -63,14 +63,14 @@
 								</div>
 								<div class="col-12 col-md-9">
 									<div class="form-check form-check-inline">
-										<input th:field="${user.gender}" class="form-check-input" type="radio"
-											th:checked="${user.gender == 'male'}"
+										<input th:field="${user.gender}" class="form-check-input"
+											type="radio" th:checked="${user.gender == 'male'}"
 											name="inlineRadioOptions" id="male" value="male" required />
 										<label class="form-check-label" for="maleGender">Male</label>
 									</div>
 									<div class="form-check form-check-inline">
-										<input th:field="${user.gender}" class="form-check-input" type="radio"
-											th:checked="${user.gender == 'female'}"
+										<input th:field="${user.gender}" class="form-check-input"
+											type="radio" th:checked="${user.gender == 'female'}"
 											name="inlineRadioOptions" id="female" value="female" /> <label
 											class="form-check-label" for="femaleGender">Female</label>
 									</div>
@@ -111,7 +111,8 @@
 								<div class="col-12 col-md-9">
 									<input th:field="${user.birthday}" required type="date"
 										id="text-input" name="birthday" placeholder="Birthday"
-										class="form-control">
+										class="form-control"
+										th:max="${#dates.format(new java.util.Date(), 'yyyy-MM-dd')}">
 								</div>
 							</div>
 

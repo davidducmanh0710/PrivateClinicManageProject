@@ -100,7 +100,7 @@ export default function Header() {
                 </div>
                 {currentUser !== null && <NotificationContainer />}
 
-                {currentUser ? (
+                {currentUser !== null ? (
                   <>
                     <Dropdown className="dropdown text-end ms-2">
                       <Dropdown.Toggle className="btn btn-secondary">
