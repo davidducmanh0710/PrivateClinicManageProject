@@ -66,24 +66,25 @@
 /* History container */
 
 .history-container .table {
-  width: 100%; /* Đảm bảo bảng chiếm toàn bộ chiều rộng */
-  table-layout: fixed; /* Giúp cột có chiều rộng bằng nhau */
+  width: 100%;
+  table-layout: fixed;
   background-color: #baf6e8;
 }
 
-.history-container .table th, .history-container .table td {
-  text-align: center; 
-  vertical-align: middle; 
+.history-container .table th,
+.history-container .table td {
+  text-align: center;
+  vertical-align: middle;
   padding: 15px;
   font-weight: bold;
 }
 
 .history-container .table thead th {
-  font-weight: bold; /* In đậm tiêu đề cột */
+  font-weight: bold;
 }
 
 .history-container .table td {
-  border-top: 1px solid #dee2e6; /* Đường viền giữa các hàng */
+  border-top: 1px solid #dee2e6;
 }
 
 .wrapper {
@@ -91,5 +92,34 @@
 }
 
 .shadow-lg {
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175); /* Đổ bóng */
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+}
+
+.payment-history-container {
+  .table {
+    width: 100%;
+    table-layout: fixed;
+    background-color: #baf6e8;
+  }
+  .table th,
+  .table td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 15px;
+    font-weight: bold;
+  }
+  .table thead th {
+    font-weight: bold;
+  }
+  .table td {
+    border-top: 1px solid #dee2e6;
+  }
+
+  .wrapper {
+    padding: 20px;
+  }
+
+  .shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  }
 }

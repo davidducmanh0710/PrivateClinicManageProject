@@ -6,6 +6,7 @@ import DirectRegister from "../DirectRegister/DirectRegister";
 import ExaminationForm from "../ExaminationForm/ExaminationForm";
 import Home from "../Home/Home";
 import QRScanner from "../QRScan/QRScanner";
+import UserHistory from "../UserHistory/UserHistory";
 import UserProcessingList from "../UserProcessingList/UserProcessingList";
 import UserProfile from "../UserProfile/UserProfile";
 import UserRegisterScheduleList from "../UserRegisterScheduleList/UserRegisterScheduleList";
@@ -38,6 +39,7 @@ const publicRoutes = [
   { path: "/advise-section", component: AdviseSection, role: "ROLE_ALL" },
   { path: "/user-profile", component: UserProfile, role: "ROLE_ANY" },
   { path: "/chatting", component: Chatting, role: "ROLE_ANY" },
+  { path: "/history", component: UserHistory, role: "ROLE_BENHNHAN" },
 ];
 
 const privateRoutes = [];

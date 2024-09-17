@@ -176,8 +176,14 @@ const PaymentForm = forwardRef(function PaymentForm(
   };
 
   useEffect(() => {
-    const applyDiscount = (price) =>
-      price - (price * voucher?.voucherCondition?.percentSale) / 100; // voucher null sẽ tính là 0
+    const applyDiscount = (price) => {
+      const percentSale = voucher?.voucherCondition?.percentSale ?? 0;
+
+      if (typeof price !== "number" || isNaN(price)) {
+        throw new Error("Invalid price");
+      }
+      return price - (price * percentSale) / 100;
+    };
 
     if (me === null && urs !== null && pis === null) {
       setFinalPrice(applyDiscount(100000));

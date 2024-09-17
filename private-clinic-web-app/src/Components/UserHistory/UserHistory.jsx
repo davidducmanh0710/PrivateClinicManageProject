@@ -1,18 +1,18 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { UserContext } from "../config/Context";
+import "./UserHistory.css";
+import { CustomerSnackbar, isBENHNHAN } from "../Common/Common";
 import { authAPI, endpoints } from "../config/Api";
-import { CustomerSnackbar, isBACSI } from "../Common/Common";
-import { Alert, Pagination } from "@mui/material";
+import { UserContext } from "../config/Context";
 import dayjs from "dayjs";
-import "./UserProcessingList.css";
+import { Alert, Pagination } from "@mui/material";
 import PatientTabs from "../PatientTabs/PatientTabs";
 
-export default function UserProcessingList() {
-  const [userProcessingList, setUserProcessingList] = useState([]);
+export default function UserHistory() {
+  const [allUserHistoryList, setAllUserHistoryList] = useState([]);
   const { currentUser } = useContext(UserContext);
-
-  const [examPatient, setExamPatient] = useState({});
+  const [namePatient, setNamePatient] = useState(null);
   const [historyExamsPatient, setHistoryExamPatient] = useState([]);
+  const [historyPaymentPatient, setHistoryPaymentPatient] = useState([]);
 
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
@@ -36,11 +36,16 @@ export default function UserProcessingList() {
     }, 5000);
   };
 
-  const getAllProcessingUserToday = useCallback(async () => {
+  useEffect(() => {
+    if (currentUser !== null && isBENHNHAN(currentUser))
+      getMrlAndMeUserHistory();
+  }, [currentUser]);
+
+  const getMrlAndMeUserHistory = useCallback(async () => {
     let response;
-    if (isBACSI(currentUser) && currentUser !== null) {
+    if (isBENHNHAN(currentUser) && currentUser !== null) {
       try {
-        let url = `${endpoints["getAllProcessingUserToday"]}?page=${page}`;
+        let url = `${endpoints["getMrlAndMeUserHistory"]}?page=${page}`;
         response = await authAPI().get(url, {
           validateStatus: function (status) {
             return status < 500; // Chỉ ném lỗi nếu status code >= 500
@@ -48,7 +53,7 @@ export default function UserProcessingList() {
         });
 
         if (response.status === 200) {
-          setUserProcessingList(response.data);
+          setAllUserHistoryList(response.data);
           setTotalPage(response.data.totalPages);
         } else showSnackbar(response.data, "error");
       } catch {
@@ -59,14 +64,18 @@ export default function UserProcessingList() {
 
   const getHistoryUserRegister = async () => {
     let response;
-    if (isBACSI(currentUser) && currentUser !== null && examPatient !== null) {
+    if (
+      isBENHNHAN(currentUser) &&
+      currentUser !== null &&
+      namePatient !== null
+    ) {
       try {
         let url = `${endpoints["getHistoryUserRegister"]}`;
         response = await authAPI().post(
           url,
           {
-            email: examPatient.user.email,
-            nameRegister: examPatient.name,
+            email: currentUser?.email,
+            nameRegister: namePatient,
           },
           {
             validateStatus: function (status) {
@@ -77,7 +86,6 @@ export default function UserProcessingList() {
 
         if (response.status === 200) {
           setHistoryExamPatient(response.data);
-          console.log(response.data);
         } else showSnackbar(response.data, "error");
       } catch {
         console.log(response);
@@ -86,11 +94,36 @@ export default function UserProcessingList() {
     }
   };
 
-  useEffect(() => {
-    if (currentUser !== null) {
-      getAllProcessingUserToday();
+  const getPaymentHistoryPatientByName = async () => {
+    let response;
+    if (
+      isBENHNHAN(currentUser) &&
+      currentUser !== null &&
+      namePatient !== null
+    ) {
+      try {
+        let url = `${endpoints["getPaymentHisotoryByName"]}`;
+        response = await authAPI().post(
+          url,
+          {
+            name: namePatient,
+          },
+          {
+            validateStatus: function (status) {
+              return status < 500;
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          setHistoryPaymentPatient(response.data);
+        } else showSnackbar(response.data, "error");
+      } catch {
+        console.log(response);
+        showSnackbar(response, "error");
+      }
     }
-  }, [currentUser, page, examPatient]);
+  };
 
   return (
     <>
@@ -100,8 +133,8 @@ export default function UserProcessingList() {
         severity={data.severity}
       />
       <div className="container container-user-processing-list">
-        <h2 className="text text-primary">Danh sách bệnh nhân đang đợi</h2>
-        {userProcessingList.empty === false && (
+        <h2 className="text text-primary">Lịch sử khám bệnh</h2>
+        {allUserHistoryList.empty === false && (
           <Pagination
             count={totalPage}
             color="primary"
@@ -111,14 +144,11 @@ export default function UserProcessingList() {
         )}
         <ul className="responsive-table">
           <li className="table-header">
-            <div className="col col-1">Mã</div>
             <div className="col col-2">Tên người khám</div>
-            <div className="col col-4">Ngày khám</div>
-            <div className="col col-5">Số điện thoại</div>
-            <div className="col col-6">Địa chỉ</div>
-            <div className="col col-7">Triệu chứng</div>
+            <div className="col col-4">Ngày khám gần nhất</div>
+            <div className="col col-5">Số lần khám</div>
           </li>
-          {userProcessingList.empty === true ? (
+          {allUserHistoryList.empty === true ? (
             <>
               <Alert variant="filled" severity="info" className="w-50 mx-auto">
                 Hiện không có phiếu đăng kí nào
@@ -126,42 +156,34 @@ export default function UserProcessingList() {
             </>
           ) : (
             <>
-              {userProcessingList.empty === false &&
-                userProcessingList.content.map((up) => {
+              {allUserHistoryList.empty === false &&
+                allUserHistoryList.content.map((uh) => {
                   return (
                     <>
-                      <li key={up.id} className="table-row">
-                        <div className="col col-1" data-label="ID">
-                          #MSPDKLK{up.id}
-                        </div>
+                      <li key={uh.name} className="table-row">
                         <div
                           role="button"
                           className="col col-2 text text-info underline"
                           data-label="Name Register"
-                          onClick={() => setExamPatient(up)}
+                          onClick={() => setNamePatient(uh.name)}
                         >
-                          {up.name}
+                          {uh.name}
                         </div>
                         <div className="col col-4" data-label="Date Register">
-                          {dayjs(up.schedule.date).format("DD-MM-YYYY")}
+                          {dayjs(uh.lastestDate).format("DD-MM-YYYY")}
                         </div>
-                        <div className="col col-5" data-label="Phone">
-                          {up.user.phone}
-                        </div>
-                        <div className="col col-6" data-label="Address">
-                          {up.user.address}
-                        </div>
-                        <div className="col col-7" data-label="Favor">
-                          {up.favor}
+                        <div className="col col-5" data-label="total">
+                          {uh.total}
                         </div>
                       </li>
-                      {examPatient.id === up.id && (
+                      {namePatient === uh.name && (
                         <PatientTabs
-                          examPatient={examPatient}
-                          setExamPatient={setExamPatient}
                           historyExamsPatient={historyExamsPatient}
                           setHistoryExamPatient={setHistoryExamPatient}
                           getHistoryUserRegister={getHistoryUserRegister}
+                          historyPaymentPatient={historyPaymentPatient}
+                          setHistoryPaymentPatient={setHistoryPaymentPatient}
+                          getPaymentHistoryPatientByName={getPaymentHistoryPatientByName}
                         />
                       )}
                     </>

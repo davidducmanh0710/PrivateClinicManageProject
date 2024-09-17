@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import PrescriptionItems from "../PrecriptionItems/PrecriptionItems";
 import { authAPI, endpoints } from "../config/Api";
 import { Alert } from "@mui/material";
+import { UserContext } from "../config/Context";
+import { isBACSI, isBENHNHAN } from "../Common/Common";
 
 export default function PatientTabs({
   examPatient,
@@ -13,10 +15,15 @@ export default function PatientTabs({
   historyExamsPatient,
   setHistoryExamPatient,
   getHistoryUserRegister,
+  historyPaymentPatient,
+  setHistoryPaymentPatient,
+  getPaymentHistoryPatientByName,
 }) {
   // không thể để state của historyExamsPatient ở đây đc , vì nó thay đổi mỗi component con , mà component cha đang chứa giao diện thằng này , dẫn đến ko đổi
   const [selectMedicalExamId, setSelectMedicalExamId] = useState(0);
   const [precriptionItems, setPrecriptionItems] = useState([]);
+
+  const { currentUser } = useContext(UserContext);
 
   const getPrescriptionItemsByMedicalExamId = async (selectMedicalExamId) => {
     try {
@@ -41,95 +48,107 @@ export default function PatientTabs({
     <>
       <div className="patient-info-tabs">
         <Tabs
-          defaultActiveKey="info"
+          defaultActiveKey={
+            currentUser !== null && isBACSI(currentUser) ? "info" : ""
+          }
           id="patient-info-tabs"
           className="custom-tabs"
           onSelect={(key) => {
             if (key === "history") {
-              if (examPatient.id !== undefined) getHistoryUserRegister();
+              if (examPatient?.id !== undefined || isBENHNHAN(currentUser)) {
+                getHistoryUserRegister();
+              }
+            } else if (key === "invoices") {
+              getPaymentHistoryPatientByName();
             } else console.log("else");
           }}
         >
-          <Tab eventKey="info" title="Thông tin bệnh nhân">
-            <div className="tab-content-area">
-              <div className="patient-details">
-                <table className="table table-bordered">
-                  <h4 className="w-100 text-center text text-primary">
-                    Thông tin tài khoản
-                  </h4>
-                  <tbody>
-                    <tr>
-                      <th>Mã bệnh nhân</th>
-                      <td>{examPatient.user.id}</td>
-                      <th>Tên tài khoản</th>
-                      <td>{examPatient.user.name}</td>
-                    </tr>
-                    <tr>
-                      <th>Giới tính</th>
-                      <td>{examPatient.user.gender}</td>
-                      <th>Ngày sinh</th>
-                      <td>
-                        {dayjs(examPatient.user.birthday).format("DD/MM/YYYY")}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Điện thoại</th>
-                      <td>{examPatient.user.phone}</td>
-                      <th>Địa chỉ</th>
-                      <td>{examPatient.user.address}</td>
-                    </tr>
-                    <tr>
-                      <th>Email</th>
-                      <td>{examPatient.user.email}</td>
-                      <th>Số lần đăng kí khám</th>
-                      <td>...</td>
-                    </tr>
-                  </tbody>
-                </table>
+          {currentUser !== null &&
+            isBACSI(currentUser) &&
+            examPatient !== null && (
+              <Tab eventKey="info" title="Thông tin bệnh nhân">
+                <div className="tab-content-area">
+                  <div className="patient-details">
+                    <table className="table table-bordered">
+                      <h4 className="w-100 text-center text text-primary">
+                        Thông tin tài khoản
+                      </h4>
+                      <tbody>
+                        <tr>
+                          <th>Mã bệnh nhân</th>
+                          <td>{examPatient.user.id}</td>
+                          <th>Tên tài khoản</th>
+                          <td>{examPatient.user.name}</td>
+                        </tr>
+                        <tr>
+                          <th>Giới tính</th>
+                          <td>{examPatient.user.gender}</td>
+                          <th>Ngày sinh</th>
+                          <td>
+                            {dayjs(examPatient.user.birthday).format(
+                              "DD/MM/YYYY"
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Điện thoại</th>
+                          <td>{examPatient.user.phone}</td>
+                          <th>Địa chỉ</th>
+                          <td>{examPatient.user.address}</td>
+                        </tr>
+                        <tr>
+                          <th>Email</th>
+                          <td>{examPatient.user.email}</td>
+                        </tr>
+                      </tbody>
+                    </table>
 
-                <table className="table table-bordered mt-5">
-                  <h4 className="w-100 text-center text text-primary">
-                    Thông tin người khám
-                  </h4>
-                  <tbody>
-                    <tr>
-                      <th>Tên người khám</th>
-                      <td>{examPatient.name}</td>
-                      <th>Triệu chứng</th>
-                      <td>{examPatient.favor}</td>
-                    </tr>
-                    <tr>
-                      <th>Ngày khám</th>
-                      <td>
-                        {dayjs(examPatient.schedule.date).format("DD/MM/YYYY")}
-                      </td>
-                      <th>Số thứ tự</th>
-                      <td>{examPatient.order}</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div className="d-flex justify-content-evenly align-item-center">
-                  <div>
-                    <Link
-                      className="btn btn-primary mt-3"
-                      to="/examination-form"
-                      state={{ examPatient }}
-                    >
-                      Kê toa
-                    </Link>
-                  </div>
-                  <div>
-                    <button
-                      className="btn btn-danger mt-3"
-                      onClick={() => setExamPatient({})}
-                    >
-                      Đóng
-                    </button>
+                    <table className="table table-bordered mt-5">
+                      <h4 className="w-100 text-center text text-primary">
+                        Thông tin người khám
+                      </h4>
+                      <tbody>
+                        <tr>
+                          <th>Tên người khám</th>
+                          <td>{examPatient.name}</td>
+                          <th>Triệu chứng</th>
+                          <td>{examPatient.favor}</td>
+                        </tr>
+                        <tr>
+                          <th>Ngày khám</th>
+                          <td>
+                            {dayjs(examPatient.schedule.date).format(
+                              "DD/MM/YYYY"
+                            )}
+                          </td>
+                          <th>Số thứ tự</th>
+                          <td>{examPatient.order}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div className="d-flex justify-content-evenly align-item-center">
+                      <div>
+                        <Link
+                          className="btn btn-primary mt-3"
+                          to="/examination-form"
+                          state={{ examPatient }}
+                        >
+                          Kê toa
+                        </Link>
+                      </div>
+                      <div>
+                        <button
+                          className="btn btn-danger mt-3"
+                          onClick={() => setExamPatient({})}
+                        >
+                          Đóng
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </Tab>
+              </Tab>
+            )}
           <Tab eventKey="history" title="Lịch sử khám bệnh">
             <div className="history-container tab-content-area">
               <div className="table-responsive wrapper shadow-lg">
@@ -204,11 +223,68 @@ export default function PatientTabs({
               </div>
             </div>
           </Tab>
-          <Tab eventKey="invoices" title="Danh sách hóa đơn">
-            <div className="tab-content-area">
-              {/* Nội dung cho tab Danh sách hóa đơn */}
-            </div>
-          </Tab>
+          {currentUser !== null && isBENHNHAN(currentUser) && (
+            <Tab eventKey="invoices" title="Lịch sử hóa đơn">
+              <div className="payment-history-container tab-content-area">
+                <div className="table-responsive wrapper shadow-lg">
+                  <table className="table table-scrollable">
+                    <thead className="bg-light text-center">
+                      <tr className="align-middle">
+                        <th>Mã hóa đơn</th>
+                        <th>Ngày thanh toán</th>
+                        <th>Tên người khám</th>
+                        <th>Số tiền</th>
+                        <th>Mô tả hóa đơn</th>
+                        <th>Trạng thái</th>
+                        <th>Phương thức thanh toán</th>
+                      </tr>
+                    </thead>
+                    <tbody className="table-hover text-center">
+                      {historyPaymentPatient.length > 0 ? (
+                        historyPaymentPatient.map((hpt) => {
+                          return (
+                            <>
+                              <tr key={hpt.orderId} className="align-middle">
+                                <td>{hpt.orderId}</td>
+                                <td className="text text-danger">
+                                  {dayjs(hpt.createdDate).format("DD/MM/YYYY")}
+                                </td>
+                                <td>{hpt.name}</td>
+                                <td className="text text-danger">
+                                  {hpt.amount.toLocaleString("vi-VN")}
+                                </td>
+                                <td>{hpt.description}</td>
+                                <td className="text text-primary">
+                                  {hpt.resultCode === "0" || "00"
+                                    ? "Thành công"
+                                    : ""}
+                                </td>
+                                <td>{hpt.partnerCode}</td>
+                              </tr>
+                            </>
+                          );
+                        })
+                      ) : (
+                        <>
+                          <tr>
+                            <td colSpan="12" className="text-center">
+                              <Alert
+                                variant="filled"
+                                severity="info"
+                                className="w-100"
+                              >
+                                Không có lịch sử thanh toán
+                              </Alert>
+                            </td>
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </Tab>
+          )}
         </Tabs>
       </div>
     </>

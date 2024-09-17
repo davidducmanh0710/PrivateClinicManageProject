@@ -1,6 +1,5 @@
 package com.spring.privateClinicManage.api;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.spring.privateClinicManage.dto.HisotryUserMedicalRegisterDto;
 import com.spring.privateClinicManage.dto.MedicalExamDto;
 import com.spring.privateClinicManage.dto.PrescriptionItemDto;
 import com.spring.privateClinicManage.entity.MedicalExamination;
@@ -227,50 +225,6 @@ public class ApiBacsiRestController {
 		}
 
 		return new ResponseEntity<>("Thành công !", HttpStatus.CREATED);
-	}
-
-	@PostMapping("/get-history-user-register/")
-	@CrossOrigin
-	public ResponseEntity<Object> getHistoryUserRegister(
-			@RequestBody HisotryUserMedicalRegisterDto hisotryUserMedicalRegisterDto) {
-		
-		User currentUser = userService.getCurrentLoginUser();
-		User patient = userService.findByEmail(hisotryUserMedicalRegisterDto.getEmail());
-		if (currentUser == null || patient == null)
-			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
-		
-		List<MedicalRegistryList> mrls = medicalRegistryListService.findAllMrlByUserAndName(patient,
-				hisotryUserMedicalRegisterDto.getNameRegister());
-		
-		mrls = medicalRegistryListService.sortBy2StatusIsApproved(mrls, "FOLLOWUP", "FINISHED");
-
-		List<MedicalExamination> mas = new ArrayList<>();
-
-		mrls.forEach(mrl -> {
-			mas.add(mrl.getMedicalExamination());
-		});
-
-		return new ResponseEntity<>(mas, HttpStatus.OK);
-	}
-
-	@GetMapping("/get-prescriptionItems-by-medicalExam-id/{medicalExamId}/")
-	@CrossOrigin
-	public ResponseEntity<Object> getPrescriptionItemsByMedicalExamId(
-			@PathVariable("medicalExamId") Integer medicalExamId) {
-
-		User currentUser = userService.getCurrentLoginUser();
-		if (currentUser == null)
-			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
-
-		MedicalExamination medicalExamination = medicalExaminationService.findById(medicalExamId);
-
-		if (medicalExamination == null)
-			return new ResponseEntity<>("Phiếu khám không tồn tại", HttpStatus.NOT_FOUND);
-
-		List<PrescriptionItems> pis = prescriptionItemsService
-				.findByMedicalExamination(medicalExamination);
-
-		return new ResponseEntity<>(pis, HttpStatus.OK);
 	}
 
 }

@@ -163,7 +163,7 @@ export default function Chatting() {
     stompUSERClient.debug = () => {}; // tắt log của stomp in ra console
     stompUSERClientRef.current = stompUSERClient;
     stompUSERClient.connect(
-      { "Access-Control-Allow-Origin": `${BASE_URL}/ws/info` },
+      { "Access-Control-Allow-Origin": `*` },
       () => {
         stompUSERClient.subscribe(
           `/user/${currentUser?.id}/queue/messages`,

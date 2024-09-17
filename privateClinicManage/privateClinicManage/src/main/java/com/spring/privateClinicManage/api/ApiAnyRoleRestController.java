@@ -33,6 +33,7 @@ import com.spring.privateClinicManage.dto.ChangePasswordDto;
 import com.spring.privateClinicManage.dto.CommentDto;
 import com.spring.privateClinicManage.dto.CountDto;
 import com.spring.privateClinicManage.dto.GetChatMessageDto;
+import com.spring.privateClinicManage.dto.HisotryUserMedicalRegisterDto;
 import com.spring.privateClinicManage.dto.OnlineUserDto;
 import com.spring.privateClinicManage.dto.RecipientChatRoomDto;
 import com.spring.privateClinicManage.dto.RecipientDto;
@@ -43,6 +44,9 @@ import com.spring.privateClinicManage.entity.ChatRoom;
 import com.spring.privateClinicManage.entity.Comment;
 import com.spring.privateClinicManage.entity.CommentBlog;
 import com.spring.privateClinicManage.entity.LikeBlog;
+import com.spring.privateClinicManage.entity.MedicalExamination;
+import com.spring.privateClinicManage.entity.MedicalRegistryList;
+import com.spring.privateClinicManage.entity.PrescriptionItems;
 import com.spring.privateClinicManage.entity.User;
 import com.spring.privateClinicManage.service.BlogService;
 import com.spring.privateClinicManage.service.ChatMessageService;
@@ -50,6 +54,9 @@ import com.spring.privateClinicManage.service.ChatRoomService;
 import com.spring.privateClinicManage.service.CommentBlogService;
 import com.spring.privateClinicManage.service.CommentService;
 import com.spring.privateClinicManage.service.LikeBlogService;
+import com.spring.privateClinicManage.service.MedicalExaminationService;
+import com.spring.privateClinicManage.service.MedicalRegistryListService;
+import com.spring.privateClinicManage.service.PrescriptionItemsService;
 import com.spring.privateClinicManage.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -79,6 +86,12 @@ public class ApiAnyRoleRestController {
 	private ChatRoomService chatRoomService;
 	@Autowired
 	private ChatMessageService chatMessageService;
+	@Autowired
+	private MedicalRegistryListService medicalRegistryListService;
+	@Autowired
+	private MedicalExaminationService medicalExaminationService;
+	@Autowired
+	private PrescriptionItemsService prescriptionItemsService;
 
 	@PostMapping("/logout/")
 	@CrossOrigin
@@ -470,6 +483,50 @@ public class ApiAnyRoleRestController {
 		chatRoomService.getChatRoomId(currentUser, recipient, true);
 
 		return new ResponseEntity<>(recipient, HttpStatus.OK);
+	}
+
+	@PostMapping("/get-history-user-register/")
+	@CrossOrigin
+	public ResponseEntity<Object> getHistoryUserRegister(
+			@RequestBody HisotryUserMedicalRegisterDto hisotryUserMedicalRegisterDto) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		User patient = userService.findByEmail(hisotryUserMedicalRegisterDto.getEmail());
+		if (currentUser == null || patient == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		List<MedicalRegistryList> mrls = medicalRegistryListService.findAllMrlByUserAndName(patient,
+				hisotryUserMedicalRegisterDto.getNameRegister());
+
+		mrls = medicalRegistryListService.sortBy2StatusIsApproved(mrls, "FOLLOWUP", "FINISHED");
+
+		List<MedicalExamination> mas = new ArrayList<>();
+
+		mrls.forEach(mrl -> {
+			mas.add(mrl.getMedicalExamination());
+		});
+
+		return new ResponseEntity<>(mas, HttpStatus.OK);
+	}
+
+	@GetMapping("/get-prescriptionItems-by-medicalExam-id/{medicalExamId}/")
+	@CrossOrigin
+	public ResponseEntity<Object> getPrescriptionItemsByMedicalExamId(
+			@PathVariable("medicalExamId") Integer medicalExamId) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		MedicalExamination medicalExamination = medicalExaminationService.findById(medicalExamId);
+
+		if (medicalExamination == null)
+			return new ResponseEntity<>("Phiếu khám không tồn tại", HttpStatus.NOT_FOUND);
+
+		List<PrescriptionItems> pis = prescriptionItemsService
+				.findByMedicalExamination(medicalExamination);
+
+		return new ResponseEntity<>(pis, HttpStatus.OK);
 	}
 
 }

@@ -7,8 +7,7 @@ import dayjs from "dayjs";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DeleteConfirmationForm from "../DeleteConfirmationForm/DeleteConfirmationForm";
 import { UserContext } from "../config/Context";
-import PaymentPhase1Form from "../PaymentPhase1Form/PaymentForm";
-import PaymentForm from "../PaymentPhase1Form/PaymentForm";
+import PaymentForm from "../PaymentForm/PaymentForm";
 
 export default function UserRegisterScheduleList() {
   const [userRegisterScheduleList, setUserRegisterScheduleList] = useState([]);

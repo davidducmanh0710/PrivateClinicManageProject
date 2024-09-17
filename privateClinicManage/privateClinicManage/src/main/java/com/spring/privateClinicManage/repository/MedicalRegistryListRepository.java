@@ -8,6 +8,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.spring.privateClinicManage.dto.MrlAndMeHistoryDto;
+import com.spring.privateClinicManage.dto.PaymentHistoryDto;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
 import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
@@ -77,5 +79,30 @@ public interface MedicalRegistryListRepository extends JpaRepository<MedicalRegi
 			"WHERE mrl.user = :user and mrl.name = :nameRegister")
 	List<MedicalRegistryList> findAllMrlByUserAndName(@Param("user") User user,
 			@Param("nameRegister") String nameRegister);
+
+	@Query("SELECT new com.spring.privateClinicManage.dto.MrlAndMeHistoryDto(mrl.name , MAX(me.createdDate) , COUNT(me.id)) "
+			+
+			"FROM MedicalRegistryList mrl " +
+			"Inner join mrl.medicalExamination me " +
+			"WHERE mrl.user = :user " +
+			"GROUP BY mrl.name ")
+	List<MrlAndMeHistoryDto> statsUserMrlAndMeHistory(@Param("user") User user);
+
+	@Query("SELECT new com.spring.privateClinicManage.dto.PaymentHistoryDto " +
+			"(pmp1.orderId , pmp1.createdDate , mrl.name, pmp1.amount , pmp1.description , pmp1.resultCode , pmp1.partnerCode) "
+			+
+			"FROM MedicalRegistryList mrl " +
+			"INNER JOIN mrl.paymentPhase1 pmp1 " +
+			"WHERE mrl.name = :name ")
+	List<PaymentHistoryDto> statsPaymentPhase1History(@Param("name") String name);
+
+	@Query("SELECT new com.spring.privateClinicManage.dto.PaymentHistoryDto " +
+			"(pmp2.orderId , pmp2.createdDate , mrl.name, pmp2.amount , pmp2.description , pmp2.resultCode , pmp2.partnerCode) "
+			+
+			"FROM MedicalRegistryList mrl " +
+			"INNER JOIN mrl.medicalExamination me " +
+			"INNER JOIN me.paymentPhase2 pmp2 " +
+			"WHERE mrl.name = :name ")
+	List<PaymentHistoryDto> statsPaymentPhase2History(@Param("name") String name);
 
 }

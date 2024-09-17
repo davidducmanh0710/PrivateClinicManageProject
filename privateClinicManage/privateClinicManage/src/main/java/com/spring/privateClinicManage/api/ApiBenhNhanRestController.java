@@ -1,5 +1,6 @@
 package com.spring.privateClinicManage.api;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spring.privateClinicManage.dto.ApplyVoucherDto;
+import com.spring.privateClinicManage.dto.MrlAndMeHistoryDto;
+import com.spring.privateClinicManage.dto.NameDto;
+import com.spring.privateClinicManage.dto.PaymentHistoryDto;
 import com.spring.privateClinicManage.dto.PaymentPhase2OutputDto;
 import com.spring.privateClinicManage.dto.RegisterScheduleDto;
 import com.spring.privateClinicManage.entity.MedicalExamination;
@@ -34,6 +38,7 @@ import com.spring.privateClinicManage.entity.Voucher;
 import com.spring.privateClinicManage.service.MedicalRegistryListService;
 import com.spring.privateClinicManage.service.PrescriptionItemsService;
 import com.spring.privateClinicManage.service.ScheduleService;
+import com.spring.privateClinicManage.service.StatsService;
 import com.spring.privateClinicManage.service.StatusIsApprovedService;
 import com.spring.privateClinicManage.service.UserService;
 import com.spring.privateClinicManage.service.UserVoucherService;
@@ -52,6 +57,7 @@ public class ApiBenhNhanRestController {
 	private VoucherService voucherService;
 	private UserVoucherService userVoucherService;
 	private PrescriptionItemsService prescriptionItemsService;
+	private StatsService statsService;
 
 	@Autowired
 	public ApiBenhNhanRestController(UserService userService, Environment environment,
@@ -59,7 +65,7 @@ public class ApiBenhNhanRestController {
 			StatusIsApprovedService statusIsApprovedService,
 			SimpMessagingTemplate messagingTemplate, VoucherService voucherService,
 			UserVoucherService userVoucherService,
-			PrescriptionItemsService prescriptionItemsService) {
+			PrescriptionItemsService prescriptionItemsService, StatsService statsService) {
 		super();
 		this.userService = userService;
 		this.environment = environment;
@@ -70,6 +76,7 @@ public class ApiBenhNhanRestController {
 		this.voucherService = voucherService;
 		this.userVoucherService = userVoucherService;
 		this.prescriptionItemsService = prescriptionItemsService;
+		this.statsService = statsService;
 	}
 
 	// ROLE_BENHNHAN
@@ -207,6 +214,7 @@ public class ApiBenhNhanRestController {
 	}
 
 	@GetMapping(value = "/get-medical-exam-by-mrlId/{mrlId}/")
+	@CrossOrigin
 	public ResponseEntity<Object> getMedicalExamByMrlId(@PathVariable("mrlId") Integer mrlId) {
 		User currentUser = userService.getCurrentLoginUser();
 		if (currentUser == null)
@@ -230,6 +238,50 @@ public class ApiBenhNhanRestController {
 		pp2.setPis(pis);
 
 		return new ResponseEntity<>(pp2, HttpStatus.OK);
+	}
+
+	@GetMapping("/get-mrl-and-me-user-history/")
+	@CrossOrigin
+	public ResponseEntity<Object> getMrlAndMeUserHistory(@RequestParam Map<String, String> params) {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		Integer page = Integer.parseInt(params.getOrDefault("page", "1"));
+		Integer size = Integer.parseInt(params.getOrDefault("size", "3"));
+
+		Page<MrlAndMeHistoryDto> userMrAndMeHistoryPaginated = statsService
+				.paginatedStatsUserMrlAndMeHistory(page, size, currentUser);
+
+
+		return new ResponseEntity<>(userMrAndMeHistoryPaginated, HttpStatus.OK);
+	}
+
+	@PostMapping("/get-payment-history-by-name/")
+	@CrossOrigin
+	public ResponseEntity<Object> getPaymentHistoryByName(@RequestBody NameDto nameDto){
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+		
+		if (nameDto.getName() == null)
+			return new ResponseEntity<>("Tên không được rỗng !", HttpStatus.NOT_FOUND);
+
+		List<PaymentHistoryDto> php1Dtos = statsService
+				.statsPaymentPhase1History(nameDto.getName());
+
+		List<PaymentHistoryDto> php2Dtos = statsService
+				.statsPaymentPhase2History(nameDto.getName());
+
+		List<PaymentHistoryDto> total2Phase = new ArrayList<>();
+
+		total2Phase.addAll(php1Dtos);
+		total2Phase.addAll(php2Dtos);
+
+		total2Phase = statsService.sortByCreatedDate(total2Phase);
+
+		return new ResponseEntity<>(total2Phase, HttpStatus.OK);
+
 	}
 
 }

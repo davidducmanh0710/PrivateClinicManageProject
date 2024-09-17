@@ -73,14 +73,16 @@ public class JwtSecurityConfig {
 				.permitAll()
 
 				.requestMatchers(HttpMethod.GET,
-						"/api/benhnhan/get-medical-exam-by-mrlId/{mrlId}/")
+						"/api/benhnhan/get-medical-exam-by-mrlId/{mrlId}/",
+						"/api/benhnhan/get-mrl-and-me-user-history/")
 				.hasRole("BENHNHAN")
 
 				.requestMatchers(HttpMethod.POST,
 						"/api/benhnhan/register-schedule/",
 						"/api/benhnhan/user-register-schedule-list/",
 						"/api/benhnhan/apply-voucher/",
-						"/api/payment/**")
+						"/api/payment/**",
+						"/api/benhnhan/get-payment-history-by-name/")
 				.hasRole("BENHNHAN")
 
 				.requestMatchers(HttpMethod.PATCH,
@@ -102,13 +104,11 @@ public class JwtSecurityConfig {
 						"/api/bacsi/get-all-medicine-group/",
 						"/api/bacsi/get-all-medicine-by-group/{medicineGroupId}/",
 						"/api/bacsi/get-medicine-by-id/{medicineId}/",
-						"/api/bacsi/get-all-medicines/",
-						"/api/bacsi/get-prescriptionItems-by-medicalExam-id/{medicalExamId}/")
+						"/api/bacsi/get-all-medicines/")
 				.hasRole("BACSI")
 
 				.requestMatchers(HttpMethod.POST,
-						"/api/bacsi/submit-medical-examination/",
-						"/api/bacsi/get-history-user-register/")
+						"/api/bacsi/submit-medical-examination/")
 				.hasRole("BACSI")
 
 				.requestMatchers("/api/anyrole/blogs/",
@@ -118,6 +118,10 @@ public class JwtSecurityConfig {
 				.requestMatchers("/api/anyrole/**",
 						"/api/users/current-user/", "/api/yta/get-all-users/")
 				.hasAnyRole("BENHNHAN", "BACSI", "YTA", "TUVAN")
+
+				.requestMatchers("/api/anyrole/get-history-user-register/",
+						"/api/bacsi/get-prescriptionItems-by-medicalExam-id/{medicalExamId}/")
+				.hasAnyRole("BENHNHAN", "BACSI")
 
 				.anyRequest().authenticated())
 				.httpBasic(httpbc -> httpbc
@@ -146,6 +150,9 @@ public class JwtSecurityConfig {
 		configuration.setAllowedMethods(Arrays.asList("*"));
 		configuration.addAllowedHeader("*");
 		configuration.addExposedHeader("*");
+
+		configuration.addAllowedOriginPattern("*");
+		configuration.setAllowCredentials(false);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;

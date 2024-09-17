@@ -49,7 +49,6 @@ export default function Header() {
     } catch {}
   };
 
-
   useEffect(() => {}, [currentUser]);
 
   function handleAppointmentSchedule() {
@@ -115,7 +114,7 @@ export default function Header() {
                       <Dropdown.Menu className="r-0 header-dropdown-menu">
                         {currentUser !== null && (
                           <Dropdown.Item>
-                            <Link className="dropdown-item" to="/user-profile">
+                            <Link className="dropdown-item text-center" to="/user-profile">
                               Thông tin cá nhân
                             </Link>
                           </Dropdown.Item>
@@ -123,7 +122,7 @@ export default function Header() {
                         {currentUser !== null && isBENHNHAN(currentUser) && (
                           <Dropdown.Item>
                             <Link
-                              className="dropdown-item"
+                              className="dropdown-item text-center"
                               to="/user-register-schedule-list"
                             >
                               Danh sách lịch hẹn
@@ -133,8 +132,19 @@ export default function Header() {
 
                         {currentUser !== null && (
                           <Dropdown.Item>
-                            <Link className="dropdown-item" to="/chatting">
+                            <Link className="dropdown-item text-center" to="/chatting">
                               Nhắn tin tư vấn
+                            </Link>
+                          </Dropdown.Item>
+                        )}
+
+                        {currentUser !== null && isBENHNHAN(currentUser) && (
+                          <Dropdown.Item>
+                            <Link
+                              className="dropdown-item text-center"
+                              to="/history"
+                            >
+                              Lịch sử khám bệnh và hóa đơn
                             </Link>
                           </Dropdown.Item>
                         )}
@@ -143,7 +153,7 @@ export default function Header() {
 
                         <NavDropdown.Item>
                           <Button
-                            className="dropdown-item"
+                            className="dropdown-item text-center"
                             onClick={handleLogoutOnlineUser}
                           >
                             Đăng xuất

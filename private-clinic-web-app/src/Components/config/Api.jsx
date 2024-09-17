@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const BASE_URL = "http://localhost:8888";
 
-// export const BASE_URL = "https://240c-14-169-84-114.ngrok-free.app";
+// export const BASE_URL = "https://9945-113-185-76-122.ngrok-free.app";
 
 export let endpoints = {
   login: "/api/users/login/",
@@ -29,9 +29,9 @@ export let endpoints = {
     `/api/bacsi/get-medicine-by-id/${medicineId}/`,
   getAllMedicines: "/api/bacsi/get-all-medicines/",
   submitMedicalExamination: "/api/bacsi/submit-medical-examination/",
-  getHistoryUserRegister: "/api/bacsi/get-history-user-register/",
+  getHistoryUserRegister: "/api/anyrole/get-history-user-register/",
   getPrescriptionItemsByMedicalExamId: (medicalExamId) =>
-    `/api/bacsi/get-prescriptionItems-by-medicalExam-id/${medicalExamId}/`,
+    `/api/anyrole/get-prescriptionItems-by-medicalExam-id/${medicalExamId}/`,
   benhnhanMOMOPayment: "/api/payment/momo/",
   benhnhanVNPAYPayment: "/api/payment/vnpay/",
   applyVoucherPayment: "/api/benhnhan/apply-voucher/",
@@ -55,6 +55,8 @@ export let endpoints = {
   isUserOnline: "/api/anyrole/is-user-online/",
   getLastChatMessage: "/api/anyrole/get-last-chat-message/",
   connentToNewRecipient: "/api/anyrole/connect-to-new-recipient/",
+  getMrlAndMeUserHistory : "/api/benhnhan/get-mrl-and-me-user-history/",
+  getPaymentHisotoryByName : "/api/benhnhan/get-payment-history-by-name/"
 };
 
 export const authAPI = () => {
