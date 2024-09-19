@@ -84,7 +84,7 @@ public class AdminController {
 
 	@GetMapping("/login")
 	public String showSignInForm() {
-		return "/admin/authenticate/login";
+		return "admin/authenticate/login";
 	}
 
 	@GetMapping("/admin")

@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import com.spring.privateClinicManage.dto.UserRegisterDto;
 import com.spring.privateClinicManage.entity.Role;
 import com.spring.privateClinicManage.entity.User;
+import com.spring.privateClinicManage.oauth2.Dto.CustomOAuth2User;
 
 
 public interface UserService extends UserDetailsService {
@@ -52,5 +53,9 @@ public interface UserService extends UserDetailsService {
 	boolean isValidGmail(String email);
 
 	boolean isValidPhoneNumber(String phoneNumber);
+
+	void processOAuthPostLogin(CustomOAuth2User customOAuth2User);
+
+	void uploadFromUrl(User user, String imageUrl);
 
 }

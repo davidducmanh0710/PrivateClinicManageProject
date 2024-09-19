@@ -38,6 +38,13 @@
 					<div
 						class="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
 						<p class="lead fw-normal mb-0 me-3">Sign in with</p>
+						<a th:href="@{/oauth2/authorization/github}"><button
+								type="button" class="btn btn-primary btn-floating mx-1">
+								<i class="fa-brands fa-github"></i>
+							</button></a>
+						<button type="button" class="btn btn-primary btn-floating mx-1">
+							<i class="fab fa-linkedin-in"></i>
+						</button>
 						<button type="button" class="btn btn-primary btn-floating mx-1">
 							<i class="fab fa-facebook-f"></i>
 						</button>
@@ -79,22 +86,20 @@
 							as venfor !</div>
 					</div>
 
-					<form action="#" th:action="@{/login}" method="POST"
-						role="form">
+					<form action="#" th:action="@{/login}" method="POST" role="form">
 
 						<!-- Email input -->
 						<div class="form-outline mb-4">
 							<input autocomplete="on" name="email" type="text" id="email"
 								class="form-control form-control-lg"
-								placeholder="Enter your email" /> <label
-								class="form-label" for="form3Example3">Email
-							</label>
+								placeholder="Enter your email" /> <label class="form-label"
+								for="form3Example3">Email </label>
 						</div>
 
 						<!-- Password input -->
 						<div class="form-outline mb-3">
-							<input autocomplete="on" name="password" type="password" id="password"
-								class="form-control form-control-lg"
+							<input autocomplete="on" name="password" type="password"
+								id="password" class="form-control form-control-lg"
 								placeholder="Enter password" /> <label class="form-label"
 								for="form3Example4">Password</label>
 						</div>
@@ -129,8 +134,8 @@
 		<div
 			class="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary">
 			<!-- Copyright -->
-			<div class="text-white mb-3 mb-md-0">Copyright By Nguyễn Đức Mạnh. All
-				rights reserved.</div>
+			<div class="text-white mb-3 mb-md-0">Copyright By Nguyễn Đức
+				Mạnh. All rights reserved.</div>
 			<!-- Copyright -->
 
 			<!-- Right -->

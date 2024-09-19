@@ -153,6 +153,7 @@ public class JwtSecurityConfig {
 
 		configuration.addAllowedOriginPattern("*");
 		configuration.setAllowCredentials(false);
+
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;

@@ -55,17 +55,17 @@ public class User implements Serializable {
 	private String name;
 
 	@Column(name = "gender", nullable = false)
-	private String gender;
+	private String gender = "unknown";
 
 	@Column(name = "birthday", nullable = false)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date birthday;
+	private Date birthday = new Date();
 
 	@Column(name = "phone", nullable = false)
-	private String phone;
+	private String phone = "0000000000";
 
 	@Column(name = "address", nullable = false)
-	private String address;
+	private String address = "unknown";
 
 	@Column(name = "is_actived")
 	@JsonIgnore

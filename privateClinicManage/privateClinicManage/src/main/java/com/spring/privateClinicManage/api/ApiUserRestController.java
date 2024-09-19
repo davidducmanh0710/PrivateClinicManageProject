@@ -102,6 +102,7 @@ public class ApiUserRestController {
 		return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
 	}
 
+
 	@PostMapping(path = "/verify-email/")
 	@CrossOrigin
 	public ResponseEntity<Object> retrieveOtp(@RequestBody EmailDto emailDto)

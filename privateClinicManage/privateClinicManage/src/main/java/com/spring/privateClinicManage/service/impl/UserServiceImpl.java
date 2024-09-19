@@ -31,6 +31,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.spring.privateClinicManage.dto.UserRegisterDto;
 import com.spring.privateClinicManage.entity.Role;
 import com.spring.privateClinicManage.entity.User;
+import com.spring.privateClinicManage.oauth2.Dto.CustomOAuth2User;
 import com.spring.privateClinicManage.repository.UserRepository;
 import com.spring.privateClinicManage.service.RoleService;
 import com.spring.privateClinicManage.service.UserService;
@@ -113,6 +114,7 @@ public class UserServiceImpl implements UserService {
 		userRepository.save(user);
 	}
 
+
 	@Override
 	public User getCurrentLoginUser() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -136,6 +138,17 @@ public class UserServiceImpl implements UserService {
 			} catch (IOException ex) {
 				Logger.getLogger(UserServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
 			}
+		}
+	}
+
+	@Override
+	public void uploadFromUrl(User user, String imageUrl) {
+		try {
+			Map uploadResult = cloudinary.uploader().upload(imageUrl, ObjectUtils.emptyMap());
+			user.setAvatar(uploadResult.get("secure_url").toString());
+			this.userRepository.save(user);
+		} catch (IOException ex) {
+			Logger.getLogger(UserServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
@@ -225,6 +238,32 @@ public class UserServiceImpl implements UserService {
 	public boolean isValidPhoneNumber(String phoneNumber) {
 		String regex = "\\d{10}";
 		return phoneNumber != null && phoneNumber.matches(regex);
+	}
+
+	@Override
+	@Transactional
+	public void processOAuthPostLogin(CustomOAuth2User customOAuth2User) {
+
+		String email = customOAuth2User.getEmail();
+		User existUser = userRepository.findByEmail(email);
+
+		if (existUser == null) {
+
+			String name = (String) customOAuth2User.getAttributes().get("name");
+			String picture = (String) customOAuth2User.getAttributes().get("picture");
+			String sub = (String) customOAuth2User.getAttributes().get("sub");
+
+			User newUser = new User();
+			newUser.setEmail(email);
+			newUser.setName(name);
+			newUser.setPassword(encoder.encode(sub));
+			newUser.setRole(roleService.findByName("ROLE_BENHNHAN"));
+			newUser.setActive(true);
+			this.uploadFromUrl(newUser, picture);
+
+			userRepository.save(newUser);
+		}
+
 	}
 
 }

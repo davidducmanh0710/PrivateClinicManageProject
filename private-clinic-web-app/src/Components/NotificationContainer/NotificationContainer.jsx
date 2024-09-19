@@ -85,23 +85,19 @@ export default function NotificationContainer() {
     stompYTAClient = over(socket);
     stompYTAClient.debug = () => {}; // tắt log của stomp in ra console
     stompYTAClientRef.current = stompYTAClient;
-    stompYTAClient.connect(
-      { "Access-Control-Allow-Origin": `*` },
-      () => {
-        stompYTAClient.subscribe("/notify/registerContainer/", (payload) => {
-          const p = JSON.parse(payload.body);
-          p.timeSent = Date.now();
-          p.isRead = false;
-          setYTANotifications((prevYTANotifications) => [
-            p,
-            ...prevYTANotifications,
-          ]);
-          showSnackbar("Bạn có thông báo mới", "success");
-          forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
-        });
-      },
-      onError
-    );
+    stompYTAClient.connect(() => {
+      stompYTAClient.subscribe("/notify/registerContainer/", (payload) => {
+        const p = JSON.parse(payload.body);
+        p.timeSent = Date.now();
+        p.isRead = false;
+        setYTANotifications((prevYTANotifications) => [
+          p,
+          ...prevYTANotifications,
+        ]);
+        showSnackbar("Bạn có thông báo mới", "success");
+        forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
+      });
+    }, onError);
     return () => {
       if (stompYTAClientRef.current) {
         stompYTAClientRef.current.disconnect();
@@ -118,9 +114,7 @@ export default function NotificationContainer() {
     stompBENHNHANClient.debug = () => {}; // tắt log của stomp in ra console
     stompBENHNHANClientRef.current = stompBENHNHANClient;
     stompBENHNHANClient.connect(
-      {
-        "Access-Control-Allow-Origin": `*`,
-      },
+      {},
       () => {
         stompBENHNHANClient.subscribe(
           "/notify/directRegister/" + currentUser.id,
@@ -185,12 +179,7 @@ export default function NotificationContainer() {
     stompTUVANClient = over(socket);
     stompTUVANClient.debug = () => {}; // tắt log của stomp in ra console
     stompTUVANClientRef.current = stompTUVANClient;
-    stompTUVANClient.connect(
-      {
-        "Access-Control-Allow-Origin": `*`,
-      },
-      () => {}
-    );
+    stompTUVANClient.connect({}, () => {});
   };
 
   useEffect(() => {

@@ -66,7 +66,6 @@ export const authAPI = () => {
       Authorization: localStorage.getItem("token"),
       "ngrok-skip-browser-warning": "69420",
       "bypass-tunnel-reminder": "69420",
-      "Access-Control-Allow-Origin": `*`,
     },
   });
 };
@@ -76,6 +75,5 @@ export default axios.create({
   headers: {
     "ngrok-skip-browser-warning": "69420",
     "bypass-tunnel-reminder": "69420",
-    "Access-Control-Allow-Origin": `*`,
   },
 });

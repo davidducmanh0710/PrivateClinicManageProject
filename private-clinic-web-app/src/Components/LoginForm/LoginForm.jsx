@@ -11,6 +11,7 @@ import {
 import { CircularProgress } from "@mui/material";
 import { CustomerSnackbar } from "../Common/Common";
 import { UserContext } from "../config/Context";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
   const [email, setEmail] = useState();
@@ -18,6 +19,9 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
   const [loading, setLoading] = useState();
   const dialog = useRef();
   const { currentUser, setCurrentUser } = useContext(UserContext);
+
+  const [params] = useSearchParams();
+  const location = useLocation();
 
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
@@ -52,13 +56,36 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
     };
   });
 
+  useEffect(() => {
+    const token = params.get("token");
+
+    if (currentUser == null && token !== "" && token !== null) {
+      localStorage.setItem("token", token);
+      setTimeout(async () => {
+        const userResponse = await authAPI().get(endpoints["currentUser"], {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        });
+        if (userResponse.status === 200) {
+          window.history.replaceState(null, "", location.pathname);
+          showSnackbar("Đăng nhập thành công", "success");
+          setCurrentUser(userResponse.data);
+          dialog.current.close();
+        } else {
+          showSnackbar(userResponse.data, "error");
+        }
+      }, 200);
+    }
+  }, [params]);
+
   const login = async (event) => {
     event.preventDefault();
 
     setLoading(true);
-    let response
+    let response;
     try {
-       response = await Api.post(
+      response = await Api.post(
         endpoints["login"],
         {
           email: email,
@@ -94,7 +121,7 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
       }
     } catch (error) {
       showSnackbar(response, "error");
-      console.log(response)
+      console.log(response);
     }
     setTimeout(() => {
       setLoading(false);
@@ -147,15 +174,21 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
               </button>
             )}
           </form>
-          <div className="text-center mt-3">
-            <a href="#" className="text-decoration-none">
-              Tạo tài khoản? Đăng ký
-            </a>
-          </div>
-          <div className="text-center mb-3">
-            <a href="#" className="text-decoration-none">
-              Quên mật khẩu?
-            </a>
+          <div className="social-login">
+            <div class="d-flex justify-content-center align-items-center mt-4">
+              <button
+                class="google-btn"
+                onClick={() => {
+                  window.location.href = `${BASE_URL}/oauth2/authorization/google`;
+                }}
+              >
+                <img
+                  src="https://res.cloudinary.com/diwxda8bi/image/upload/v1726737717/google-icon-logo-png-transparent_yday5a.png"
+                  alt="Google logo"
+                />
+                Đăng nhập bằng GOOGLE
+              </button>
+            </div>
           </div>
         </div>
       </dialog>
