@@ -24,9 +24,12 @@ public interface MedicalRegistryListRepository extends JpaRepository<MedicalRegi
 			@Param("schedule") Schedule schedule);
 
 	@Query("SELECT COUNT(mrl) FROM MedicalRegistryList mrl " +
-			"WHERE mrl.user = :user and mrl.schedule = :schedule and mrl.isCanceled = :isCanceled")
-	Integer countMRLByUserAndScheduleAndisCancelled(@Param("user") User user,
-			@Param("schedule") Schedule schedule, @Param("isCanceled") Boolean isCanceled);
+			"WHERE mrl.user = :user and mrl.schedule = :schedule and mrl.isCanceled = :isCanceled "
+			+
+			"and mrl.statusIsApproved = :statusIsApproved ")
+	Integer countMRLByUserAndScheduleAndisCancelledAndStatusIsApproved(@Param("user") User user,
+			@Param("schedule") Schedule schedule, @Param("isCanceled") Boolean isCanceled,
+			@Param("statusIsApproved") StatusIsApproved statusIsApproved);
 
 	List<MedicalRegistryList> findByUser(User user);
 
@@ -83,7 +86,7 @@ public interface MedicalRegistryListRepository extends JpaRepository<MedicalRegi
 	@Query("SELECT new com.spring.privateClinicManage.dto.MrlAndMeHistoryDto(mrl.name , MAX(me.createdDate) , COUNT(me.id)) "
 			+
 			"FROM MedicalRegistryList mrl " +
-			"Inner join mrl.medicalExamination me " +
+			"LEFT join mrl.medicalExamination me " +
 			"WHERE mrl.user = :user " +
 			"GROUP BY mrl.name ")
 	List<MrlAndMeHistoryDto> statsUserMrlAndMeHistory(@Param("user") User user);

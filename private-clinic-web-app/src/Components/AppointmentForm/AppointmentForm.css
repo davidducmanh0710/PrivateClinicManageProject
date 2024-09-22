@@ -1,15 +1,30 @@
 .appointment-form-container {
-    font-family: Arial, sans-serif;
-      background-color: #f1ffff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100vh;
-      margin: 0;
-}
+  font-family: Arial, sans-serif;
+  background-color: #f1ffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  margin: 0;
 
-.appointment-form {
+  .note-container{
+    width: 60%;
+    height: 300px;
+  }
+
+  .note-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .note-content-p {
+    font-size: larger;
+  }
+
+  .appointment-form {
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -46,3 +61,4 @@
   .appointment-form button:hover {
     background-color: #0056b3;
   }
+}

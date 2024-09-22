@@ -54,6 +54,9 @@ public class MedicalRegistryList implements Serializable {
 	@Column(name = "created_date")
 	private Date createdDate;
 
+	@Column(name = "is_medicine_taken")
+	private Boolean isMedicineTaken = false;
+
 	@ManyToOne(fetch = FetchType.EAGER, cascade = {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
 	})

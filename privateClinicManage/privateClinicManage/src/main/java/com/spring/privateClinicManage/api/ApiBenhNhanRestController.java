@@ -100,15 +100,18 @@ public class ApiBenhNhanRestController {
 		if (schedule.getIsDayOff())
 			return new ResponseEntity<>("Không thể chọn ngày lễ", HttpStatus.UNAUTHORIZED);
 
+		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("CHECKING");
+
 		Integer countMedicalRegistryList = medicalRegistryListService
-				.countMRLByUserAndScheduleAndisCancelled(currentUser, schedule, false);
+				.countMRLByUserAndScheduleAndisCancelledAndStatusIsApproved(currentUser, schedule,
+						false, statusIsApproved);
 
 		if (countMedicalRegistryList >= Integer
 				.parseInt(environment.getProperty("register_schedule_per_day_max")))
-			return new ResponseEntity<>("Tài khoản này đã đăng kí đủ 4 lần / 1 ngày",
+			return new ResponseEntity<>(
+					"Tài khoản này đã đăng kí đủ 4 phiếu đang xét duyệt trong ngày hôm nay !",
 					HttpStatus.UNAUTHORIZED);
 
-		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("CHECKING");
 
 		MedicalRegistryList medicalRegistryList = new MedicalRegistryList();
 		medicalRegistryList.setCreatedDate(new Date());

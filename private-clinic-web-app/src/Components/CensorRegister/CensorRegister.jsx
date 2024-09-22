@@ -4,9 +4,10 @@ import "./CensorRegister.css";
 import { authAPI, endpoints } from "../config/Api";
 import { UserContext } from "../config/Context";
 import dayjs from "dayjs";
-import { Alert, Pagination } from "@mui/material";
+import { Alert, CircularProgress, Pagination } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AutoConfirmForm from "../AutoConfirmForm/AutoConfirmForm";
+import CashPaymentForm from "../CashPaymentForm/CashPaymentForm";
 
 export default function CencorRegister() {
   const [statusList, setStatusList] = useState([]);
@@ -17,6 +18,11 @@ export default function CencorRegister() {
   const [registerDate, setRegisterDate] = useState("");
 
   const [isConfirmRegister, setIsConfirmRegister] = useState(false);
+
+  const [isCanceled, setIsCanceled] = useState(false);
+  const [mrlId, setMrlId] = useState(null);
+
+  const cashPaymentRef = useRef();
 
   const { currentUser } = useContext(UserContext);
   const navigate = useNavigate();
@@ -120,15 +126,16 @@ export default function CencorRegister() {
     } catch {
       showSnackbar("Lỗi", "error");
     }
-  }, [currentUser, page, params, isConfirmRegister]);
+  }, [currentUser, page, params, isConfirmRegister, isCanceled]);
 
   useEffect(() => {
     if (currentUser !== null) {
       getAllRegisterScheduleList();
       if (statusList.length < 1) getAllStatusIsApproved();
       // if (userList.length < 1) getAllUsers();
+      setIsCanceled(false);
     }
-  }, [currentUser, page, params, isConfirmRegister]);
+  }, [currentUser, page, params, isConfirmRegister, isCanceled]);
 
   const handleStatusChange = (event) => {
     setStatus(event.target.value);
@@ -150,12 +157,50 @@ export default function CencorRegister() {
     autoConfirmFormRef.current.close();
   }
 
+  function handleCloseCashPaymentConfirmForm() {
+    setIsCanceled(false);
+    cashPaymentRef.current.close();
+  }
+
+  function handleOpenCashPaymentConfirmForm(mrlId) {
+    cashPaymentRef.current.open();
+    setMrlId(mrlId);
+  }
+
+  const handleConfirmCashPaymentConfirmForm = async (mrlId) => {
+    try {
+      const response = await authAPI().post(
+        endpoints["cashPaymentMrl"](mrlId),
+        {
+          validateStatus: function (status) {
+            return status < 500;
+          },
+        }
+      );
+      if (response.status === 200) {
+        showSnackbar("Thanht toán tiền mặt thành công", "success");
+        handleCloseCashPaymentConfirmForm();
+        setIsCanceled(true);
+      } else {
+        showSnackbar(response.data, "error");
+      }
+    } catch {
+      showSnackbar("Lỗi", "error");
+    }
+  };
+
   return (
     <>
       <CustomerSnackbar
         open={open}
         message={data.message}
         severity={data.severity}
+      />
+
+      <CashPaymentForm
+        ref={cashPaymentRef}
+        onCancel={handleCloseCashPaymentConfirmForm}
+        onConfirm={() => handleConfirmCashPaymentConfirmForm(mrlId)}
       />
 
       <AutoConfirmForm
@@ -271,13 +316,13 @@ export default function CencorRegister() {
           <thead className="bg-light text-center">
             <tr className="align-middle">
               <th>ID</th>
-              <th>SĐT</th>
               <th>Email</th>
               <th>Tên người khám</th>
               <th>Ngày đặt</th>
               <th>Ngày hẹn</th>
               <th>Ghi chú</th>
-              <th>Status</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody className="table-hover text-center" id="userDetails">
@@ -297,7 +342,6 @@ export default function CencorRegister() {
                 return (
                   <tr key={index} className="align-middle">
                     <td>{mrl.id}</td>
-                    <td>{mrl.user.phone}</td>
                     <td>{mrl.user.email}</td>
                     <td>{mrl.name}</td>
                     <td>
@@ -315,6 +359,19 @@ export default function CencorRegister() {
                       >
                         {mrl.statusIsApproved.status}
                       </span>
+                    </td>
+                    <td>
+                      {(mrl.statusIsApproved.status === "PAYMENTPHASE1" ||
+                        mrl.statusIsApproved.status === "PAYMENTPHASE2") && (
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() =>
+                            handleOpenCashPaymentConfirmForm(mrl.id)
+                          }
+                        >
+                          Đã thu tiền mặt
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );

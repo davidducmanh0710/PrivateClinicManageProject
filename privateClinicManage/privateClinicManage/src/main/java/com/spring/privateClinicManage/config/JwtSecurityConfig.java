@@ -96,7 +96,8 @@ public class JwtSecurityConfig {
 				.requestMatchers(HttpMethod.POST,
 						"/api/yta/get-users-schedule-status/",
 						"/api/yta/auto-confirm-registers/",
-						"/api/yta/direct-register/")
+						"/api/yta/direct-register/",
+						"/api/yta/cash-payment/{mrlId}/")
 				.hasRole("YTA")
 
 				.requestMatchers(HttpMethod.GET,

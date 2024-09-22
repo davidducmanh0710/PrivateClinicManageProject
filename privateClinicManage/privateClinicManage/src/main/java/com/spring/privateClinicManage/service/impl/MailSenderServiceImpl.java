@@ -25,7 +25,8 @@ import jakarta.mail.internet.MimeMessage;
 public class MailSenderServiceImpl implements MailSenderService {
 
 	@Autowired
-	private JavaMailSender mailSender;
+	private JavaMailSender mailSender; // không cần nạp Bean vì chỉ có 1 lớp JavaMailSenderImpl nó
+										// implement thôi
 	@Autowired
 	private Environment env;
 	@Autowired
@@ -76,6 +77,7 @@ public class MailSenderServiceImpl implements MailSenderService {
 	}
 
 	@Override
+	@Async
 	public void sendStatusRegisterEmail(MedicalRegistryList mrl, String content,
 			StatusIsApproved statusIsApproved)
 			throws MessagingException, UnsupportedEncodingException {
@@ -92,7 +94,7 @@ public class MailSenderServiceImpl implements MailSenderService {
 		String body = "";
 		String footer = "";
 
-		if (statusIsApproved.getStatus().equals("CHECKING")) {
+		if (statusIsApproved.getStatus().equals("PAYMENTPHASE1")) {
 
 			header += "<p class='text-success'><strong>Quý khách đã đăng kí thành công lịch khám !</strong><p/>";
 //			

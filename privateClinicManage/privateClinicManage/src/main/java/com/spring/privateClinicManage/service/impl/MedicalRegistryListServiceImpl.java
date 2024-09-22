@@ -51,10 +51,12 @@ public class MedicalRegistryListServiceImpl implements MedicalRegistryListServic
 	}
 
 	@Override
-	public Integer countMRLByUserAndScheduleAndisCancelled(User user, Schedule schedule,
-			Boolean isCanceled) {
-		return medicalRegistryListRepository.countMRLByUserAndScheduleAndisCancelled(user, schedule,
-				isCanceled);
+	public Integer countMRLByUserAndScheduleAndisCancelledAndStatusIsApproved(User user,
+			Schedule schedule,
+			Boolean isCanceled, StatusIsApproved statusIsApproved) {
+		return medicalRegistryListRepository
+				.countMRLByUserAndScheduleAndisCancelledAndStatusIsApproved(user, schedule,
+						isCanceled, statusIsApproved);
 	}
 
 	@Override

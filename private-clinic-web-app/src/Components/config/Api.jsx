@@ -56,7 +56,8 @@ export let endpoints = {
   getLastChatMessage: "/api/anyrole/get-last-chat-message/",
   connentToNewRecipient: "/api/anyrole/connect-to-new-recipient/",
   getMrlAndMeUserHistory : "/api/benhnhan/get-mrl-and-me-user-history/",
-  getPaymentHisotoryByName : "/api/benhnhan/get-payment-history-by-name/"
+  getPaymentHisotoryByName : "/api/benhnhan/get-payment-history-by-name/",
+  cashPaymentMrl : (mrlId) =>`/api/yta/cash-payment/${mrlId}/`
 };
 
 export const authAPI = () => {

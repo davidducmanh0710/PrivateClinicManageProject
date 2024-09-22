@@ -15,9 +15,6 @@ public interface MedicalRegistryListService {
 
 	MedicalRegistryList findMRLByUserAndSchedule(User user, Schedule schedule);
 
-	Integer countMRLByUserAndScheduleAndisCancelled(User user,
-			Schedule schedule, Boolean isCanceled);
-
 	List<MedicalRegistryList> findByUser(User user);
 
 	List<MedicalRegistryList> findByScheduleAndStatusIsApproved(Integer year, Integer month,
@@ -66,5 +63,8 @@ public interface MedicalRegistryListService {
 
 	List<MedicalRegistryList> sortBy2StatusIsApproved(List<MedicalRegistryList> mrls, String s1,
 			String s2);
+
+	Integer countMRLByUserAndScheduleAndisCancelledAndStatusIsApproved(User user, Schedule schedule,
+			Boolean isCanceled, StatusIsApproved statusIsApproved);
 
 }

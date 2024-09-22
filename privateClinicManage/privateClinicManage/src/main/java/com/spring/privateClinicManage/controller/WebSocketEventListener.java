@@ -18,6 +18,7 @@ public class WebSocketEventListener {
 	@Autowired
 	private UserService userService;
 
+
 	@EventListener
 	public void handleWebSocketDisconnectListener(SessionDisconnectEvent sessionDisconnectEvent) {
 		StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor

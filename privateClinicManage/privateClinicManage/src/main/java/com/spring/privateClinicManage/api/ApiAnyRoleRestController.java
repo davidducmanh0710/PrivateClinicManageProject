@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -307,7 +306,6 @@ public class ApiAnyRoleRestController {
 
 	@PostMapping(path = "/blogs/{blogId}/likes/")
 	@CrossOrigin
-	@Async
 	public ResponseEntity<Object> toggleLikeBlog(@PathVariable("blogId") Integer blogId) {
 
 		User currentUser = userService.getCurrentLoginUser();

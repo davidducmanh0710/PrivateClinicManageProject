@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -14,6 +15,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,12 +26,14 @@ import com.spring.privateClinicManage.dto.ConfirmRegisterDto;
 import com.spring.privateClinicManage.dto.DirectRegisterDto;
 import com.spring.privateClinicManage.dto.RegisterStatusDto;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
+import com.spring.privateClinicManage.entity.PaymentDetailPhase1;
 import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
 import com.spring.privateClinicManage.entity.User;
 import com.spring.privateClinicManage.service.DownloadPDFService;
 import com.spring.privateClinicManage.service.MailSenderService;
 import com.spring.privateClinicManage.service.MedicalRegistryListService;
+import com.spring.privateClinicManage.service.PaymentDetailPhase1Service;
 import com.spring.privateClinicManage.service.ScheduleService;
 import com.spring.privateClinicManage.service.StatusIsApprovedService;
 import com.spring.privateClinicManage.service.UserService;
@@ -49,14 +53,15 @@ public class ApiYtaRestController {
 	private MedicalRegistryListService medicalRegistryListService;
 	private StatusIsApprovedService statusIsApprovedService;
 	private SimpMessagingTemplate messagingTemplate;
-
+	private PaymentDetailPhase1Service paymentDetailPhase1Service;
 
 	@Autowired
 	public ApiYtaRestController(UserService userService, MailSenderService mailSenderService,
 			Environment environment, ScheduleService scheduleService,
 			MedicalRegistryListService medicalRegistryListService,
 			StatusIsApprovedService statusIsApprovedService,
-			DownloadPDFService downloadPDFService, SimpMessagingTemplate messagingTemplate) {
+			DownloadPDFService downloadPDFService, SimpMessagingTemplate messagingTemplate,
+			PaymentDetailPhase1Service paymentDetailPhase1Service) {
 		super();
 		this.userService = userService;
 		this.mailSenderService = mailSenderService;
@@ -65,6 +70,7 @@ public class ApiYtaRestController {
 		this.medicalRegistryListService = medicalRegistryListService;
 		this.statusIsApprovedService = statusIsApprovedService;
 		this.messagingTemplate = messagingTemplate;
+		this.paymentDetailPhase1Service = paymentDetailPhase1Service;
 	}
 
 	// ROLE_YTA
@@ -218,8 +224,6 @@ public class ApiYtaRestController {
 		return new ResponseEntity<>(mrls, HttpStatus.OK);
 	}
 
-
-
 	@PostMapping(value = "/direct-register/")
 	@CrossOrigin
 	public ResponseEntity<Object> directRegister(@RequestBody DirectRegisterDto directRegisterDto) {
@@ -243,14 +247,15 @@ public class ApiYtaRestController {
 		}
 
 		Integer countMedicalRegistryList = medicalRegistryListService
-				.countMRLByUserAndScheduleAndisCancelled(currentUser, schedule, false);
+				.countMRLByUserAndScheduleAndisCancelledAndStatusIsApproved(currentUser, schedule,
+						false, statusIsApprovedService.findByStatus("CHECKING"));
 
 		if (countMedicalRegistryList >= Integer
 				.parseInt(environment.getProperty("register_schedule_per_day_max")))
 			return new ResponseEntity<>("Tài khoản này đã đăng kí hạn mức 4 lần / 1 ngày",
 					HttpStatus.UNAUTHORIZED);
 
-		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("SUCCESS");
+		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("PAYMENTPHASE1");
 		MedicalRegistryList mrl = new MedicalRegistryList();
 		mrl.setCreatedDate(new Date());
 		mrl.setStatusIsApproved(statusIsApproved);
@@ -261,6 +266,45 @@ public class ApiYtaRestController {
 		mrl.setSchedule(schedule);
 		mrl.setName(directRegisterDto.getName());
 		medicalRegistryListService.saveMedicalRegistryList(mrl);
+
+		try {
+			mailSenderService.sendStatusRegisterEmail(mrl, "Direct regiter", statusIsApproved);
+		} catch (UnsupportedEncodingException | MessagingException e1) {
+			System.out.println("Không gửi được mail !");
+		}
+
+		messagingTemplate.convertAndSend("/notify/directRegister/" + registerUser.getId(),
+				mrl);
+
+		return new ResponseEntity<>(
+				"Đặt lịch trực tiếp thành công , vui lòng kiểm tra mail, thanh toán để lấy số thứ tự",
+				HttpStatus.CREATED);
+	}
+
+	@PostMapping(value = "/cash-payment/{mrlId}/")
+	@CrossOrigin
+	public ResponseEntity<Object> cashPaymentMrl(@PathVariable("mrlId") Integer mrlId) {
+		User currentUser = userService.getCurrentLoginUser();
+		MedicalRegistryList mrl = medicalRegistryListService.findById(mrlId);
+
+		if (currentUser == null || mrl == null)
+			return new ResponseEntity<>("Người dùng không tồn tại hoặc đơn đăng ký không tồn tại",
+					HttpStatus.NOT_FOUND);
+
+		PaymentDetailPhase1 pdp1 = new PaymentDetailPhase1();
+		pdp1.setAmount(Long.valueOf(100000));
+		pdp1.setDescription(
+				"Thanh toán phiếu đăng kí khám bệnh mã #MSPDKKB" + mrlId + " bằng tiền mặt");
+		pdp1.setOrderId(UUID.randomUUID().toString());
+		pdp1.setPartnerCode("CASH");
+		pdp1.setResultCode("0");
+		pdp1.setCreatedDate(new Date());
+
+		mrl.setPaymentPhase1(pdp1);
+
+		paymentDetailPhase1Service.savePdp1(pdp1);
+
+		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("SUCCESS");
 
 		try {
 			medicalRegistryListService.createQRCodeAndUpLoadCloudinaryAndSetStatus(mrl,
@@ -275,12 +319,7 @@ public class ApiYtaRestController {
 			System.out.println("Không gửi được mail !");
 		}
 
-		messagingTemplate.convertAndSend("/notify/directRegister/" + registerUser.getId(),
-				mrl);
-
-		return new ResponseEntity<>(
-				"Đặt lịch thành công , vui lòng kiểm tra mail lấy mã QR để lấy số thứ tự",
-				HttpStatus.CREATED);
+		return new ResponseEntity<>("Thanh toán thành công !", HttpStatus.OK);
 	}
 
 }

@@ -39,7 +39,7 @@ export default function UserHistory() {
   useEffect(() => {
     if (currentUser !== null && isBENHNHAN(currentUser))
       getMrlAndMeUserHistory();
-  }, [currentUser]);
+  }, [currentUser,page]);
 
   const getMrlAndMeUserHistory = useCallback(async () => {
     let response;

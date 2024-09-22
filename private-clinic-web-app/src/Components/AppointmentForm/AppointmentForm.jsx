@@ -31,7 +31,6 @@ export default function AppointmentForm() {
     setTimeout(() => {
       setOpen(false);
     }, 5000);
-
   };
 
   function handleDateChange(e) {
@@ -107,7 +106,36 @@ export default function AppointmentForm() {
         severity={data.severity}
       />
 
-      <div className="appointment-form-container ">
+      <div className="appointment-form-container">
+        <div className="note-container">
+          <h4 className="text text-danger text-center">Lưu ý khi đặt lịch: </h4>
+          <div className="note-content">
+            <p className="note-content-p">
+              - Một tài khoản bệnh nhân trong hệ thống chúng tôi có thể đặt lịch
+              khám cho người thân của bạn, ví dụ như trẻ em, người già{" "}
+              <span className="text text-danger">
+                {" "}
+                không có email để đăng ký.
+              </span>{" "}
+              <br />- Để kiểm soát thông tin dễ dàng, chúng tôi sẽ gom nhóm
+              thông tin từng người bệnh theo{" "}
+              <span className="text text-danger">Tên người khám</span>.<br />-
+              <span className="text text-danger"> Không khuyến khích </span>{" "}
+              người dùng đặt hộ cho người đã có tài khoản hoặc tài khoản đang
+              đặt nhiều hơn 3 kiểu tên người khám khác nhau.
+              <br />- Một tài khoản chỉ được đặt tối đa{" "}
+              <span className="text text-danger"> 4 </span> phiếu đăng ký khám
+              bệnh đang tồn tại trạng thái{" "}
+              <span className="text text-danger"> 'Đang xác nhận từ y tá' </span>.
+              <br />- Bệnh nhân sau khi đặt lịch thành công,{" "}
+              <span className="text text-danger">
+                trước khi vào giai đoạn thanh toán{" "}
+              </span>{" "}
+              , có thể <span className="text text-danger">HỦY </span> đơn đăng
+              ký khám bệnh bất cứ lúc nào.
+            </p>
+          </div>
+        </div>
         <div className="appointment-form">
           <h2 className="text text-primary">Đặt Lịch Khám Bệnh</h2>
           <form id="appointmentForm" onSubmit={registerScheduleAct}>

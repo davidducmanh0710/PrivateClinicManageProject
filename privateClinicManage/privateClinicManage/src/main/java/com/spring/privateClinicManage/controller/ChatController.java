@@ -74,6 +74,13 @@ public class ChatController {
 
 
 		ChatMessage chatMessage = new ChatMessage();
+		/*
+		 * Khi set 2 object là sender và recipient , 2 đối tượng này đã bị qua trạng
+		 * thái là Detach , Nếu save để cascade có chứa persist , sẽ báo lỗi là ko thê
+		 * lưu đối tượng detach vào database , vì persist chỉ dùng cho đối tượng mới
+		 * hoàn toàn. Nếu đến địa chỉ /chat này hiện tại , nó đang ko đc Hibernate quản
+		 * lý, nên sender và recipient đã bị detached
+		 */
 		chatMessage.setSender(sender);
 		chatMessage.setRecipient(recipient);
 		chatMessage.setCreatedDate(chatMessageDto.getCreatedDate());
