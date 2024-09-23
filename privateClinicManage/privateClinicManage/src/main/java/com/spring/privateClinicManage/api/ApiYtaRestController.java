@@ -15,18 +15,20 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.spring.privateClinicManage.dto.CashPaymentDto;
 import com.spring.privateClinicManage.dto.ConfirmRegisterDto;
 import com.spring.privateClinicManage.dto.DirectRegisterDto;
 import com.spring.privateClinicManage.dto.RegisterStatusDto;
+import com.spring.privateClinicManage.entity.MedicalExamination;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
 import com.spring.privateClinicManage.entity.PaymentDetailPhase1;
+import com.spring.privateClinicManage.entity.PaymentDetailPhase2;
 import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
 import com.spring.privateClinicManage.entity.User;
@@ -34,6 +36,8 @@ import com.spring.privateClinicManage.service.DownloadPDFService;
 import com.spring.privateClinicManage.service.MailSenderService;
 import com.spring.privateClinicManage.service.MedicalRegistryListService;
 import com.spring.privateClinicManage.service.PaymentDetailPhase1Service;
+import com.spring.privateClinicManage.service.PaymentDetailPhase2Service;
+import com.spring.privateClinicManage.service.PrescriptionItemsService;
 import com.spring.privateClinicManage.service.ScheduleService;
 import com.spring.privateClinicManage.service.StatusIsApprovedService;
 import com.spring.privateClinicManage.service.UserService;
@@ -54,6 +58,8 @@ public class ApiYtaRestController {
 	private StatusIsApprovedService statusIsApprovedService;
 	private SimpMessagingTemplate messagingTemplate;
 	private PaymentDetailPhase1Service paymentDetailPhase1Service;
+	private PaymentDetailPhase2Service paymentDetailPhase2Service;
+	private PrescriptionItemsService prescriptionItemsService;
 
 	@Autowired
 	public ApiYtaRestController(UserService userService, MailSenderService mailSenderService,
@@ -61,7 +67,9 @@ public class ApiYtaRestController {
 			MedicalRegistryListService medicalRegistryListService,
 			StatusIsApprovedService statusIsApprovedService,
 			DownloadPDFService downloadPDFService, SimpMessagingTemplate messagingTemplate,
-			PaymentDetailPhase1Service paymentDetailPhase1Service) {
+			PaymentDetailPhase1Service paymentDetailPhase1Service,
+			PaymentDetailPhase2Service paymentDetailPhase2Service,
+			PrescriptionItemsService prescriptionItemsService) {
 		super();
 		this.userService = userService;
 		this.mailSenderService = mailSenderService;
@@ -71,6 +79,8 @@ public class ApiYtaRestController {
 		this.statusIsApprovedService = statusIsApprovedService;
 		this.messagingTemplate = messagingTemplate;
 		this.paymentDetailPhase1Service = paymentDetailPhase1Service;
+		this.paymentDetailPhase2Service = paymentDetailPhase2Service;
+		this.prescriptionItemsService = prescriptionItemsService;
 	}
 
 	// ROLE_YTA
@@ -281,42 +291,81 @@ public class ApiYtaRestController {
 				HttpStatus.CREATED);
 	}
 
-	@PostMapping(value = "/cash-payment/{mrlId}/")
+	@PostMapping(value = "/cash-payment/")
 	@CrossOrigin
-	public ResponseEntity<Object> cashPaymentMrl(@PathVariable("mrlId") Integer mrlId) {
+	public ResponseEntity<Object> cashPaymentMrl(@RequestBody CashPaymentDto cashPaymentDto) {
 		User currentUser = userService.getCurrentLoginUser();
+		Integer mrlId = cashPaymentDto.getMrlId();
 		MedicalRegistryList mrl = medicalRegistryListService.findById(mrlId);
 
 		if (currentUser == null || mrl == null)
 			return new ResponseEntity<>("Người dùng không tồn tại hoặc đơn đăng ký không tồn tại",
 					HttpStatus.NOT_FOUND);
+		if (!mrl.getStatusIsApproved().getStatus().equals("PAYMENTPHASE1")
+				&& !mrl.getStatusIsApproved().getStatus().equals("PAYMENTPHASE2"))
+			return new ResponseEntity<>("Trạng thái phiếu đăng ký không hợp lệ",
+					HttpStatus.UNAUTHORIZED);
 
-		PaymentDetailPhase1 pdp1 = new PaymentDetailPhase1();
-		pdp1.setAmount(Long.valueOf(100000));
-		pdp1.setDescription(
-				"Thanh toán phiếu đăng kí khám bệnh mã #MSPDKKB" + mrlId + " bằng tiền mặt");
-		pdp1.setOrderId(UUID.randomUUID().toString());
-		pdp1.setPartnerCode("CASH");
-		pdp1.setResultCode("0");
-		pdp1.setCreatedDate(new Date());
+		if (mrl.getStatusIsApproved().getStatus().equals("PAYMENTPHASE1")) {
+			PaymentDetailPhase1 pdp1 = new PaymentDetailPhase1();
+			pdp1.setAmount(Long.valueOf(cashPaymentDto.getAmount()));
+			pdp1.setDescription(
+					"Thanh toán phiếu đăng kí khám bệnh mã #MSPDKKB" + mrlId + " bằng tiền mặt");
+			pdp1.setOrderId(UUID.randomUUID().toString());
+			pdp1.setPartnerCode("CASH");
+			pdp1.setResultCode("0");
+			pdp1.setCreatedDate(new Date());
 
-		mrl.setPaymentPhase1(pdp1);
+			mrl.setPaymentPhase1(pdp1);
 
-		paymentDetailPhase1Service.savePdp1(pdp1);
+			paymentDetailPhase1Service.savePdp1(pdp1);
 
-		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("SUCCESS");
+			StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("SUCCESS");
 
-		try {
-			medicalRegistryListService.createQRCodeAndUpLoadCloudinaryAndSetStatus(mrl,
-					statusIsApproved);
-		} catch (Exception e) {
-			System.out.println("Lỗi");
-		}
+			try {
+				medicalRegistryListService.createQRCodeAndUpLoadCloudinaryAndSetStatus(mrl,
+						statusIsApproved);
+			} catch (Exception e) {
+				System.out.println("Lỗi");
+			}
 
-		try {
-			mailSenderService.sendStatusRegisterEmail(mrl, "Direct regiter", statusIsApproved);
-		} catch (UnsupportedEncodingException | MessagingException e1) {
-			System.out.println("Không gửi được mail !");
+			try {
+				mailSenderService.sendStatusRegisterEmail(mrl, "Direct regiter", statusIsApproved);
+			} catch (UnsupportedEncodingException | MessagingException e1) {
+				System.out.println("Không gửi được mail !");
+			}
+		} else if (mrl.getStatusIsApproved().getStatus().equals("PAYMENTPHASE2")) {
+
+			MedicalExamination me = mrl.getMedicalExamination();
+
+
+			PaymentDetailPhase2 pdp2 = new PaymentDetailPhase2();
+
+			pdp2.setAmount(cashPaymentDto.getAmount());
+			pdp2.setDescription("Thanh toán tiền thuốc mã #MSPKB" + mrlId + " bằng tiền mặt");
+			pdp2.setOrderId(UUID.randomUUID().toString());
+			pdp2.setPartnerCode("CASH");
+			pdp2.setResultCode("0");
+			pdp2.setCreatedDate(new Date());
+
+			me.setPaymentPhase2(pdp2);
+			paymentDetailPhase2Service.savePdp2(pdp2);
+
+			StatusIsApproved statusIsApproved;
+			if (me.getFollowUpDate() == null) {
+				statusIsApproved = statusIsApprovedService.findByStatus("FINISHED");
+
+			} else {
+				statusIsApproved = statusIsApprovedService.findByStatus("FOLLOWUP");
+			}
+
+			try {
+				mailSenderService.sendStatusRegisterEmail(mrl, "MOMO PAYMENT",
+						statusIsApproved);
+			} catch (UnsupportedEncodingException | MessagingException e1) {
+				System.out.println("Không gửi được mail !");
+			}
+
 		}
 
 		return new ResponseEntity<>("Thanh toán thành công !", HttpStatus.OK);

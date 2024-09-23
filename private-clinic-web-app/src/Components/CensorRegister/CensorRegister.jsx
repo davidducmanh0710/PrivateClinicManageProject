@@ -8,6 +8,7 @@ import { Alert, CircularProgress, Pagination } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AutoConfirmForm from "../AutoConfirmForm/AutoConfirmForm";
 import CashPaymentForm from "../CashPaymentForm/CashPaymentForm";
+import PaymentForm from "../PaymentForm/PaymentForm";
 
 export default function CencorRegister() {
   const [statusList, setStatusList] = useState([]);
@@ -23,6 +24,10 @@ export default function CencorRegister() {
   const [mrlId, setMrlId] = useState(null);
 
   const cashPaymentRef = useRef();
+
+  const [urs, setUrs] = useState(null);
+  const [me, setMe] = useState(null);
+  const [pis, setPis] = useState(null);
 
   const { currentUser } = useContext(UserContext);
   const navigate = useNavigate();
@@ -134,8 +139,14 @@ export default function CencorRegister() {
       if (statusList.length < 1) getAllStatusIsApproved();
       // if (userList.length < 1) getAllUsers();
       setIsCanceled(false);
+
+      if (urs !== null && urs.statusIsApproved.status === "PAYMENTPHASE2") {
+        getMEByMrlId(urs.id)
+      }
+
     }
-  }, [currentUser, page, params, isConfirmRegister, isCanceled]);
+  }, [currentUser, page, params, isConfirmRegister, isCanceled, urs]);
+
 
   const handleStatusChange = (event) => {
     setStatus(event.target.value);
@@ -159,18 +170,23 @@ export default function CencorRegister() {
 
   function handleCloseCashPaymentConfirmForm() {
     setIsCanceled(false);
+    setMe(null);
+    setPis(null);
     cashPaymentRef.current.close();
   }
 
   function handleOpenCashPaymentConfirmForm(mrlId) {
     cashPaymentRef.current.open();
     setMrlId(mrlId);
+    setMe(null);
+    setPis(null);
   }
 
-  const handleConfirmCashPaymentConfirmForm = async (mrlId) => {
+  const handleConfirmCashPaymentConfirmForm = async () => {
     try {
       const response = await authAPI().post(
-        endpoints["cashPaymentMrl"](mrlId),
+        endpoints["cashPaymentMrl"],
+        {},
         {
           validateStatus: function (status) {
             return status < 500;
@@ -189,6 +205,23 @@ export default function CencorRegister() {
     }
   };
 
+  const getMEByMrlId = async (mrlId) => {
+    let response;
+    try {
+      response = await authAPI().get(endpoints["benhnhanGetMEByMrlId"](mrlId), {
+        validateStatus: function (status) {
+          return status < 500;
+        },
+      });
+      if (response.status === 200) {
+        setMe(response.data.me);
+        setPis(response.data.pis);
+      } else showSnackbar(response.data, "error");
+    } catch {
+      showSnackbar("Lỗi", "error");
+    }
+  };
+
   return (
     <>
       <CustomerSnackbar
@@ -197,10 +230,17 @@ export default function CencorRegister() {
         severity={data.severity}
       />
 
-      <CashPaymentForm
+      <PaymentForm
         ref={cashPaymentRef}
         onCancel={handleCloseCashPaymentConfirmForm}
-        onConfirm={() => handleConfirmCashPaymentConfirmForm(mrlId)}
+        urs={urs}
+        me={me}
+        pis={pis}
+        isCanceled={isCanceled}
+        setIsCanceled={setIsCanceled}
+        showSnackbar={showSnackbar}
+        data={data}
+        open={open}
       />
 
       <AutoConfirmForm
@@ -365,11 +405,12 @@ export default function CencorRegister() {
                         mrl.statusIsApproved.status === "PAYMENTPHASE2") && (
                         <button
                           className="btn btn-danger btn-sm"
-                          onClick={() =>
-                            handleOpenCashPaymentConfirmForm(mrl.id)
-                          }
+                          onClick={() => {
+                            handleOpenCashPaymentConfirmForm(mrl.id);
+                            setUrs(mrl);
+                          }}
                         >
-                          Đã thu tiền mặt
+                          Thu tiền mặt
                         </button>
                       )}
                     </td>

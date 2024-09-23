@@ -142,8 +142,8 @@ export default function UserRegisterScheduleList() {
 
   function handleClosePaymentForm() {
     paymentFormRef.current.close();
-    setMe(null)
-    setPis(null)
+    setMe(null);
+    setPis(null);
   }
 
   return (

@@ -36,7 +36,7 @@ export let endpoints = {
   benhnhanVNPAYPayment: "/api/payment/vnpay/",
   applyVoucherPayment: "/api/benhnhan/apply-voucher/",
   benhnhanGetMEByMrlId: (mrlId) =>
-    `/api/benhnhan/get-medical-exam-by-mrlId/${mrlId}/`,
+    `/api/anyrole/get-medical-exam-by-mrlId/${mrlId}/`,
   getAllBlogs: "/api/anyrole/blogs/",
   createNewBlog: "/api/anyrole/blogs/create/",
   getCommentBlogByBlogId: (blogId) =>
@@ -57,7 +57,7 @@ export let endpoints = {
   connentToNewRecipient: "/api/anyrole/connect-to-new-recipient/",
   getMrlAndMeUserHistory : "/api/benhnhan/get-mrl-and-me-user-history/",
   getPaymentHisotoryByName : "/api/benhnhan/get-payment-history-by-name/",
-  cashPaymentMrl : (mrlId) =>`/api/yta/cash-payment/${mrlId}/`
+  cashPaymentMrl : `/api/yta/cash-payment/`
 };
 
 export const authAPI = () => {

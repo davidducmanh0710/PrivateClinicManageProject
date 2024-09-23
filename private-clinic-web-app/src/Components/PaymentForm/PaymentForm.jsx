@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useContext,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -8,12 +9,13 @@ import {
 import "./PaymentForm.css";
 import dayjs from "dayjs";
 import { authAPI, endpoints } from "../config/Api";
-import { CustomerSnackbar } from "../Common/Common";
+import { CustomerSnackbar, isBENHNHAN, isYTA } from "../Common/Common";
 import { CircularProgress } from "@mui/material";
 import VoucherForm from "../VoucherForm/VoucherForm";
+import { UserContext } from "../config/Context";
 
 const PaymentForm = forwardRef(function PaymentForm(
-  { onCancel, urs, me, pis },
+  { onCancel, urs, me, pis, setIsCanceled, showSnackbar, data, open },
   ref
 ) {
   const dialog2 = useRef();
@@ -28,23 +30,25 @@ const PaymentForm = forwardRef(function PaymentForm(
   const [finalPrice, setFinalPrice] = useState(100000);
   const [totalPisPrice, setTotalPisPrice] = useState(0);
 
-  const [open, setOpen] = useState(false);
-  const [data, setData] = useState({
-    message: "Thanh toán thành công",
+  const { currentUser } = useContext(UserContext);
+
+  const [open2, setOpen2] = useState(false);
+  const [data2, setData2] = useState({
+    message: "Nạp dữ liệu thành công",
     severity: "success",
   });
 
-  const showSnackbar = (message, severity) => {
-    setData({
+  const showSnackbar2 = (message, severity) => {
+    setData2({
       message: message,
       severity: severity,
     });
 
-    setOpen(true);
+    setOpen2(true);
 
     setTimeout(() => {
-      setOpen(false);
-    }, 3000);
+      setOpen2(false);
+    }, 5000);
   };
 
   useImperativeHandle(ref, () => {
@@ -84,7 +88,7 @@ const PaymentForm = forwardRef(function PaymentForm(
       );
 
       if (response.status === 200) {
-        showSnackbar("Đang chuyển hướng thanh toán MOMO ... ", "warning");
+        showSnackbar2("Đang chuyển hướng thanh toán MOMO ... ", "warning");
         setTimeout(() => {
           window.location.href = response.data;
         }, 3000);
@@ -92,10 +96,10 @@ const PaymentForm = forwardRef(function PaymentForm(
           setLoading(false);
         }, 5000);
       } else {
-        showSnackbar(response.data, "error");
+        showSnackbar2(response.data, "error");
       }
     } catch {
-      showSnackbar("Lỗi", "error");
+      showSnackbar2("Lỗi", "error");
       console.log(response);
     }
   };
@@ -120,7 +124,7 @@ const PaymentForm = forwardRef(function PaymentForm(
       );
 
       if (response.status === 200) {
-        showSnackbar(
+        showSnackbar2(
           "Đang chuyển hướng thanh toán sang trang VNPAY ... ",
           "warning"
         );
@@ -130,6 +134,38 @@ const PaymentForm = forwardRef(function PaymentForm(
         setTimeout(() => {
           setLoading(false);
         }, 5000);
+      } else {
+        showSnackbar2(response.data, "error");
+      }
+    } catch {
+      showSnackbar2("Lỗi", "error");
+      console.log(response);
+    }
+  };
+
+  const handleCashPayment = async (amount, mrlId) => {
+    setLoading(true);
+    let response;
+    try {
+      response = await authAPI().post(
+        endpoints["cashPaymentMrl"],
+        {
+          amount,
+          mrlId,
+          voucherId: voucher ? voucher.id : null,
+          meId: me ? me.id : null,
+        },
+        {
+          validateStatus: function (status) {
+            return status < 500; // Chỉ ném lỗi nếu status code >= 500
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        showSnackbar("Thanh toán tiền mặt thành công", "success");
+        onCancel();
+        setIsCanceled(true);
       } else {
         showSnackbar(response.data, "error");
       }
@@ -164,12 +200,12 @@ const PaymentForm = forwardRef(function PaymentForm(
       if (response.status === 200) {
         voucherFormRef.current.close();
         setVoucher(response.data); // mới set sẽ vô hàng đợi , nên nếu cập nhật giá ở đây là không thể
-        showSnackbar("Sử dụng mã giảm giá thành công !", "success");
+        showSnackbar2("Sử dụng mã giảm giá thành công !", "success");
       } else {
-        showSnackbar(response.data, "error");
+        showSnackbar2(response.data, "error");
       }
     } catch {
-      showSnackbar("Lỗi", "error");
+      showSnackbar2("Lỗi", "error");
       console.log(response);
       console.log(code);
     }
@@ -223,15 +259,24 @@ const PaymentForm = forwardRef(function PaymentForm(
         setCode={setCode}
         voucher={voucher}
         setVoucher={setVoucher}
-        open={open}
-        data={data}
+        open={open2}
+        data={data2}
       />
       <dialog ref={dialog2}>
-        <CustomerSnackbar
-          open={open}
-          message={data.message}
-          severity={data.severity}
-        />
+        {open !== null && data !== null && (
+          <CustomerSnackbar
+            open={open}
+            message={data?.message}
+            severity={data?.severity}
+          />
+        )}
+        {open2 !== null && data2 !== null && (
+          <CustomerSnackbar
+            open={open2}
+            message={data2?.message}
+            severity={data2?.severity}
+          />
+        )}
         <div className="payment-phase1-container">
           <button
             className="btn-close position-absolute top-0 end-0 m-3"
@@ -549,43 +594,70 @@ const PaymentForm = forwardRef(function PaymentForm(
                       <CircularProgress className="mt-3" />
                     </div>
                   ) : (
-                    <div className="container">
-                      <div className="d-flex justify-content-center">
-                        <div className="p-3 w-50">
-                          <button
-                            className="button-vnpay-payment"
-                            onClick={() =>
-                              handleVNPAYPayment(finalPrice, urs.id)
-                            }
-                          >
-                            <div className="icon-vnpay-div">
-                              <img
-                                className="icon-vnpay-image"
-                                src="https://res.cloudinary.com/diwxda8bi/image/upload/v1725081067/vnpay_g4m1a7.png"
-                              />
-                            </div>
-                            <div className="text-payment">VNPAY Payment</div>
-                          </button>
-                        </div>
+                    currentUser !== null && (
+                      <>
+                        {isBENHNHAN(currentUser) && (
+                          <div className="container">
+                            <div className="d-flex justify-content-center">
+                              <div className="p-3 w-50">
+                                <button
+                                  className="button-vnpay-payment"
+                                  onClick={() =>
+                                    handleVNPAYPayment(finalPrice, urs.id)
+                                  }
+                                >
+                                  <div className="icon-vnpay-div">
+                                    <img
+                                      className="icon-vnpay-image"
+                                      src="https://res.cloudinary.com/diwxda8bi/image/upload/v1725081067/vnpay_g4m1a7.png"
+                                    />
+                                  </div>
+                                  <div className="text-payment">
+                                    VNPAY Payment
+                                  </div>
+                                </button>
+                              </div>
 
-                        <div className="p-3 w-50">
-                          <button
-                            className="button-momo-payment"
-                            onClick={() =>
-                              handleMOMOPayment(finalPrice, urs.id)
-                            }
-                          >
-                            <div className="icon-momo-div">
-                              <img
-                                className="icon-momo-image"
-                                src="https://res.cloudinary.com/diwxda8bi/image/upload/v1725079829/momo_payment_i0xokf.png"
-                              />
+                              <div className="p-3 w-50">
+                                <button
+                                  className="button-momo-payment"
+                                  onClick={() =>
+                                    handleMOMOPayment(finalPrice, urs.id)
+                                  }
+                                >
+                                  <div className="icon-momo-div">
+                                    <img
+                                      className="icon-momo-image"
+                                      src="https://res.cloudinary.com/diwxda8bi/image/upload/v1725079829/momo_payment_i0xokf.png"
+                                    />
+                                  </div>
+                                  <div className="text-payment">
+                                    MOMO Payment
+                                  </div>
+                                </button>
+                              </div>
                             </div>
-                            <div className="text-payment">MOMO Payment</div>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                          </div>
+                        )}
+
+                        {isYTA(currentUser) && (
+                          <div className="d-flex justify-content-center">
+                            <div className="p-3 w-100 d-flex justify-content-center">
+                              <button
+                                className="btn btn-primary w-50"
+                                onClick={() =>
+                                  handleCashPayment(finalPrice, urs.id)
+                                }
+                              >
+                                <div className="text-center text-lg">
+                                  Thanh toán tiền mặt
+                                </div>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )
                   ))}
               </div>
             </div>

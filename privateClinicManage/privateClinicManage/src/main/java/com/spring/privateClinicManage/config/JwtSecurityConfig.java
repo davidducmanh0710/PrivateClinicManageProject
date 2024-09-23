@@ -73,7 +73,7 @@ public class JwtSecurityConfig {
 				.permitAll()
 
 				.requestMatchers(HttpMethod.GET,
-						"/api/benhnhan/get-medical-exam-by-mrlId/{mrlId}/",
+
 						"/api/benhnhan/get-mrl-and-me-user-history/")
 				.hasRole("BENHNHAN")
 
@@ -97,7 +97,7 @@ public class JwtSecurityConfig {
 						"/api/yta/get-users-schedule-status/",
 						"/api/yta/auto-confirm-registers/",
 						"/api/yta/direct-register/",
-						"/api/yta/cash-payment/{mrlId}/")
+						"/api/yta/cash-payment/")
 				.hasRole("YTA")
 
 				.requestMatchers(HttpMethod.GET,
@@ -123,6 +123,9 @@ public class JwtSecurityConfig {
 				.requestMatchers("/api/anyrole/get-history-user-register/",
 						"/api/bacsi/get-prescriptionItems-by-medicalExam-id/{medicalExamId}/")
 				.hasAnyRole("BENHNHAN", "BACSI")
+
+				.requestMatchers("/api/anyrole/get-medical-exam-by-mrlId/{mrlId}/")
+				.hasAnyRole("BENHNHAN", "YTA")
 
 				.anyRequest().authenticated())
 				.httpBasic(httpbc -> httpbc

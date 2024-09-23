@@ -34,6 +34,7 @@ import com.spring.privateClinicManage.dto.CountDto;
 import com.spring.privateClinicManage.dto.GetChatMessageDto;
 import com.spring.privateClinicManage.dto.HisotryUserMedicalRegisterDto;
 import com.spring.privateClinicManage.dto.OnlineUserDto;
+import com.spring.privateClinicManage.dto.PaymentPhase2OutputDto;
 import com.spring.privateClinicManage.dto.RecipientChatRoomDto;
 import com.spring.privateClinicManage.dto.RecipientDto;
 import com.spring.privateClinicManage.dto.UpdateProfileDto;
@@ -525,6 +526,33 @@ public class ApiAnyRoleRestController {
 				.findByMedicalExamination(medicalExamination);
 
 		return new ResponseEntity<>(pis, HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/get-medical-exam-by-mrlId/{mrlId}/")
+	@CrossOrigin
+	public ResponseEntity<Object> getMedicalExamByMrlId(@PathVariable("mrlId") Integer mrlId) {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		MedicalRegistryList mrl = medicalRegistryListService.findById(mrlId);
+		if (mrl == null || mrl.getIsCanceled())
+			return new ResponseEntity<>("Phiếu đăng kí này không tồn tại hoặc đã được hủy !",
+					HttpStatus.NOT_FOUND);
+		MedicalExamination me = mrl.getMedicalExamination();
+
+		if (me == null)
+			return new ResponseEntity<>("Phiếu đăng kí này chưa có phiếu khám bệnh !",
+					HttpStatus.NOT_FOUND);
+
+		List<PrescriptionItems> pis = prescriptionItemsService
+				.findByMedicalExamination(me);
+
+		PaymentPhase2OutputDto pp2 = new PaymentPhase2OutputDto();
+		pp2.setMe(me);
+		pp2.setPis(pis);
+
+		return new ResponseEntity<>(pp2, HttpStatus.OK);
 	}
 
 }

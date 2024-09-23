@@ -1,8 +1,10 @@
 import { Tab, Tabs } from "react-bootstrap";
 import "./PrescriptionItems.css";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Alert } from "@mui/material";
 import { Link } from "react-router-dom";
+import { isBACSI } from "../Common/Common";
+import { UserContext } from "../config/Context";
 
 export default function PrescriptionItems({
   precriptionItems,
@@ -11,6 +13,8 @@ export default function PrescriptionItems({
   examPatient,
   h,
 }) {
+  const { currentUser } = useContext(UserContext);
+
   return (
     <>
       <div className="medical-info-tabs">
@@ -71,13 +75,15 @@ export default function PrescriptionItems({
                 </h4>
 
                 <div className="d-flex justify-content-evenly align-item-center">
-                  <Link
-                    className="btn btn-primary mt-3"
-                    to="/examination-form"
-                    state={{ examPatient, precriptionItems, h }}
-                  >
-                    Nạp đơn lên phiếu khám
-                  </Link>
+                  {isBACSI(currentUser) && (
+                    <Link
+                      className="btn btn-primary mt-3"
+                      to="/examination-form"
+                      state={{ examPatient, precriptionItems, h }}
+                    >
+                      Nạp đơn lên phiếu khám
+                    </Link>
+                  )}
                   <button
                     onClick={() => setSelectMedicalExamId(0)}
                     className="btn btn-danger mt-3"

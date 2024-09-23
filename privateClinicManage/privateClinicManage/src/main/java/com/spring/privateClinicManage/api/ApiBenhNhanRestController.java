@@ -25,11 +25,8 @@ import com.spring.privateClinicManage.dto.ApplyVoucherDto;
 import com.spring.privateClinicManage.dto.MrlAndMeHistoryDto;
 import com.spring.privateClinicManage.dto.NameDto;
 import com.spring.privateClinicManage.dto.PaymentHistoryDto;
-import com.spring.privateClinicManage.dto.PaymentPhase2OutputDto;
 import com.spring.privateClinicManage.dto.RegisterScheduleDto;
-import com.spring.privateClinicManage.entity.MedicalExamination;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
-import com.spring.privateClinicManage.entity.PrescriptionItems;
 import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
 import com.spring.privateClinicManage.entity.User;
@@ -111,7 +108,6 @@ public class ApiBenhNhanRestController {
 			return new ResponseEntity<>(
 					"Tài khoản này đã đăng kí đủ 4 phiếu đang xét duyệt trong ngày hôm nay !",
 					HttpStatus.UNAUTHORIZED);
-
 
 		MedicalRegistryList medicalRegistryList = new MedicalRegistryList();
 		medicalRegistryList.setCreatedDate(new Date());
@@ -216,33 +212,6 @@ public class ApiBenhNhanRestController {
 
 	}
 
-	@GetMapping(value = "/get-medical-exam-by-mrlId/{mrlId}/")
-	@CrossOrigin
-	public ResponseEntity<Object> getMedicalExamByMrlId(@PathVariable("mrlId") Integer mrlId) {
-		User currentUser = userService.getCurrentLoginUser();
-		if (currentUser == null)
-			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
-
-		MedicalRegistryList mrl = medicalRegistryListService.findById(mrlId);
-		if (mrl == null || mrl.getIsCanceled())
-			return new ResponseEntity<>("Phiếu đăng kí này không tồn tại hoặc đã được hủy !",
-					HttpStatus.NOT_FOUND);
-		MedicalExamination me = mrl.getMedicalExamination();
-
-		if (me == null)
-			return new ResponseEntity<>("Phiếu đăng kí này chưa có phiếu khám bệnh !",
-					HttpStatus.NOT_FOUND);
-
-		List<PrescriptionItems> pis = prescriptionItemsService
-				.findByMedicalExamination(me);
-
-		PaymentPhase2OutputDto pp2 = new PaymentPhase2OutputDto();
-		pp2.setMe(me);
-		pp2.setPis(pis);
-
-		return new ResponseEntity<>(pp2, HttpStatus.OK);
-	}
-
 	@GetMapping("/get-mrl-and-me-user-history/")
 	@CrossOrigin
 	public ResponseEntity<Object> getMrlAndMeUserHistory(@RequestParam Map<String, String> params) {
@@ -256,17 +225,16 @@ public class ApiBenhNhanRestController {
 		Page<MrlAndMeHistoryDto> userMrAndMeHistoryPaginated = statsService
 				.paginatedStatsUserMrlAndMeHistory(page, size, currentUser);
 
-
 		return new ResponseEntity<>(userMrAndMeHistoryPaginated, HttpStatus.OK);
 	}
 
 	@PostMapping("/get-payment-history-by-name/")
 	@CrossOrigin
-	public ResponseEntity<Object> getPaymentHistoryByName(@RequestBody NameDto nameDto){
+	public ResponseEntity<Object> getPaymentHistoryByName(@RequestBody NameDto nameDto) {
 		User currentUser = userService.getCurrentLoginUser();
 		if (currentUser == null)
 			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
-		
+
 		if (nameDto.getName() == null)
 			return new ResponseEntity<>("Tên không được rỗng !", HttpStatus.NOT_FOUND);
 
