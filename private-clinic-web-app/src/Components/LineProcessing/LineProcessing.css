@@ -1,0 +1,70 @@
+.line-processing-container {
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: column;
+
+  .process-step {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 40px 0;
+    width: 70%;
+  }
+
+  .step-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+
+  i {
+    color: #ff0000;
+  }
+
+  .finished {
+    background-color: #0d6efd;
+    color: white;
+  }
+
+  .finished i {
+    color: #37c132;
+  }
+
+  .step-line {
+    flex-grow: 1;
+    height: 4px;
+    background-color: #e0e0e0;
+    margin: 0 5px;
+  }
+
+  .step-line.finished {
+    background-color: #0d6efd;
+  }
+
+  .doing {
+    background-color: #e4e06c;
+  }
+
+  .doing i {
+    color: #0800ff;
+  }
+
+  .step-line.failed {
+    background-color: #ff0000;
+  }
+
+  .failed {
+    background-color: #ff0000;
+  }
+
+  .failed i {
+    color: white;
+  }
+}

@@ -15,6 +15,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import DeleteConfirmationForm from "../DeleteConfirmationForm/DeleteConfirmationForm";
 import { UserContext } from "../config/Context";
 import PaymentForm from "../PaymentForm/PaymentForm";
+import LineProcessing from "../LineProcessing/LineProcessing";
 
 export default function UserRegisterScheduleList() {
   const [userRegisterScheduleList, setUserRegisterScheduleList] = useState([]);
@@ -25,12 +26,13 @@ export default function UserRegisterScheduleList() {
 
   const { BENHNHANnotifications } = useContext(UserContext);
 
-
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const { currentUser } = useContext(UserContext);
 
   const [isCanceled, setIsCanceled] = useState(false);
+
+  const lineProcessRef = useRef();
 
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
@@ -79,7 +81,7 @@ export default function UserRegisterScheduleList() {
         showSnackbar("Lỗi", "error");
       }
     }
-  }, [page, currentUser, isCanceled , BENHNHANnotifications]);
+  }, [page, currentUser, isCanceled, BENHNHANnotifications, urs]);
 
   useEffect(() => {
     if (currentUser !== null) {
@@ -88,7 +90,7 @@ export default function UserRegisterScheduleList() {
       setMe(null);
       setPis(null);
     }
-  }, [page, currentUser, isCanceled, BENHNHANnotifications]);
+  }, [page, currentUser, isCanceled, BENHNHANnotifications, urs]);
 
   const handleCancelRegisterSchedule = async (registerScheduleId) => {
     try {
@@ -159,6 +161,16 @@ export default function UserRegisterScheduleList() {
     setPis(null);
   }
 
+  function handleOpenLineProcessForm(urs) {
+    lineProcessRef.current.open();
+    setUrs(urs);
+  }
+
+  function handleCloseLineProcessForm() {
+    lineProcessRef.current.close();
+    setUrs(null);
+  }
+
   return (
     <>
       <DeleteConfirmationForm
@@ -178,6 +190,11 @@ export default function UserRegisterScheduleList() {
         me={me}
         pis={pis}
       />
+      <LineProcessing
+        ref={lineProcessRef}
+        onClose={handleCloseLineProcessForm}
+        urs={urs}
+      />
       {userRegisterScheduleList.empty !== true && (
         <Pagination
           count={totalPage}
@@ -190,12 +207,13 @@ export default function UserRegisterScheduleList() {
         <h2 className="text text-primary">Danh sách đặt lịch khám</h2>
         <ul className="responsive-table">
           <li className="table-header">
-            <div className="col col-1">Ngày đặt</div>
-            <div className="col col-2">Tên người khám</div>
-            <div className="col col-3">Ngày hẹn khám</div>
-            <div className="col col-4">Trạng thái</div>
-            <div className="col col-5">Ghi chú</div>
-            <div className="col col-6">Hủy lịch khám</div>
+            <div className="col col-1">Mã phiếu khám</div>
+            <div className="col col-2">Ngày đặt</div>
+            <div className="col col-3">Tên người khám</div>
+            <div className="col col-4">Ngày hẹn khám</div>
+            <div className="col col-5">Trạng thái</div>
+            <div className="col col-6">Ghi chú</div>
+            <div className="col col-7">Hủy lịch khám</div>
           </li>
           {userRegisterScheduleList.empty === true ? (
             <>
@@ -209,26 +227,34 @@ export default function UserRegisterScheduleList() {
                 userRegisterScheduleList.content.map((urs) => {
                   return (
                     <li key={urs.id} className="table-row">
-                      <div className="col col-1" data-label="Date Created">
+                      <div
+                        role="button"
+                        className="col col-1 text text-info underline"
+                        data-label="id"
+                        onClick={() => handleOpenLineProcessForm(urs)}
+                      >
+                        #MSPDKKB{urs.id}
+                      </div>
+                      <div className="col col-2" data-label="Date Created">
                         {dayjs(urs.createdDate).format("DD-MM-YYYY HH:mm:ss")}
                       </div>
-                      <div className="col col-2" data-label="Name Register">
+                      <div className="col col-3" data-label="Name Register">
                         {urs.name}
                       </div>
-                      <div className="col col-3" data-label="Date Register">
+                      <div className="col col-4" data-label="Date Register">
                         {dayjs(urs.schedule.date).format("DD-MM-YYYY HH:mm:ss")}
                       </div>
-                      <div className="col col-4" data-label="Status Register">
+                      <div className="col col-5" data-label="Status Register">
                         {urs.statusIsApproved.status}
                       </div>
-                      <div className="col col-5" data-label="Note">
+                      <div className="col col-6" data-label="Note">
                         {urs.statusIsApproved.note}
                       </div>
                       {urs.statusIsApproved.status !== "PAYMENTPHASE1" &&
                       urs.statusIsApproved.status !== "PAYMENTPHASE2" ? (
                         <button
                           onClick={() => handleOpenDeleteConfirmForm(urs.id)}
-                          className={`col col-6 btn ${
+                          className={`col col-7 btn ${
                             urs.statusIsApproved.status !== "CHECKING"
                               ? "btn-secondary disabled"
                               : "btn-danger"
@@ -241,7 +267,7 @@ export default function UserRegisterScheduleList() {
                         <>
                           {urs.statusIsApproved.status === "PAYMENTPHASE1" && (
                             <button
-                              className="col col-6 btn btn-success"
+                              className="col col-7 btn btn-success"
                               onClick={() => {
                                 handleOpenPaymentPhase1Form(urs);
                               }}
@@ -251,7 +277,7 @@ export default function UserRegisterScheduleList() {
                           )}
                           {urs.statusIsApproved.status === "PAYMENTPHASE2" && (
                             <button
-                              className="col col-6 btn btn-success"
+                              className="col col-7 btn btn-success"
                               onClick={() => {
                                 handleOpenPaymentPhase2Form(urs);
                               }}
