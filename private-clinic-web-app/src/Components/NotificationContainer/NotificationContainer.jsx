@@ -14,7 +14,10 @@ export default function NotificationContainer() {
   const [showDropdownBN, setShowDropdownBN] = useState(false);
 
   const [YTAnotifications, setYTANotifications] = useState([]);
-  const [BENHNHANnotifications, setBENHNHANNotifications] = useState([]);
+  // const [BENHNHANnotifications, setBENHNHANNotifications] = useState([]);
+  const { BENHNHANnotifications, setBENHNHANNotifications } =
+    useContext(UserContext);
+
   const [TUVANnotifications, setTUVANNotifications] = useState([]);
   const [tempNotifications, setTempNotification] = useState([]); // received all output data from Websocket before seperated
 
@@ -127,6 +130,36 @@ export default function NotificationContainer() {
             p.timeSent = Date.now();
             p.isRead = false;
             p.type = "DICRECT_REGISTER";
+            setBENHNHANNotifications((prevBNNotifications) => [
+              p,
+              ...prevBNNotifications,
+            ]);
+            showSnackbar("Bạn có thông báo mới", "success");
+            forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
+          }
+        );
+        stompBENHNHANClient.subscribe(
+          "/notify/censorSuccessfully/" + currentUser.id,
+          (payload) => {
+            const p = JSON.parse(payload.body);
+            p.timeSent = Date.now();
+            p.isRead = false;
+            p.type = "CENSOR_SUCCESSFULLY";
+            setBENHNHANNotifications((prevBNNotifications) => [
+              p,
+              ...prevBNNotifications,
+            ]);
+            showSnackbar("Bạn có thông báo mới", "success");
+            forceUpdate(); // bên client đã re-render , do đã navigate và nạp trang list , nhưng bên này để màn hình đứng yên dẫn đến ko đc re render
+          }
+        );
+        stompBENHNHANClient.subscribe(
+          "/notify/cashSuccesfully/" + currentUser.id,
+          (payload) => {
+            const p = JSON.parse(payload.body);
+            p.timeSent = Date.now();
+            p.isRead = false;
+            p.type = "CASH_SUCCESSFULLY";
             setBENHNHANNotifications((prevBNNotifications) => [
               p,
               ...prevBNNotifications,
@@ -476,6 +509,126 @@ export default function NotificationContainer() {
                         />
                         <div>
                           <strong>Đặt lịch khám trực tiếp thành công !</strong>
+                          <p
+                            className="mb-0"
+                            style={{ fontSize: "12px", color: "#fff" }}
+                          >
+                            <small style={{ fontSize: "12px", color: "#000" }}>
+                              Đặt lịch khám vào ngày{" "}
+                              {dayjs(notification.schedule.date).format(
+                                "DD/MM/YYYY"
+                              )}
+                            </small>
+                            <small
+                              style={{
+                                display: "block",
+                                fontSize: "12px",
+                                color: "red",
+                              }}
+                            >
+                              {formatDuration(
+                                Date.now() - notification.timeSent
+                              )}{" "}
+                              trước
+                            </small>
+                          </p>
+                        </div>
+                      </Dropdown.Item>
+                    );
+                  }
+                  if (notification.type === "CENSOR_SUCCESSFULLY") {
+                    return (
+                      <Dropdown.Item
+                        onClick={() => {
+                          notification.isRead = true;
+                          navigate("/user-register-schedule-list");
+                          handleCountIsReadFalseBN(BENHNHANnotifications);
+                        }}
+                        key={notification.id}
+                        className={`d-flex align-items-start border ${
+                          notification.isRead ? "" : "bg-warning"
+                        }`}
+                        style={{
+                          fontSize: "12px",
+                          color: "#000",
+                          backgroundColor: "#fff",
+                        }}
+                      >
+                        <img
+                          src={notification.user.avatar}
+                          alt="Avatar"
+                          className="rounded-circle"
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            marginRight: "10px",
+                          }}
+                        />
+                        <div>
+                          <strong>Xét duyệt thành công đơn đăng ký !</strong>
+                          <p
+                            className="mb-0"
+                            style={{ fontSize: "12px", color: "#fff" }}
+                          >
+                            <small style={{ fontSize: "12px", color: "#000" }}>
+                              Đặt lịch khám vào ngày{" "}
+                              {dayjs(notification.schedule.date).format(
+                                "DD/MM/YYYY"
+                              )}
+                            </small>
+                            <small
+                              style={{
+                                display: "block",
+                                fontSize: "12px",
+                                color: "red",
+                              }}
+                            >
+                              {formatDuration(
+                                Date.now() - notification.timeSent
+                              )}{" "}
+                              trước
+                            </small>
+                          </p>
+                        </div>
+                      </Dropdown.Item>
+                    );
+                  }
+                  if (notification.type === "CASH_SUCCESSFULLY") {
+                    return (
+                      <Dropdown.Item
+                        onClick={() => {
+                          notification.isRead = true;
+                          navigate("/user-register-schedule-list");
+                          handleCountIsReadFalseBN(BENHNHANnotifications);
+                        }}
+                        key={notification.id}
+                        className={`d-flex align-items-start border ${
+                          notification.isRead ? "" : "bg-warning"
+                        }`}
+                        style={{
+                          fontSize: "12px",
+                          color: "#000",
+                          backgroundColor: "#fff",
+                        }}
+                      >
+                        <img
+                          src={notification.user.avatar}
+                          alt="Avatar"
+                          className="rounded-circle"
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            marginRight: "10px",
+                          }}
+                        />
+                        <div>
+                          <strong className="text-wrap">
+                            Thanh toán tiền mặt thành công
+                            {notification.statusIsApproved.status ===
+                            "PROCESSING"
+                              ? ` mã phiếu đăng ký : #MSPDKKB${notification.id} !`
+                              : ` phiếu khám bệnh của mã phiếu đăng ký : #MSPDKKB${notification.id}`}
+                          </strong>
                           <p
                             className="mb-0"
                             style={{ fontSize: "12px", color: "#fff" }}

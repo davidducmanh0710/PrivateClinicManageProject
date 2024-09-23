@@ -215,6 +215,11 @@ public class ApiYtaRestController {
 						System.out.println("Không gửi được mail !");
 					}
 				}
+
+				messagingTemplate.convertAndSend(
+						"/notify/censorSuccessfully/" + mrl.getUser().getId(),
+						mrl);
+
 			});
 			return new ResponseEntity<>("Thành công", HttpStatus.OK);
 		}
@@ -229,6 +234,10 @@ public class ApiYtaRestController {
 					System.out.println("Không gửi được mail !");
 				}
 			}
+
+			messagingTemplate.convertAndSend("/notify/censorSuccessfully/" + mrl.getUser().getId(),
+					mrl);
+
 		});
 
 		return new ResponseEntity<>(mrls, HttpStatus.OK);
@@ -338,7 +347,6 @@ public class ApiYtaRestController {
 
 			MedicalExamination me = mrl.getMedicalExamination();
 
-
 			PaymentDetailPhase2 pdp2 = new PaymentDetailPhase2();
 
 			pdp2.setAmount(cashPaymentDto.getAmount());
@@ -367,6 +375,9 @@ public class ApiYtaRestController {
 			}
 
 		}
+
+		messagingTemplate.convertAndSend("/notify/cashSuccesfully/" + mrl.getUser().getId(),
+				mrl);
 
 		return new ResponseEntity<>("Thanh toán thành công !", HttpStatus.OK);
 	}

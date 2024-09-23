@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import "./UserRegisterScheduleList.css";
 import { authAPI, endpoints } from "../config/Api";
 import { CustomerSnackbar, isBENHNHAN } from "../Common/Common";
@@ -15,6 +22,9 @@ export default function UserRegisterScheduleList() {
   const [urs, setUrs] = useState(null);
   const [me, setMe] = useState(null);
   const [pis, setPis] = useState(null);
+
+  const { BENHNHANnotifications } = useContext(UserContext);
+
 
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
@@ -69,7 +79,7 @@ export default function UserRegisterScheduleList() {
         showSnackbar("Lỗi", "error");
       }
     }
-  }, [page, currentUser, isCanceled]);
+  }, [page, currentUser, isCanceled , BENHNHANnotifications]);
 
   useEffect(() => {
     if (currentUser !== null) {
@@ -78,7 +88,7 @@ export default function UserRegisterScheduleList() {
       setMe(null);
       setPis(null);
     }
-  }, [page, currentUser, isCanceled]);
+  }, [page, currentUser, isCanceled, BENHNHANnotifications]);
 
   const handleCancelRegisterSchedule = async (registerScheduleId) => {
     try {
@@ -94,9 +104,12 @@ export default function UserRegisterScheduleList() {
         showSnackbar("Hủy lịch thành công !", "success");
         handleCloseDeleteConfirmForm();
         setIsCanceled(true);
-      } else showSnackbar(response.data, "error");
+      } else {
+        showSnackbar(response.data, "error");
+        handleCloseDeleteConfirmForm();
+      }
     } catch {
-      showSnackbar("Lỗi", "error");
+      showSnackbar("Không thể hủy lịch khám", "error");
     }
   };
 
@@ -229,7 +242,9 @@ export default function UserRegisterScheduleList() {
                           {urs.statusIsApproved.status === "PAYMENTPHASE1" && (
                             <button
                               className="col col-6 btn btn-success"
-                              onClick={() => handleOpenPaymentPhase1Form(urs)}
+                              onClick={() => {
+                                handleOpenPaymentPhase1Form(urs);
+                              }}
                             >
                               Thanh toán lấy mã QR
                             </button>
@@ -237,7 +252,9 @@ export default function UserRegisterScheduleList() {
                           {urs.statusIsApproved.status === "PAYMENTPHASE2" && (
                             <button
                               className="col col-6 btn btn-success"
-                              onClick={() => handleOpenPaymentPhase2Form(urs)}
+                              onClick={() => {
+                                handleOpenPaymentPhase2Form(urs);
+                              }}
                             >
                               Thanh toán lấy thuốc
                             </button>

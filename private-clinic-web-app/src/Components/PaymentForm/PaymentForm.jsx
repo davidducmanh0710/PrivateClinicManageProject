@@ -152,8 +152,6 @@ const PaymentForm = forwardRef(function PaymentForm(
         {
           amount,
           mrlId,
-          voucherId: voucher ? voucher.id : null,
-          meId: me ? me.id : null,
         },
         {
           validateStatus: function (status) {
@@ -166,13 +164,17 @@ const PaymentForm = forwardRef(function PaymentForm(
         showSnackbar("Thanh toán tiền mặt thành công", "success");
         onCancel();
         setIsCanceled(true);
+        setLoading(false);
       } else {
         showSnackbar(response.data, "error");
+        setLoading(false);
       }
     } catch {
       showSnackbar("Lỗi", "error");
       console.log(response);
+      setLoading(false);
     }
+    setLoading(false);
   };
 
   function handleOpenVoucherForm() {
@@ -539,22 +541,24 @@ const PaymentForm = forwardRef(function PaymentForm(
                       </tr>
                     </tbody>
                   </table>
-                  <div className="w-100 d-flex justify-content-between border shadow-sm align-item-center p-3">
-                    <div className="bg-success p-1 rounded">
-                      <i className="fa-solid fa-ticket fs-5 mr-5"></i>{" "}
-                      <span className="text text-white bg-success fs-5 p-1">
-                        HEALTHCARE VOUCHER
-                      </span>
+                  {isBENHNHAN(currentUser) && (
+                    <div className="w-100 d-flex justify-content-between border shadow-sm align-item-center p-3">
+                      <div className="bg-success p-1 rounded">
+                        <i className="fa-solid fa-ticket fs-5 mr-5"></i>{" "}
+                        <span className="text text-white bg-success fs-5 p-1">
+                          HEALTHCARE VOUCHER
+                        </span>
+                      </div>
+                      <div className="text text-primary">
+                        <button
+                          className="btn btn-primary"
+                          onClick={handleOpenVoucherForm}
+                        >
+                          Nhập mã
+                        </button>{" "}
+                      </div>
                     </div>
-                    <div className="text text-primary">
-                      <button
-                        className="btn btn-primary"
-                        onClick={handleOpenVoucherForm}
-                      >
-                        Nhập mã
-                      </button>{" "}
-                    </div>
-                  </div>
+                  )}
                   <table className="table table-hover">
                     <thead>
                       <tr>

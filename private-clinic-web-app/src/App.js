@@ -18,6 +18,7 @@ import { publicRoutes } from "./Components/Routes/Routes";
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState("");
+  const [BENHNHANnotifications, setBENHNHANNotifications] = useState([]);
 
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({
@@ -76,7 +77,9 @@ function App() {
     currentUser: currentUser,
     setCurrentUser: setCurrentUser,
     token: token,
-    fetchUser : fetchUser,
+    fetchUser : fetchUser,    
+    BENHNHANnotifications: BENHNHANnotifications,
+    setBENHNHANNotifications : setBENHNHANNotifications,
   };
 
   return (

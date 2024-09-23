@@ -7,7 +7,6 @@ import dayjs from "dayjs";
 import { Alert, CircularProgress, Pagination } from "@mui/material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AutoConfirmForm from "../AutoConfirmForm/AutoConfirmForm";
-import CashPaymentForm from "../CashPaymentForm/CashPaymentForm";
 import PaymentForm from "../PaymentForm/PaymentForm";
 
 export default function CencorRegister() {
@@ -141,12 +140,10 @@ export default function CencorRegister() {
       setIsCanceled(false);
 
       if (urs !== null && urs.statusIsApproved.status === "PAYMENTPHASE2") {
-        getMEByMrlId(urs.id)
+        getMEByMrlId(urs.id);
       }
-
     }
   }, [currentUser, page, params, isConfirmRegister, isCanceled, urs]);
-
 
   const handleStatusChange = (event) => {
     setStatus(event.target.value);
@@ -181,29 +178,6 @@ export default function CencorRegister() {
     setMe(null);
     setPis(null);
   }
-
-  const handleConfirmCashPaymentConfirmForm = async () => {
-    try {
-      const response = await authAPI().post(
-        endpoints["cashPaymentMrl"],
-        {},
-        {
-          validateStatus: function (status) {
-            return status < 500;
-          },
-        }
-      );
-      if (response.status === 200) {
-        showSnackbar("Thanht toán tiền mặt thành công", "success");
-        handleCloseCashPaymentConfirmForm();
-        setIsCanceled(true);
-      } else {
-        showSnackbar(response.data, "error");
-      }
-    } catch {
-      showSnackbar("Lỗi", "error");
-    }
-  };
 
   const getMEByMrlId = async (mrlId) => {
     let response;

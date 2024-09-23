@@ -6,4 +6,6 @@ export const UserContext = createContext({
   token: "",
   setToken: () => {},
   fetchUser: () => {},
+  BENHNHANnotifications : [],
+  setBENHNHANNotifications : () => {}
 });
