@@ -1,6 +1,7 @@
 package com.spring.privateClinicManage.api;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,14 @@ public class ApiBenhNhanRestController {
 		if (currentUser == null)
 			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
 
-		Schedule schedule = scheduleService.findByDate(registerScheduleDto.getDate());
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(registerScheduleDto.getDate());
+
+//		Schedule schedule = scheduleService.findByDate(registerScheduleDto.getDate());
+		Schedule schedule = scheduleService.findByDayMonthYear(calendar.get(Calendar.YEAR),
+				calendar.get(Calendar.MONTH) + 1,
+				calendar.get(Calendar.DAY_OF_MONTH));
+
 		if (schedule == null) {
 			schedule = new Schedule();
 			schedule.setDate(registerScheduleDto.getDate());
@@ -95,7 +103,9 @@ public class ApiBenhNhanRestController {
 		}
 
 		if (schedule.getIsDayOff())
-			return new ResponseEntity<>("Không thể chọn ngày lễ", HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>(
+					"Phòng khám không có lịch làm việc ngày này, xin lối quý khách",
+					HttpStatus.UNAUTHORIZED);
 
 		StatusIsApproved statusIsApproved = statusIsApprovedService.findByStatus("CHECKING");
 

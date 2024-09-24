@@ -225,13 +225,14 @@ export default function AdviseSection() {
         if (likeIcon.classList.contains("fa-solid")) {
           likeIcon.classList.remove("fa-solid");
           likeCount.textContent = parseInt(likeCount.textContent) - 1;
-        } else {
+        } else if (!likeIcon.classList.contains("fa-solid")) {
           likeIcon.classList.add("fa-solid");
           likeCount.textContent = parseInt(likeCount.textContent) + 1;
         }
       }
-      handleToggleLikeApi(blogId);
-      setLikeChange((prev) => !prev);
+      setTimeout(() => {
+        handleToggleLikeApi(blogId);
+      }, 500);
     } else {
       showSnackbar("Bạn cần đăng nhập để thích bài viết !", "error");
     }
@@ -246,6 +247,7 @@ export default function AdviseSection() {
         },
       });
       if (response.status === 200) {
+        setLikeChange((prev) => !prev);
       } else showSnackbar(response, "error");
     } catch {
       showSnackbar(response, "error");

@@ -19,4 +19,5 @@ public interface ScheduleService {
 	List<Schedule> findAllSchedule();
 
 	Page<Schedule> schedulePaginated(Integer page, Integer size, List<Schedule> schedules);
+
 }

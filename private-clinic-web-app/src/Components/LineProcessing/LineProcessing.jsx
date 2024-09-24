@@ -108,6 +108,21 @@ const LineProcessing = forwardRef(function LineProcessing(
           if (elementName.length > 0 && statusIndex !== 0)
             e.classList.add("failed");
         });
+      } else if (status === "FOLLOWUP" || status === "FINISHED") {
+        for (let i = 0; i <= 5; i++) {
+          let elementId = document.getElementById(goodOrder[i]);
+          let elementName = document.getElementsByName(goodOrder[i]);
+
+          if (elementName.length > 0 && statusIndex !== 0)
+            elementName.forEach((e) => {
+              e.classList.add("finished");
+            });
+
+          if (i !== statusIndex) {
+            elementId.classList.add("finished");
+            console.log(elementId);
+          }
+        }
       }
     }
   }

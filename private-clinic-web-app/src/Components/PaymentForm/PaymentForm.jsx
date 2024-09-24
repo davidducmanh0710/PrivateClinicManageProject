@@ -57,7 +57,7 @@ const PaymentForm = forwardRef(function PaymentForm(
         dialog2.current.style.border = "none";
         // dialog2.current.style.overflow = "hidden";
         dialog2.current.style.width = "50%";
-        dialog2.current.style.height = "50%";
+        dialog2.current.style.height = "100%";
         dialog2.current.showModal();
       },
 

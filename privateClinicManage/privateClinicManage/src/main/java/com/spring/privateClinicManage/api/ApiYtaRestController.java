@@ -1,6 +1,7 @@
 package com.spring.privateClinicManage.api;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -160,7 +161,14 @@ public class ApiYtaRestController {
 		StatusIsApproved statusIsApproved = statusIsApprovedService
 				.findByStatus("CHECKING");
 
-		Schedule schedule = scheduleService.findByDate(registerStatusDto.getRegisterDate());
+//		Schedule schedule = scheduleService.findByDate(registerStatusDto.getRegisterDate());
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(registerStatusDto.getRegisterDate());
+
+		Schedule schedule = scheduleService.findByDayMonthYear(calendar.get(Calendar.YEAR),
+				calendar.get(Calendar.MONTH) + 1,
+				calendar.get(Calendar.DAY_OF_MONTH));
 
 		if (statusIsApproved == null || schedule == null)
 			return new ResponseEntity<>("Không có email đăng kí khám ngày này",
@@ -187,9 +195,14 @@ public class ApiYtaRestController {
 		StatusIsApproved statusIsApproved = statusIsApprovedService
 				.findByStatus(confirmRegisterDto.getStatus());
 
-		Schedule schedule = scheduleService.findByDate(confirmRegisterDto.getRegisterDate());
+//		Schedule schedule = scheduleService.findByDate(confirmRegisterDto.getRegisterDate());
 
-		System.out.println(statusIsApproved.getStatus());
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(confirmRegisterDto.getRegisterDate());
+
+		Schedule schedule = scheduleService.findByDayMonthYear(calendar.get(Calendar.YEAR),
+				calendar.get(Calendar.MONTH) + 1,
+				calendar.get(Calendar.DAY_OF_MONTH));
 
 		if (statusIsApproved == null || schedule == null)
 			return new ResponseEntity<>("Trạng thái hoặc ngày này chưa có đơn đăng kí khám",
