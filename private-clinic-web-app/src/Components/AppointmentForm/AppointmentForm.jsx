@@ -112,7 +112,7 @@ export default function AppointmentForm() {
           <div className="note-content">
             <p className="note-content-p">
               - Một tài khoản bệnh nhân trong hệ thống chúng tôi có thể đặt lịch
-              khám cho người thân của bạn, ví dụ như trẻ em, người già{" "}
+              khám cho người thân của bạn, ví dụ như trẻ em, người cao tuổi{" "}
               <span className="text text-danger">
                 {" "}
                 không có email để đăng ký.

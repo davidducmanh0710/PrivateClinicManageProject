@@ -5,6 +5,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -28,12 +30,15 @@ import com.spring.privateClinicManage.dto.NameDto;
 import com.spring.privateClinicManage.dto.PaymentHistoryDto;
 import com.spring.privateClinicManage.dto.RegisterScheduleDto;
 import com.spring.privateClinicManage.entity.MedicalRegistryList;
+import com.spring.privateClinicManage.entity.MrlVoucher;
 import com.spring.privateClinicManage.entity.Schedule;
 import com.spring.privateClinicManage.entity.StatusIsApproved;
 import com.spring.privateClinicManage.entity.User;
 import com.spring.privateClinicManage.entity.UserVoucher;
 import com.spring.privateClinicManage.entity.Voucher;
+import com.spring.privateClinicManage.entity.VoucherCondition;
 import com.spring.privateClinicManage.service.MedicalRegistryListService;
+import com.spring.privateClinicManage.service.MrlVoucherService;
 import com.spring.privateClinicManage.service.PrescriptionItemsService;
 import com.spring.privateClinicManage.service.ScheduleService;
 import com.spring.privateClinicManage.service.StatsService;
@@ -56,6 +61,7 @@ public class ApiBenhNhanRestController {
 	private UserVoucherService userVoucherService;
 	private PrescriptionItemsService prescriptionItemsService;
 	private StatsService statsService;
+	private MrlVoucherService mrlVoucherService;
 
 	@Autowired
 	public ApiBenhNhanRestController(UserService userService, Environment environment,
@@ -63,7 +69,8 @@ public class ApiBenhNhanRestController {
 			StatusIsApprovedService statusIsApprovedService,
 			SimpMessagingTemplate messagingTemplate, VoucherService voucherService,
 			UserVoucherService userVoucherService,
-			PrescriptionItemsService prescriptionItemsService, StatsService statsService) {
+			PrescriptionItemsService prescriptionItemsService, StatsService statsService,
+			MrlVoucherService mrlVoucherService) {
 		super();
 		this.userService = userService;
 		this.environment = environment;
@@ -75,6 +82,7 @@ public class ApiBenhNhanRestController {
 		this.userVoucherService = userVoucherService;
 		this.prescriptionItemsService = prescriptionItemsService;
 		this.statsService = statsService;
+		this.mrlVoucherService = mrlVoucherService;
 	}
 
 	// ROLE_BENHNHAN
@@ -263,6 +271,84 @@ public class ApiBenhNhanRestController {
 
 		return new ResponseEntity<>(total2Phase, HttpStatus.OK);
 
+	}
+
+	@GetMapping("/receive-voucher/{urlId}/")
+	@CrossOrigin
+	public ResponseEntity<Object> receiveVoucherAsGift(@PathVariable("urlId") Integer urlId) {
+
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		MedicalRegistryList mrl = medicalRegistryListService.findById(urlId);
+
+		if (mrl == null)
+			return new ResponseEntity<>("Phiếu đăng ký khám bệnh không tồn tại",
+					HttpStatus.NOT_FOUND);
+
+		String status = mrl.getStatusIsApproved().getStatus();
+
+		if (!status.equals("FINISHED") && !status.equals("FOLLOWUP"))
+			return new ResponseEntity<>("Trạng thái không hợp lệ",
+					HttpStatus.UNAUTHORIZED);
+		
+		Voucher voucher = null;
+
+		if (mrl.getIsVoucherTaken() == false) {
+
+			Random random = new Random();
+			Integer percentSale = random.nextInt(16) + 10;
+
+			voucher = new Voucher();
+			voucher.setCode(UUID.randomUUID().toString().replace("-", ""));
+			voucher.setIsActived(true);
+			voucher.setDescription(
+					"Giảm giá " + percentSale + "% cho tổng giá trị hóa đơn thanh toán");
+
+			VoucherCondition voucherCondition = new VoucherCondition();
+			voucherCondition.setPercentSale(percentSale);
+
+			Date currentDate = new Date();
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(currentDate);
+			calendar.add(Calendar.MONTH, 3);
+			Date expiredDate = calendar.getTime();
+
+			voucherCondition.setExpiredDate(expiredDate);
+
+			voucher.setVoucherCondition(voucherCondition);
+
+			voucherService.saveVoucher(voucher);
+
+			mrl.setIsVoucherTaken(true);
+			medicalRegistryListService.saveMedicalRegistryList(mrl);
+
+			MrlVoucher mrlVoucher = new MrlVoucher();
+			mrlVoucher.setMrl(mrl);
+			mrlVoucher.setVoucher(voucher);
+
+			mrlVoucherService.saveMrlVoucher(mrlVoucher);
+
+			UserVoucher userVoucher = new UserVoucher();
+			userVoucher.setIsOwned(true);
+			userVoucher.setIsUsed(false);
+			userVoucher.setUser(currentUser);
+			userVoucher.setVoucher(voucher);
+
+			userVoucherService.saveUserVoucher(userVoucher);
+		} else {
+			MrlVoucher mrlVoucher = mrlVoucherService.findByMrl(mrl);
+			if (mrlVoucher == null)
+				return new ResponseEntity<>("Mã giảm giá này không tồn tại không tồn tại",
+						HttpStatus.NOT_FOUND);
+			voucher = mrlVoucher.getVoucher();
+			if (voucher == null)
+				return new ResponseEntity<>("Mã giảm giá này không tồn tại không tồn tại",
+						HttpStatus.NOT_FOUND);
+		}
+
+		return new ResponseEntity<>(voucher, HttpStatus.OK);
 	}
 
 }

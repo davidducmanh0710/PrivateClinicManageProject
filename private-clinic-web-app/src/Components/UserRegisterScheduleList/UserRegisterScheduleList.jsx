@@ -1,17 +1,9 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import "./UserRegisterScheduleList.css";
 import { authAPI, endpoints } from "../config/Api";
 import { CustomerSnackbar, isBENHNHAN } from "../Common/Common";
 import { Alert, Pagination } from "@mui/material";
 import dayjs from "dayjs";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import DeleteConfirmationForm from "../DeleteConfirmationForm/DeleteConfirmationForm";
 import { UserContext } from "../config/Context";
 import PaymentForm from "../PaymentForm/PaymentForm";
@@ -31,6 +23,8 @@ export default function UserRegisterScheduleList() {
   const { currentUser } = useContext(UserContext);
 
   const [isCanceled, setIsCanceled] = useState(false);
+
+  const [voucherGift, setVoucherGift] = useState(null);
 
   const lineProcessRef = useRef();
 
@@ -194,6 +188,9 @@ export default function UserRegisterScheduleList() {
         ref={lineProcessRef}
         onClose={handleCloseLineProcessForm}
         urs={urs}
+        setUrs={setUrs}
+        voucherGift={voucherGift}
+        setVoucherGift={setVoucherGift}
       />
       {userRegisterScheduleList.empty !== true && (
         <Pagination
@@ -213,7 +210,7 @@ export default function UserRegisterScheduleList() {
             <div className="col col-4">Ngày hẹn khám</div>
             <div className="col col-5">Trạng thái</div>
             <div className="col col-6">Ghi chú</div>
-            <div className="col col-7">Hủy lịch khám</div>
+            <div className="col col-7">Hành động</div>
           </li>
           {userRegisterScheduleList.empty === true ? (
             <>

@@ -53,4 +53,8 @@ public class Voucher implements Serializable {
 	@JsonIgnore
 	private List<UserVoucher> userVoucher;
 
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "voucher")
+	@JsonIgnore
+	private List<MrlVoucher> mrlVoucher;
+
 }

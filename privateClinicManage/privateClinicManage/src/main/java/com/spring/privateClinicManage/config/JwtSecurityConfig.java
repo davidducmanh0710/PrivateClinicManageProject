@@ -73,8 +73,8 @@ public class JwtSecurityConfig {
 				.permitAll()
 
 				.requestMatchers(HttpMethod.GET,
-
-						"/api/benhnhan/get-mrl-and-me-user-history/")
+						"/api/benhnhan/get-mrl-and-me-user-history/",
+						"/api/benhnhan/receive-voucher/{urlId}/")
 				.hasRole("BENHNHAN")
 
 				.requestMatchers(HttpMethod.POST,

@@ -2,6 +2,7 @@ package com.spring.privateClinicManage.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -54,8 +56,8 @@ public class MedicalRegistryList implements Serializable {
 	@Column(name = "created_date")
 	private Date createdDate;
 
-	@Column(name = "is_medicine_taken")
-	private Boolean isMedicineTaken = false;
+	@Column(name = "is_voucher_taken")
+	private Boolean isVoucherTaken = false;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = {
 			CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH
@@ -93,4 +95,8 @@ public class MedicalRegistryList implements Serializable {
 	@JoinColumn(name = "payment_phase1_id", referencedColumnName = "id")
 	@JsonIgnore
 	private PaymentDetailPhase1 paymentPhase1;
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "mrl")
+	@JsonIgnore
+	private List<MrlVoucher> mrlVoucher;
 }

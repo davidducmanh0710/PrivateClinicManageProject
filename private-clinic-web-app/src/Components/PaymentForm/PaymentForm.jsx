@@ -339,7 +339,7 @@ const PaymentForm = forwardRef(function PaymentForm(
                               </p>
                               <p>
                                 <span>Số điện thoại : </span>
-                                <strong>{urs.user.phone}</strong>
+                                <strong>{urs.user?.phone}</strong>
                               </p>
                             </div>
                             <div className="col-xs-6 col-sm-6 col-md-6 text-end">
@@ -352,7 +352,7 @@ const PaymentForm = forwardRef(function PaymentForm(
                               <p>
                                 <span>Ngày hẹn khám : </span>
                                 <strong>
-                                  {dayjs(urs.schedule.date).format(
+                                  {dayjs(urs.schedule?.date).format(
                                     "DD/MM/YYYY"
                                   )}
                                 </strong>

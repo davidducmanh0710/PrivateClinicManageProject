@@ -19,7 +19,8 @@ export default function PatientTabs({
   setHistoryPaymentPatient,
   getPaymentHistoryPatientByName,
 }) {
-  // không thể để state của historyExamsPatient ở đây đc , vì nó thay đổi mỗi component con , mà component cha đang chứa giao diện thằng này , dẫn đến ko đổi
+  // không thể để state của historyExamsPatient ở đây đc , vì nó thay đổi mỗi component con 
+  //, mà component cha đang chứa giao diện thằng này , dẫn đến ko đổi
   const [selectMedicalExamId, setSelectMedicalExamId] = useState(0);
   const [precriptionItems, setPrecriptionItems] = useState([]);
 
