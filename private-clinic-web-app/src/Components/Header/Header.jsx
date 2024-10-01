@@ -178,7 +178,7 @@ export default function Header() {
                         onClick={handleOpenRegisterForm}
                         className="border border-white dropdown-item"
                       >
-                        Đăng kí
+                        Đăng ký
                       </a>
                       <a
                         onClick={handleOpenLoginForm}

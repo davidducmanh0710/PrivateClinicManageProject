@@ -3,6 +3,7 @@ package com.spring.privateClinicManage.api;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,8 @@ import com.spring.privateClinicManage.service.MedicalRegistryListService;
 import com.spring.privateClinicManage.service.StatusIsApprovedService;
 import com.spring.privateClinicManage.service.UserService;
 import com.spring.privateClinicManage.service.VerifyEmailService;
+import com.spring.privateClinicManage.utilities.CalendarFormat;
+import com.spring.privateClinicManage.utilities.CalendarFormatUtil;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
@@ -192,6 +195,17 @@ public class ApiUserRestController {
 					HttpStatus.NOT_FOUND);
 		if (!mrl.getStatusIsApproved().getStatus().equals("SUCCESS"))
 			return new ResponseEntity<Object>("Mã QR này đã qua sử dụng !", HttpStatus.NOT_FOUND);
+
+		CalendarFormat c1 = CalendarFormatUtil
+				.parseStringToCalendarFormat(String.valueOf(new Date()));
+
+		CalendarFormat c2 = CalendarFormatUtil
+				.parseStringToCalendarFormat(String.valueOf(mrl.getSchedule().getDate()));
+
+		if (!c1.getYear().equals(c2.getYear()) || !c1.getDay().equals(c2.getDay())
+				|| !c1.getMonth().equals(c2.getMonth()))
+			return new ResponseEntity<Object>("Ngày đăng ký không phải ngày hôm nay !",
+					HttpStatus.UNAUTHORIZED);
 
 		StatusIsApproved statusProcessing = statusIsApprovedService.findByStatus("PROCESSING");
 		mrl.setStatusIsApproved(statusProcessing);

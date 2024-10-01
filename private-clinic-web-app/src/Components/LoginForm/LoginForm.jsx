@@ -143,7 +143,7 @@ const LoginForm = forwardRef(function LoginForm({ onClose }, ref) {
             onClick={() => onClose()}
           ></button>
           <div className="text-center mb-4">
-            <h2>Đăng nhập</h2>
+            <h2>ĐĂNG NHẬP</h2>
           </div>
           <form onSubmit={login}>
             <div className="form-group mb-3">

@@ -195,7 +195,7 @@ const RegisterForm = forwardRef(function RegisterForm({ onClose }, ref) {
               onClick={() => onClose()}
             ></button>
             <div className="text-center mb-4">
-              <h2 className="text text-primary">Đăng kí</h2>
+              <h2 className="text text-primary">ĐĂNG KÝ</h2>
             </div>
             <form onSubmit={register}>
               <div className="form-group mb-2 d-flex">

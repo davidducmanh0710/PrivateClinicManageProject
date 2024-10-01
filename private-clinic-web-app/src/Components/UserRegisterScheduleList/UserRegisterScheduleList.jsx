@@ -64,8 +64,8 @@ export default function UserRegisterScheduleList() {
         if (response.status === 200) {
           setUserRegisterScheduleList(response.data);
           setTotalPage(response.data.totalPages);
-          setMe(null);
-          setPis(null);
+          // setMe(null);
+          // setPis(null);
         } else {
           showSnackbar(response.data, "error");
           setMe(null);
@@ -84,7 +84,14 @@ export default function UserRegisterScheduleList() {
       setMe(null);
       setPis(null);
     }
-  }, [page, currentUser, isCanceled, BENHNHANnotifications, urs]);
+  }, [page, currentUser, isCanceled, BENHNHANnotifications]);
+
+  useEffect(() => {
+    if (currentUser !== null) {
+      loadUserRegisterScheduleList();
+      setIsCanceled(false);
+    }
+  }, [urs]);
 
   const handleCancelRegisterSchedule = async (registerScheduleId) => {
     try {
@@ -201,7 +208,9 @@ export default function UserRegisterScheduleList() {
         />
       )}
       <div className="container container-user-register-schedule-list">
-        <h2 className="text text-primary">Danh sách đặt lịch khám</h2>
+        <h2 className="text text-primary fs-1">
+          Danh sách lịch sử đặt lịch khám
+        </h2>
         <ul className="responsive-table">
           <li className="table-header">
             <div className="col col-1">Mã phiếu khám</div>
