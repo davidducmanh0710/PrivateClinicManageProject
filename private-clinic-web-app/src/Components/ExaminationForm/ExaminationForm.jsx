@@ -484,13 +484,11 @@ export default function ExaminationForm() {
 
                   <div className="prescription-details">
                     <p>
-                      <span>Họ tên:</span> {examPatient.name}
+                      <span>Họ tên:</span> {examPatient?.name}
                     </p>
                     <p>
-                      <span>Năm sinh:</span>{" "}
-                      {2024 - dayjs(examPatient.user.birthday).year()} (
-                      {dayjs(examPatient.user.birthday).format("DD-MM-YYYY")}) (
-                      {examPatient.user.gender})
+                      <span>Nhu cầu khám : </span>
+                      {examPatient?.favor}
                     </p>
                   </div>
                   <p>
@@ -534,7 +532,11 @@ export default function ExaminationForm() {
                         max={30}
                         style={{ width: 40 + "%" }}
                         type="number"
-                        defaultValue={h !== undefined && h.durationDay ? h.durationDay : dayExam}
+                        defaultValue={
+                          h !== undefined && h.durationDay
+                            ? h.durationDay
+                            : dayExam
+                        }
                         onBlur={(e) => {
                           if (e.target.value.trim() !== "") handleSetDayExam(e);
                           else {

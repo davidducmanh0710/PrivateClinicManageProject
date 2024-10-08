@@ -501,46 +501,48 @@ export default function AdviseSection() {
           severity={data.severity}
         />
 
-        <div className="appointment-form-container">
-          <div className="appointment-form">
-            <h2 className="text text-primary">Đặt câu hỏi tư vấn</h2>
-            <form id="appointmentForm" onSubmit={handleCreateBlogForm}>
-              <div className="form-group">
-                <label htmlFor="name">Tiêu đề câu hỏi</label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  required
-                  value={createBlogForm.title}
-                  onChange={handleAutoFillCreateBlogFormAtt}
-                />
-              </div>
+        {currentUser !== null && isBENHNHAN(currentUser) && (
+          <div className="appointment-form-container">
+            <div className="appointment-form">
+              <h2 className="text text-primary">Đặt câu hỏi tư vấn</h2>
+              <form id="appointmentForm" onSubmit={handleCreateBlogForm}>
+                <div className="form-group">
+                  <label htmlFor="name">Tiêu đề câu hỏi</label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    required
+                    value={createBlogForm.title}
+                    onChange={handleAutoFillCreateBlogFormAtt}
+                  />
+                </div>
 
-              <div className="form-group">
-                <label htmlFor="content">Nội dung : </label>
-                <textarea
-                  id="content"
-                  name="content"
-                  rows="4"
-                  required
-                  value={createBlogForm.content}
-                  onChange={handleAutoFillCreateBlogFormAtt}
-                ></textarea>
-              </div>
+                <div className="form-group">
+                  <label htmlFor="content">Nội dung : </label>
+                  <textarea
+                    id="content"
+                    name="content"
+                    rows="4"
+                    required
+                    value={createBlogForm.content}
+                    onChange={handleAutoFillCreateBlogFormAtt}
+                  ></textarea>
+                </div>
 
-              {loading ? (
-                <>
-                  <div className="d-flex justify-content-center align-item-center">
-                    <CircularProgress className="mt-3" />
-                  </div>
-                </>
-              ) : (
-                <button type="submit">Gửi câu hỏi</button>
-              )}
-            </form>
+                {loading ? (
+                  <>
+                    <div className="d-flex justify-content-center align-item-center">
+                      <CircularProgress className="mt-3" />
+                    </div>
+                  </>
+                ) : (
+                  <button type="submit">Gửi câu hỏi</button>
+                )}
+              </form>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );
