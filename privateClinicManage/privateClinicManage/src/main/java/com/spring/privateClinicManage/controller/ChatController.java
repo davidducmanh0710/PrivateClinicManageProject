@@ -8,6 +8,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
 import com.spring.privateClinicManage.component.OnlinerUsers;
@@ -44,15 +45,14 @@ public class ChatController {
 			List<OnlineUsersOutputDto> ouoDtos = onlineUsers
 					.getOnlineUsers().getOrDefault(user.getRole().getName(), new ArrayList<>());
 
-			Boolean flag = false;
+			boolean flag = false;
 
-			for (int i = 0; i < ouoDtos.size(); i++) {
-				OnlineUsersOutputDto userOutput = ouoDtos.get(i);
-				if (userOutput.getUser().getId().equals(user.getId())) {
-					ouoDtos.get(i).setSessionId(sessionId);
-					flag = true;
-				}
-			}
+            for (OnlineUsersOutputDto userOutput : ouoDtos) {
+                if (userOutput.getUser().getId().equals(user.getId())) {
+                    userOutput.setSessionId(sessionId);
+                    flag = true;
+                }
+            }
 
 			if (flag == false)
 				ouoDtos.add(new OnlineUsersOutputDto(user, sessionId));
@@ -78,15 +78,16 @@ public class ChatController {
 		 * Khi set 2 object là sender và recipient , 2 đối tượng này đã bị qua trạng
 		 * thái là Detach , Nếu save để cascade có chứa persist , sẽ báo lỗi là ko thê
 		 * lưu đối tượng detach vào database , vì persist chỉ dùng cho đối tượng mới
-		 * hoàn toàn. Nếu đến địa chỉ /chat này hiện tại , nó đang ko đc Hibernate quản
-		 * lý, nên sender và recipient đã bị detached
+		 * hoàn toàn. Chúng ta đang persist mới hoàn toàn đối tượng ChatMessage và 2 đối
+		 * tượng sender và recipient được lấy lên đang trong trạng thái detached,
+		 * nên save xuống sẽ bị lỗi
 		 */
 		chatMessage.setSender(sender);
 		chatMessage.setRecipient(recipient);
 		chatMessage.setCreatedDate(chatMessageDto.getCreatedDate());
 		chatMessage.setContent(chatMessageDto.getContent());
 
-		chatMessage = chatMessageService.saveChatMessage(chatMessage);
+		chatMessage = chatMessageService.saveChatMessage(chatMessage); // persist
 
 		messagingTemplate.convertAndSendToUser(
 				recipient.getId().toString(), "/queue/messages",

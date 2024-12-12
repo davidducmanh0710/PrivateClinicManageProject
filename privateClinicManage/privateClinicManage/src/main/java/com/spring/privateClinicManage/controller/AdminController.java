@@ -225,7 +225,7 @@ public class AdminController {
 		model.addAttribute("size", size);
 		model.addAttribute("name", name);
 
-		return "/admin/medicine/medicineUnitList";
+		return "admin/medicine/medicineUnitList";
 	}
 
 	@GetMapping("/admin/addNewUmt")
@@ -301,7 +301,7 @@ public class AdminController {
 		model.addAttribute("size", size);
 		model.addAttribute("name", name);
 
-		return "/admin/medicine/medicineGroupList";
+		return "admin/medicine/medicineGroupList";
 	}
 
 	@GetMapping("/admin/addNewMedicineGroup")
@@ -412,7 +412,7 @@ public class AdminController {
 		model.addAttribute("umts", umts);
 		model.addAttribute("medicineGroups", medicineGroups);
 
-		return "/admin/medicine/addOrUpdateMedicine";
+		return "admin/medicine/addOrUpdateMedicine";
 	}
 
 	@GetMapping("/admin/updateMedicine/{medicineId}")
@@ -496,7 +496,7 @@ public class AdminController {
 		Voucher voucher = new Voucher();
 		model.addAttribute("voucher", voucher);
 
-		return "/admin/voucher/addOrUpdateVoucher";
+		return "admin/voucher/addOrUpdateVoucher";
 	}
 
 	@GetMapping("/admin/updateVoucher/{voucherId}")

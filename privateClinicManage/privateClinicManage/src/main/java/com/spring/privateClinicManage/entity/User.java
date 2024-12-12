@@ -113,4 +113,8 @@ public class User implements Serializable {
 	@JsonIgnore
 	private List<ChatMessage> chatMessageRecipients;
 
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<AttendanceExerciseRecord> attendanceExerciseRecord;
+
 }

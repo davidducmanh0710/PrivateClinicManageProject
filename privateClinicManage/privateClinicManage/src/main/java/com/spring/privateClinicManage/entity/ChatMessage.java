@@ -43,7 +43,7 @@ public class ChatMessage implements Serializable {
 	private User sender;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = {
-			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH
+			CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH,
 	}) // không thê để persist
 	@JoinColumn(name = "recipient_id", referencedColumnName = "id")
 	private User recipient;

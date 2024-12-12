@@ -1,10 +1,15 @@
 package com.spring.privateClinicManage.api;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.spring.privateClinicManage.entity.*;
+import com.spring.privateClinicManage.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -38,26 +43,6 @@ import com.spring.privateClinicManage.dto.PaymentPhase2OutputDto;
 import com.spring.privateClinicManage.dto.RecipientChatRoomDto;
 import com.spring.privateClinicManage.dto.RecipientDto;
 import com.spring.privateClinicManage.dto.UpdateProfileDto;
-import com.spring.privateClinicManage.entity.Blog;
-import com.spring.privateClinicManage.entity.ChatMessage;
-import com.spring.privateClinicManage.entity.ChatRoom;
-import com.spring.privateClinicManage.entity.Comment;
-import com.spring.privateClinicManage.entity.CommentBlog;
-import com.spring.privateClinicManage.entity.LikeBlog;
-import com.spring.privateClinicManage.entity.MedicalExamination;
-import com.spring.privateClinicManage.entity.MedicalRegistryList;
-import com.spring.privateClinicManage.entity.PrescriptionItems;
-import com.spring.privateClinicManage.entity.User;
-import com.spring.privateClinicManage.service.BlogService;
-import com.spring.privateClinicManage.service.ChatMessageService;
-import com.spring.privateClinicManage.service.ChatRoomService;
-import com.spring.privateClinicManage.service.CommentBlogService;
-import com.spring.privateClinicManage.service.CommentService;
-import com.spring.privateClinicManage.service.LikeBlogService;
-import com.spring.privateClinicManage.service.MedicalExaminationService;
-import com.spring.privateClinicManage.service.MedicalRegistryListService;
-import com.spring.privateClinicManage.service.PrescriptionItemsService;
-import com.spring.privateClinicManage.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -92,11 +77,13 @@ public class ApiAnyRoleRestController {
 	private MedicalExaminationService medicalExaminationService;
 	@Autowired
 	private PrescriptionItemsService prescriptionItemsService;
+	@Autowired
+	private AttendanceExerciseRecordService attendanceExerciseRecordService;
 
 	@PostMapping("/logout/")
 	@CrossOrigin
 	public ResponseEntity<Object> logout(HttpServletRequest request, HttpServletResponse response) {
-
+		
 		User currentUser = userService.getCurrentLoginUser();
 		if (currentUser == null)
 			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
@@ -553,6 +540,66 @@ public class ApiAnyRoleRestController {
 		pp2.setPis(pis);
 
 		return new ResponseEntity<>(pp2, HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/attendance-exercise/get-today/")
+	@CrossOrigin
+	public ResponseEntity<Object> getTodayAttendanceExercise() {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+		AttendanceExerciseRecord attendanceExerciseRecord = attendanceExerciseRecordService
+				.findAttendanceExerciseRecordByClockIn(LocalDateTime.now().getYear(),
+						LocalDateTime.now().getMonthValue(), LocalDateTime.now().getDayOfMonth(), currentUser);
+		if (attendanceExerciseRecord == null)
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(attendanceExerciseRecord, HttpStatus.OK);
+
+	}
+
+	@GetMapping(value = "/attendance-exercise/clock-in/")
+	@CrossOrigin
+	public ResponseEntity<Object> attendanceExerciseClockIn() {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+
+		AttendanceExerciseRecord attendanceExerciseRecord = new AttendanceExerciseRecord();
+		attendanceExerciseRecord.setCreatedTime(LocalDateTime.now());
+		attendanceExerciseRecord.setUpdatedTime(LocalDateTime.now());
+		attendanceExerciseRecord.setClockIn(LocalDateTime.now());
+		attendanceExerciseRecord.setUser(currentUser);
+
+		attendanceExerciseRecordService.saveAttendanceExerciseRecord(attendanceExerciseRecord);
+
+		return new ResponseEntity<>(attendanceExerciseRecord, HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/attendance-exercise/clock-out/")
+	@CrossOrigin
+	public ResponseEntity<Object> attendanceExerciseClockOut() {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		AttendanceExerciseRecord attendanceExerciseRecord = attendanceExerciseRecordService
+				.findAttendanceExerciseRecordByClockIn(LocalDateTime.now().getYear(),
+						LocalDateTime.now().getMonthValue(), LocalDateTime.now().getDayOfMonth(), currentUser);
+
+		if (attendanceExerciseRecord == null)
+			return new ResponseEntity<>("Không tìm thấy record clock in !",HttpStatus.NOT_FOUND);
+
+		attendanceExerciseRecord.setClockOut(LocalDateTime.now());
+		attendanceExerciseRecord.setUpdatedTime(LocalDateTime.now());
+
+		Duration duration = Duration.between(attendanceExerciseRecord.getClockIn(), LocalDateTime.now());
+		int minutes = Integer.parseInt(String.valueOf(duration.toMinutes()));
+		attendanceExerciseRecord.setPeriod(minutes);
+
+		attendanceExerciseRecordService.saveAttendanceExerciseRecord(attendanceExerciseRecord);
+
+		return new ResponseEntity<>(attendanceExerciseRecord, HttpStatus.OK);
 	}
 
 }

@@ -14,6 +14,7 @@ import com.spring.privateClinicManage.service.ChatRoomService;
 import jakarta.transaction.Transactional;
 
 @Service
+@org.springframework.transaction.annotation.Transactional
 public class ChatMessageServiceImpl implements ChatMessageService {
 
 	@Autowired
@@ -26,6 +27,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 	public ChatMessage saveChatMessage(ChatMessage chatMessage) {
 		String chatRoomId = chatRoomService.getChatRoomId(chatMessage.getSender(),
 				chatMessage.getRecipient(), true);
+
 		chatMessage.setChatRoomId(chatRoomId);
 		chatMessageRepository.save(chatMessage);
 

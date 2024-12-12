@@ -41,11 +41,6 @@ public class PaymentMomoConfig {
 		momo_ApiUrl = env.getProperty("momo_ApiUrl");
 	}
 
-	@Bean
-	public RestTemplate restTemplate() {
-		return new RestTemplate();
-	}
-
 	public static String Sha256(String rawSignature, String secretKey) {
 		try {
 

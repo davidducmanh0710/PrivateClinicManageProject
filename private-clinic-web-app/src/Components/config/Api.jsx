@@ -58,7 +58,11 @@ export let endpoints = {
   getMrlAndMeUserHistory : "/api/benhnhan/get-mrl-and-me-user-history/",
   getPaymentHisotoryByName : "/api/benhnhan/get-payment-history-by-name/",
   cashPaymentMrl : `/api/yta/cash-payment/`,
-  receiveVoucherGift : (mrlId) => `/api/benhnhan/receive-voucher/${mrlId}/`
+  receiveVoucherGift : (mrlId) => `/api/benhnhan/receive-voucher/${mrlId}/`,
+  handleCreateAdviseAnswer2 : '/api/v1/hugging-face/completion',
+  getAttendanceExerciseToday : '/api/anyrole/attendance-exercise/get-today/',
+  clockInAttendanceExercise : '/api/anyrole/attendance-exercise/clock-in/',
+  clockOutAttendanceExercise : '/api/anyrole/attendance-exercise/clock-out/'
 };
 
 export const authAPI = () => {

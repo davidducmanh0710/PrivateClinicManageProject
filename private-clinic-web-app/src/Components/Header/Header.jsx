@@ -114,7 +114,10 @@ export default function Header() {
                       <Dropdown.Menu className="r-0 header-dropdown-menu">
                         {currentUser !== null && (
                           <Dropdown.Item>
-                            <Link className="dropdown-item text-center" to="/user-profile">
+                            <Link
+                              className="dropdown-item text-center"
+                              to="/user-profile"
+                            >
                               Thông tin cá nhân
                             </Link>
                           </Dropdown.Item>
@@ -130,14 +133,6 @@ export default function Header() {
                           </Dropdown.Item>
                         )}
 
-                        {currentUser !== null && (
-                          <Dropdown.Item>
-                            <Link className="dropdown-item text-center" to="/chatting">
-                              Nhắn tin tư vấn
-                            </Link>
-                          </Dropdown.Item>
-                        )}
-
                         {currentUser !== null && isBENHNHAN(currentUser) && (
                           <Dropdown.Item>
                             <Link
@@ -145,6 +140,28 @@ export default function Header() {
                               to="/history"
                             >
                               Lịch sử khám bệnh và hóa đơn
+                            </Link>
+                          </Dropdown.Item>
+                        )}
+
+                        {currentUser !== null && (
+                          <Dropdown.Item>
+                            <Link
+                              className="dropdown-item text-center"
+                              to="/chatting"
+                            >
+                              Nhắn tin tư vấn với chuyên gia
+                            </Link>
+                          </Dropdown.Item>
+                        )}
+
+                        {currentUser !== null && (
+                          <Dropdown.Item>
+                            <Link
+                              className="dropdown-item text-center"
+                              to="/chatting-to-AI"
+                            >
+                              Nhắn tin tư vấn với AI
                             </Link>
                           </Dropdown.Item>
                         )}
@@ -235,6 +252,16 @@ export default function Header() {
                     </span>
                   </a>
                   <div className="dropdown-menu">
+                  {currentUser !== null && isBENHNHAN(currentUser) && (
+                      <>
+                        <Link
+                          to="/manage-time-exercise"
+                          className="dropdown-item"
+                        >
+                          Quản lý thời gian tập thể dục
+                        </Link>
+                      </>
+                    )}
                     {currentUser !== null && isYTA(currentUser) && (
                       <>
                         <Link

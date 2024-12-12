@@ -1,8 +1,8 @@
-version : "3.8"
+name: privateclinicmanageproject 
 
 services:
   mysql:
-    image: mysql:8.0.33
+    image: davidd071003/privateclinicmanagerepository:database
     restart: always
     ports:
       - "3307:3306"
@@ -10,6 +10,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: privateclinicmanage
       MYSQL_ALLOW_EMPTY_PASSWORD: yes
+   
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -18,7 +19,7 @@ services:
   spring-backend:
     build:
       context: '.'
-    image: privateclinicmanagedocker:latest
+    image: davidd071003/privateclinicmanagerepository:backend
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/privateclinicmanage
       - SPRING_DATASOURCE_USERNAME=root
@@ -34,7 +35,7 @@ services:
       - app-network3
 
   reactjs-frontend:
-    image: privateclinicwebapp:latest
+    image: davidd071003/privateclinicmanagerepository:frontend
     environment:
       REACT_APP_BASE_URL: http://localhost:8888
     ports:

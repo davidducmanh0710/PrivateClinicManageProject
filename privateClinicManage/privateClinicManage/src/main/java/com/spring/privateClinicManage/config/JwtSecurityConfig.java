@@ -1,6 +1,7 @@
 package com.spring.privateClinicManage.config;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -61,7 +63,9 @@ public class JwtSecurityConfig {
 						"/api/users/getAllStatusIsApproved/",
 //						"/api/qr/barcodes/zxing/qrcode/",
 						"/api/payment/momo/return/",
-						"/api/payment/vnpay/return/")
+						"/api/payment/vnpay/return/",
+						"/api/v1/coze/**",
+						"/api/v1/hugging-face/**")
 				.permitAll()
 
 				.requestMatchers(HttpMethod.POST,
@@ -69,7 +73,9 @@ public class JwtSecurityConfig {
 						"/api/users/register/",
 						"/api/users/verify-email/",
 						"/api/pdf/generate/",
-						"/api/users/take-order-from-qrCode/")
+						"/api/users/take-order-from-qrCode/",
+						"/api/v1/hugging-face/**",
+						"/api/v1/hugging-face/completion-stream")
 				.permitAll()
 
 				.requestMatchers(HttpMethod.GET,
@@ -147,11 +153,12 @@ public class JwtSecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 
+
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.asList("*"));
-		configuration.setAllowedMethods(Arrays.asList("*"));
+		configuration.setAllowedOrigins(List.of("*"));
+		configuration.setAllowedMethods(List.of("*"));
 		configuration.addAllowedHeader("*");
 		configuration.addExposedHeader("*");
 
@@ -162,5 +169,6 @@ public class JwtSecurityConfig {
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
+
 
 }

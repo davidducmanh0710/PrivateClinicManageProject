@@ -164,8 +164,13 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-oauth2-client</artifactId>
 		</dependency>
+		<!--	Coze API-->
+		<dependency>
+			<groupId>io.github.flyinox</groupId>
+			<artifactId>coze4j</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
