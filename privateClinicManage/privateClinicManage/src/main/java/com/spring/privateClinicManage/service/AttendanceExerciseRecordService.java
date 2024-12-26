@@ -8,4 +8,6 @@ public interface AttendanceExerciseRecordService {
     void saveAttendanceExerciseRecord(AttendanceExerciseRecord attendanceExerciseRecord);
 
     AttendanceExerciseRecord findAttendanceExerciseRecordByClockIn(int year, int month, int day, User user);
+
+    Integer totalPeriodAttendanceExerciseRecordByUser(User user);
 }

@@ -14,4 +14,8 @@ public interface AttendanceExerciseRecordRepository extends JpaRepository<Attend
     @Query("SELECT a FROM AttendanceExerciseRecord a WHERE a.user = :user AND a.createdTime BETWEEN :startDate AND :endDate")
     AttendanceExerciseRecord findAttendanceExerciseRecordByDateRange(LocalDateTime startDate
             , LocalDateTime endDate , User user);
+
+    @Query("SELECT SUM(a.period) FROM AttendanceExerciseRecord a " +
+           "WHERE a.user = :user ")
+    Integer totalPeriodAttendanceExerciseRecordByUser(User user);
 }

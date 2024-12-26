@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.spring.privateClinicManage.dto.*;
 import com.spring.privateClinicManage.entity.*;
 import com.spring.privateClinicManage.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,17 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.privateClinicManage.component.OnlinerUsers;
-import com.spring.privateClinicManage.dto.BlogDto;
-import com.spring.privateClinicManage.dto.ChangePasswordDto;
-import com.spring.privateClinicManage.dto.CommentDto;
-import com.spring.privateClinicManage.dto.CountDto;
-import com.spring.privateClinicManage.dto.GetChatMessageDto;
-import com.spring.privateClinicManage.dto.HisotryUserMedicalRegisterDto;
-import com.spring.privateClinicManage.dto.OnlineUserDto;
-import com.spring.privateClinicManage.dto.PaymentPhase2OutputDto;
-import com.spring.privateClinicManage.dto.RecipientChatRoomDto;
-import com.spring.privateClinicManage.dto.RecipientDto;
-import com.spring.privateClinicManage.dto.UpdateProfileDto;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -79,6 +69,10 @@ public class ApiAnyRoleRestController {
 	private PrescriptionItemsService prescriptionItemsService;
 	@Autowired
 	private AttendanceExerciseRecordService attendanceExerciseRecordService;
+	@Autowired
+	private WallerService wallerService;
+	@Autowired
+	private WalletHistoryService walletHistoryService;
 
 	@PostMapping("/logout/")
 	@CrossOrigin
@@ -599,7 +593,79 @@ public class ApiAnyRoleRestController {
 
 		attendanceExerciseRecordService.saveAttendanceExerciseRecord(attendanceExerciseRecord);
 
+		Wallet wallet = wallerService.findByUser(currentUser);
+		if (wallet == null)
+			return new ResponseEntity<>("Không tìm thấy ví người dùng", HttpStatus.NOT_FOUND);
+
+		Long newBalance = wallet.getBalance() + duration.toMinutes() * 500 ;
+		wallet.setBalance(newBalance);
+		wallerService.saveWallet(wallet);
+
 		return new ResponseEntity<>(attendanceExerciseRecord, HttpStatus.OK);
+	}
+
+	@GetMapping("/attendance-exercise/total-period/")
+	@CrossOrigin
+	public ResponseEntity<Object> attendanceExerciseTotalPeriod() {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		Integer totalPeriod = attendanceExerciseRecordService
+				.totalPeriodAttendanceExerciseRecordByUser(currentUser);
+
+		totalPeriod = totalPeriod == null ? 0 : totalPeriod;
+
+		return new ResponseEntity<>(totalPeriod, HttpStatus.OK);
+	}
+
+	@GetMapping("/wallet-balance/")
+	@CrossOrigin
+	public Object getWallet() {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		Wallet wallet = wallerService.findByUser(currentUser);
+
+		if (wallet == null) {
+			wallet = new Wallet();
+			wallet.setUser(currentUser);
+			wallet.setCreatedTime(LocalDateTime.now());
+			wallet.setBalance(0L);
+			wallerService.saveWallet(wallet);
+		}
+
+		return new ResponseEntity<>(wallet.getBalance(), HttpStatus.OK);
+	}
+
+	@PostMapping("/wallet/withdraw/")
+	@CrossOrigin
+	public Object walletWithdraw(@RequestBody WalletHistoryDto walletHistoryDto) {
+		User currentUser = userService.getCurrentLoginUser();
+		if (currentUser == null)
+			return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.NOT_FOUND);
+
+		Wallet wallet = wallerService.findByUser(currentUser);
+
+		if (wallet == null)
+			return new ResponseEntity<>("Không tìm thấy ví thanh toán của người dùng", HttpStatus.NOT_FOUND);
+
+		if(wallet.getBalance() < walletHistoryDto.getWithDraw())
+			return new ResponseEntity<>("Số dư ví không đủ !", HttpStatus.BAD_REQUEST);
+
+		wallet.setBalance(wallet.getBalance() - walletHistoryDto.getWithDraw());
+		wallerService.saveWallet(wallet);
+
+		WalletHistory walletHistory = new WalletHistory();
+		walletHistory.setWallet(wallet);
+		walletHistory.setWithdrawal(walletHistoryDto.getWithDraw());
+		walletHistory.setCreatedDate(LocalDateTime.now());
+		walletHistory.setNote(walletHistoryDto.getNote());
+
+		walletHistoryService.saveWalletHistory(walletHistory);
+
+		return new ResponseEntity<>(walletHistory, HttpStatus.OK);
 	}
 
 }

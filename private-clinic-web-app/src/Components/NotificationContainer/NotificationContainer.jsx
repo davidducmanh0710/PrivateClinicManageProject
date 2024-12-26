@@ -84,7 +84,7 @@ export default function NotificationContainer() {
 
   const ytaConnectNotificationWsInit = () => {
     let stompYTAClient = null;
-    let socket = new SockJS(`${BASE_URL}/ws`);
+    let socket = new SockJS(`${BASE_URL}/wss`);
     stompYTAClient = over(socket);
     stompYTAClient.debug = () => {}; // tắt log của stomp in ra console
     stompYTAClientRef.current = stompYTAClient;
@@ -115,7 +115,7 @@ export default function NotificationContainer() {
 
   const benhnhanConnectNotificationWsInit = () => {
     let stompBENHNHANClient = null;
-    let socket = new SockJS(`${BASE_URL}/ws`);
+    let socket = new SockJS(`${BASE_URL}/wss`);
 
     stompBENHNHANClient = over(socket);
     stompBENHNHANClient.debug = () => {}; // tắt log của stomp in ra console
@@ -211,7 +211,7 @@ export default function NotificationContainer() {
 
   const tuvanConnectNotificationWsInit = () => {
     let stompTUVANClient = null;
-    let socket = new SockJS(`${BASE_URL}/ws`);
+    let socket = new SockJS(`${BASE_URL}/wss`);
 
     stompTUVANClient = over(socket);
     stompTUVANClient.debug = () => {}; // tắt log của stomp in ra console

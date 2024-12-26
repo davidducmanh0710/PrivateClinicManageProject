@@ -62,7 +62,10 @@ export let endpoints = {
   handleCreateAdviseAnswer2 : '/api/v1/hugging-face/completion',
   getAttendanceExerciseToday : '/api/anyrole/attendance-exercise/get-today/',
   clockInAttendanceExercise : '/api/anyrole/attendance-exercise/clock-in/',
-  clockOutAttendanceExercise : '/api/anyrole/attendance-exercise/clock-out/'
+  clockOutAttendanceExercise : '/api/anyrole/attendance-exercise/clock-out/',
+  totalPeriodAttendanceExercise : '/api/anyrole/attendance-exercise/total-period/',
+  getCurrentUserWalletBalance : '/api/anyrole/wallet-balance/',
+  withDrawAmountFromWallet : '/api/anyrole/wallet/withdraw/'
 };
 
 export const authAPI = () => {

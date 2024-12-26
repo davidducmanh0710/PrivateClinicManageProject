@@ -29,4 +29,9 @@ public class AttendanceExerciseRecordServiceImpl implements AttendanceExerciseRe
         return attendanceExerciseRecordRepository.findAttendanceExerciseRecordByDateRange(startDate, endDate, user);
     }
 
+    @Override
+    public Integer totalPeriodAttendanceExerciseRecordByUser(User user) {
+        return attendanceExerciseRecordRepository.totalPeriodAttendanceExerciseRecordByUser(user);
+    }
+
 }
